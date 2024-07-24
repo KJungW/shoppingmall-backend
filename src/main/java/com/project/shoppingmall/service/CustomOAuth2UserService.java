@@ -21,9 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+  private final DefaultOAuth2UserService superClass = new DefaultOAuth2UserService();
+
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    OAuth2User oAuth2User = super.loadUser(userRequest);
+    OAuth2User oAuth2User = superClass.loadUser(userRequest);
     try {
       OAuth2UserInfo oAuth2UserInfo = makeOAuthUserInfo(userRequest, oAuth2User);
       return new OAuth2UserPrinciple(oAuth2UserInfo);
