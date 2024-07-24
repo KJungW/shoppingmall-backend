@@ -60,30 +60,39 @@ public class JwtUtil {
         .compact();
   }
 
-  public RefreshTokenData decodeRefreshToken(String token)
-      throws io.jsonwebtoken.JwtException, IllegalArgumentException, JwtTokenException {
-    Claims payload =
-        Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
-    JwtTokenType tokenType = JwtTokenType.valueOf(payload.get("type", String.class));
-    if (!tokenType.equals(JwtTokenType.REFRESH))
-      throw new JwtTokenException("refresh Token이 아닌 다른 타입의 토큰입니다.");
+  public RefreshTokenData decodeRefreshToken(String token) throws JwtTokenException {
+    try {
+      Claims payload =
+          Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 
-    Long id = payload.get("id", Long.class);
-    MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
-    return new RefreshTokenData(id, role);
+      JwtTokenType tokenType = JwtTokenType.valueOf(payload.get("type", String.class));
+      if (!tokenType.equals(JwtTokenType.REFRESH))
+        throw new JwtTokenException("refresh Token이 아닌 다른 타입의 토큰입니다.");
+
+      Long id = payload.get("id", Long.class);
+      MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
+      return new RefreshTokenData(id, role);
+
+    } catch (io.jsonwebtoken.JwtException | IllegalArgumentException | JwtTokenException ex) {
+      throw new JwtTokenException("유효하지 않은 토큰입니다.");
+    }
   }
 
-  public AccessTokenData decodeAccessToken(String token)
-      throws io.jsonwebtoken.JwtException, IllegalArgumentException, JwtTokenException {
-    Claims payload =
-        Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+  public AccessTokenData decodeAccessToken(String token) throws JwtTokenException {
+    try {
+      Claims payload =
+          Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
 
-    JwtTokenType tokenType = JwtTokenType.valueOf(payload.get("type", String.class));
-    if (!tokenType.equals(JwtTokenType.ACCESS))
-      throw new JwtTokenException("access Token이 아닌 다른 타입의 토큰입니다.");
+      JwtTokenType tokenType = JwtTokenType.valueOf(payload.get("type", String.class));
+      if (!tokenType.equals(JwtTokenType.ACCESS))
+        throw new JwtTokenException("access Token이 아닌 다른 타입의 토큰입니다.");
 
-    Long id = payload.get("id", Long.class);
-    MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
-    return new AccessTokenData(id, role);
+      Long id = payload.get("id", Long.class);
+      MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
+      return new AccessTokenData(id, role);
+
+    } catch (io.jsonwebtoken.JwtException | IllegalArgumentException | JwtTokenException ex) {
+      throw new JwtTokenException("유효하지 않은 토큰입니다.");
+    }
   }
 }
