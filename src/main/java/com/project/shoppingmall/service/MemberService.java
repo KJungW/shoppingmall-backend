@@ -15,9 +15,8 @@ public class MemberService {
   private final MemberRepository memberRepository;
 
   @Transactional
-  public Long save(Member member) {
-    Member savedMember = memberRepository.save(member);
-    return savedMember.getId();
+  public Member save(Member member) {
+    return memberRepository.save(member);
   }
 
   public Optional<Member> findByLonginTypeAndSocialId(LoginType loginType, String socialID) {
