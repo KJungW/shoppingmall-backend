@@ -2,5 +2,6 @@ package com.project.shoppingmall.type;
 
 public enum ErrorCode {
   UNAUTHORIZED,
-  FORBIDDEN
+  FORBIDDEN,
+  BAD_INPUT
 }
