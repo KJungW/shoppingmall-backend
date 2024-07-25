@@ -19,6 +19,10 @@ public class MemberService {
     return memberRepository.save(member);
   }
 
+  public Optional<Member> findById(Long memberId) {
+    return memberRepository.findById(memberId);
+  }
+
   public Optional<Member> findByLonginTypeAndSocialId(LoginType loginType, String socialID) {
     return memberRepository.findByLoginTypeAndSocialId(loginType, socialID);
   }

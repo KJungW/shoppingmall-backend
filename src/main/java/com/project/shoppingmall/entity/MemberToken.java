@@ -15,4 +15,8 @@ public class MemberToken {
   public MemberToken(String refresh) {
     this.refresh = refresh;
   }
+
+  public void updateRefresh(String refresh) {
+    this.refresh = refresh;
+  }
 }
