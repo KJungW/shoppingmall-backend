@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
-  @Value("${frontend.login_success_url}")
+  @Value("${frontend.login_fail_url}")
   private String loginFailRedirectionUrl;
 
   @Override
