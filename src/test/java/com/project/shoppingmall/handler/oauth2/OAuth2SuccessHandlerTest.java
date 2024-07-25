@@ -11,7 +11,6 @@ import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
@@ -71,7 +71,7 @@ class OAuth2SuccessHandlerTest {
 
     String givenCookieKey = "refresh";
     when(mockCookieUtil.createCookie(any(), any(), anyInt()))
-        .thenReturn(new Cookie(givenCookieKey, givenRefreshToken));
+        .thenReturn(ResponseCookie.from(givenCookieKey, givenRefreshToken).build());
 
     // when
     target.onAuthenticationSuccess(mockRequest, mockResponse, mockAuthentication);
@@ -105,7 +105,7 @@ class OAuth2SuccessHandlerTest {
 
     String givenCookieKey = "refresh";
     when(mockCookieUtil.createCookie(any(), any(), anyInt()))
-        .thenReturn(new Cookie(givenCookieKey, givenRefreshToken));
+        .thenReturn(ResponseCookie.from(givenCookieKey, givenRefreshToken).build());
 
     // when
     target.onAuthenticationSuccess(mockRequest, mockResponse, mockAuthentication);

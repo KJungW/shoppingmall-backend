@@ -1,18 +1,28 @@
 package com.project.shoppingmall.util;
 
 import jakarta.servlet.http.Cookie;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CookieUtil {
-  public Cookie createCookie(String key, String value, int maxAge) {
-    Cookie cookie = new Cookie(key, value);
-    cookie.setMaxAge(maxAge);
-    // cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setHttpOnly(true);
+  @Value("${spring.profiles.default}")
+  private String deployEnv;
 
-    return cookie;
+  @Value("${frontend.domain}")
+  private String domain;
+
+  public ResponseCookie createCookie(String key, String value, int maxAge) {
+    ResponseCookie.ResponseCookieBuilder builder =
+        ResponseCookie.from(key, value)
+            .maxAge(maxAge)
+            .domain(domain)
+            .path("/")
+            .httpOnly(true)
+            .secure(deployEnv.equals("prod") || deployEnv.equals("stage"))
+            .sameSite("Strict");
+    return builder.build();
   }
 
   public String findCookie(String key, Cookie[] cookies) {

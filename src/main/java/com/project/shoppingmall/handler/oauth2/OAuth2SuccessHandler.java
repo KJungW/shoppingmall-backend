@@ -10,12 +10,13 @@ import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -53,13 +54,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     MemberToken memberToken = makeRefreshToken(member);
     member.updateRefreshToken(memberToken);
 
-    Cookie cookie =
+    ResponseCookie cookie =
         cookieUtil.createCookie(
             "refresh",
             memberToken.getRefresh(),
             (int) (jwtUtil.getRefreshExpirationTimeMs() / 1000));
-    response.addCookie(cookie);
 
+    response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     response.sendRedirect(loginSuccessRedirectionUrl);
   }
 
