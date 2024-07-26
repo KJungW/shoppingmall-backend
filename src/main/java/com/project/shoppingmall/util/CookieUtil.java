@@ -26,6 +26,7 @@ public class CookieUtil {
   }
 
   public String findCookie(String key, Cookie[] cookies) {
+    if (cookies == null) return "";
     for (Cookie cookie : cookies) {
       if (cookie.getName().equals(key)) {
         return cookie.getValue();
