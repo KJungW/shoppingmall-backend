@@ -1,6 +1,7 @@
 package com.project.shoppingmall.handler;
 
 import com.project.shoppingmall.dto.exception.ErrorResult;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
 import com.project.shoppingmall.exception.TokenNotFound;
 import com.project.shoppingmall.type.ErrorCode;
@@ -21,5 +22,11 @@ public class ExceptionGlobalControllerAdvice {
   @ExceptionHandler(JwtTokenException.class)
   public ErrorResult WrongInputExceptionHandler(JwtTokenException e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "토큰이 유효하지 않습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(DataNotFound.class)
+  public ErrorResult WrongInputExceptionHandler(DataNotFound e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "데이터가 존재하지 않습니다.");
   }
 }

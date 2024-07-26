@@ -38,6 +38,16 @@ public class AuthTokenService {
     }
   }
 
+  @Transactional
+  public void deleteRefreshToken(Long memberId) {
+    try {
+      Member member = memberService.findById(memberId).get();
+      member.deleteRefreshToken();
+    } catch (DataNotFound ex) {
+      throw new DataNotFound("Id에 해당하는 유저가 존재하지 않습니다.");
+    }
+  }
+
   private RefreshAndAccessToken makeNewRefreshAndAccess(RefreshTokenData tokenData) {
     AccessTokenData accessTokenData =
         new AccessTokenData(tokenData.getId(), tokenData.getRoleType());

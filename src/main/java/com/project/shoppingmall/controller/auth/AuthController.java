@@ -1,6 +1,7 @@
 package com.project.shoppingmall.controller.auth;
 
 import com.project.shoppingmall.controller.auth.dto.ReissueOutput;
+import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
 import com.project.shoppingmall.exception.TokenNotFound;
 import com.project.shoppingmall.service.AuthTokenService;
@@ -12,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +35,15 @@ public class AuthController {
     return new ReissueOutput(reissueResult.getAccessToken());
   }
 
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  @GetMapping("/logout")
+  public void logout(HttpServletResponse response) {
+    deleteRefreshTokenInResponse(response);
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    authTokenService.deleteRefreshToken(userDetail.getId());
+  }
+
   private String findRefreshCookie(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
     String refreshToken = cookieUtil.findCookie("refresh", cookies);
@@ -43,6 +55,11 @@ public class AuthController {
     ResponseCookie cookie =
         cookieUtil.createCookie(
             "refresh", refreshToken, (int) (jwtUtil.getRefreshExpirationTimeMs() / 1000));
+    response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+  }
+
+  private void deleteRefreshTokenInResponse(HttpServletResponse response) {
+    ResponseCookie cookie = cookieUtil.createCookie("refresh", "", 0);
     response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
   }
 }
