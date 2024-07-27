@@ -21,7 +21,7 @@ public class CookieUtil {
             .path("/")
             .httpOnly(true)
             .secure(!deployEnv.equals("dev"))
-            .sameSite(deployEnv.equals("prod") ? "Strict" : "None");
+            .sameSite("strict");
     return builder.build();
   }
 
