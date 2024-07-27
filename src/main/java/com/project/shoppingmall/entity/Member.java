@@ -58,6 +58,10 @@ public class Member {
     this.nickName = nickName;
   }
 
+  public void registerEmail(String email) {
+    this.email = email;
+  }
+
   public void updateRefreshToken(MemberToken token) {
     this.token = token;
   }
