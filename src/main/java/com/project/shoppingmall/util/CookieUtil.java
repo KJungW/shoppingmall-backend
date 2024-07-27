@@ -19,9 +19,9 @@ public class CookieUtil {
             .maxAge(maxAge)
             .domain(domain)
             .path("/")
-            .httpOnly(deployEnv.equals("prod"))
+            .httpOnly(true)
             .secure(!deployEnv.equals("dev"))
-            .sameSite("Strict");
+            .sameSite(deployEnv.equals("prod") ? "Strict" : "None");
     return builder.build();
   }
 
