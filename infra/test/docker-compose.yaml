@@ -1,20 +1,20 @@
 version: "3.8"
 
 services:
-  local-db:
+  test-db:
     image: mysql:8
     environment:
       MYSQL_DATABASE: shopping_mall_db
       MYSQL_ROOT_PASSWORD: dbadmin
     ports:
-      - 3306:3306
+      - 4100:3306
     volumes:
       - ./dbdata:/var/lib/mysql
-    container_name: local-db
+    container_name: test-db
 
-  local-redis:
+  test-redis:
     image: redis:6.2.6-alpine
     ports:
-      - 6379:6379
+      - 4101:6379
     command: redis-server --port 6379
-    container_name: local-redis
+    container_name: test-redis
