@@ -39,4 +39,22 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult EmailRegistrationCacheExceptionHandler(EmailRegistrationCacheError e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "이메일 등록 유효시간이 지났거나, 데이터가 유효하지 않습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(DataNotFound.class)
+  public ErrorResult DataNotFoundExceptionHandler(DataNotFound e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "데이터가 존재하진 않습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(FileUploadFail.class)
+  public ErrorResult FileUploadFailExceptionHandler(FileUploadFail e) {
+    return new ErrorResult(ErrorCode.SERVER_ERROR, "파일업로드에 실패했습니다. 잠시후 다시 시도해주세요");
+  }
+
+  @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(FileDeleteFail.class)
+  public ErrorResult FileDeleteFailExceptionHandler(FileDeleteFail e) {
+    return new ErrorResult(ErrorCode.SERVER_ERROR, "파일삭제에 실패했습니다. 잠시후 다시 시도해주세요");
+  }
 }
