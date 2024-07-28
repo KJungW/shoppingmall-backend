@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.member.input;
+package com.project.shoppingmall.controller.member.output;
 
 import com.project.shoppingmall.entity.Member;
 import lombok.AllArgsConstructor;

@@ -1,9 +1,11 @@
 package com.project.shoppingmall.controller.member;
 
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
-import com.project.shoppingmall.controller.member.input.OutputUpdateMemberInfo;
+import com.project.shoppingmall.controller.member.output.OutputGetMember;
+import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Member;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,18 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
   private final MemberService memberService;
+
+  @GetMapping("")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputGetMember getMember() {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Member member =
+        memberService
+            .findById(userDetail.getId())
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 데이터가 존재하지 않습니다."));
+    return new OutputGetMember(member);
+  }
 
   @PostMapping("/info")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
