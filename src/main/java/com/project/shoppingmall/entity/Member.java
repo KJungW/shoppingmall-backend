@@ -15,20 +15,22 @@ public class Member {
   @Id @GeneratedValue private Long id;
 
   @Enumerated(value = EnumType.STRING)
-  LoginType loginType;
+  private LoginType loginType;
 
-  String socialId;
+  private String socialId;
 
-  String nickName;
+  private String nickName;
 
-  String email;
+  private String email;
 
-  String profileImageUrl;
+  private String profileImageUrl;
+
+  private String profileImageDownLoadUrl;
 
   @Enumerated(value = EnumType.STRING)
-  MemberRoleType role;
+  private MemberRoleType role;
 
-  Boolean isBan;
+  private Boolean isBan;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "TOKEN_ID")
@@ -41,6 +43,7 @@ public class Member {
       String nickName,
       String email,
       String profileImageUrl,
+      String profileImageDownLoadUrl,
       MemberRoleType role,
       Boolean isBan,
       MemberToken token) {
@@ -49,6 +52,7 @@ public class Member {
     this.nickName = nickName;
     this.email = email;
     this.profileImageUrl = profileImageUrl;
+    this.profileImageDownLoadUrl = profileImageDownLoadUrl;
     this.role = role;
     this.isBan = isBan;
     this.token = token;
@@ -56,6 +60,11 @@ public class Member {
 
   public void updateNickName(String nickName) {
     this.nickName = nickName;
+  }
+
+  public void updateProfile(String imageUri, String downloadUrl) {
+    this.profileImageUrl = imageUri;
+    this.profileImageDownLoadUrl = downloadUrl;
   }
 
   public void registerEmail(String email) {
