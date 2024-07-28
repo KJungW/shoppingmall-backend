@@ -12,7 +12,8 @@ public class MemberBuilder {
         .socialId("sdfx413cv-033124")
         .nickName("Kim")
         .email("test123@naver.com")
-        .profileImageUrl("/test/image")
+        .profileImageUrl(null)
+        .profileImageDownLoadUrl(null)
         .role(MemberRoleType.ROLE_MEMBER)
         .isBan(false)
         .token(new MemberToken("refreshTokenString1111222333"));
