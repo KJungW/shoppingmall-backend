@@ -30,6 +30,10 @@ class S3ServiceTest {
   public void beforeEach() {
     givenTestDirectoryPath = "testDirectory/";
     bucketName = ReflectionTestUtils.getField(target, "bucketName").toString();
+  }
+
+  @AfterEach
+  public void afterEach() {
     resetBucket();
   }
 
@@ -99,6 +103,16 @@ class S3ServiceTest {
         () -> {
           downLoadFileContentByServerUri(givenFileUploadResult.getFileServerUri());
         });
+  }
+
+  @Test()
+  @DisplayName("S3Service.deleteFile() : 존재하지 않는 파일제거 제거")
+  public void deleteFile_NoData() throws IOException {
+    // given
+    String wrongServerUri = givenTestDirectoryPath + "NoData/test.txt";
+
+    // when then
+    target.deleteFile(wrongServerUri);
   }
 
   public void resetBucket() {
