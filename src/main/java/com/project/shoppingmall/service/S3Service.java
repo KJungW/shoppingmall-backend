@@ -1,6 +1,7 @@
 package com.project.shoppingmall.service;
 
 import com.project.shoppingmall.dto.file.FileUploadResult;
+import com.project.shoppingmall.exception.FileDeleteFail;
 import com.project.shoppingmall.exception.FileUploadFail;
 import java.io.IOException;
 import java.util.UUID;
@@ -52,9 +53,13 @@ public class S3Service {
 
   @Transactional
   public void deleteFile(String serverUri) {
-    DeleteObjectRequest deleteObjectRequest =
-        DeleteObjectRequest.builder().bucket(bucketName).key(serverUri).build();
-    s3Client.deleteObject(deleteObjectRequest);
+    try {
+      DeleteObjectRequest deleteObjectRequest =
+          DeleteObjectRequest.builder().bucket(bucketName).key(serverUri).build();
+      s3Client.deleteObject(deleteObjectRequest);
+    } catch (Exception ex) {
+      throw new FileDeleteFail("파일 삭제 실패");
+    }
   }
 
   private String makeServerFileName(String directoryUrl, String extension) {
