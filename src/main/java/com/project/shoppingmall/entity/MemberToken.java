@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberToken {
+public class MemberToken extends BaseEntity {
   @Id @GeneratedValue private Long id;
   private String refresh;
 
