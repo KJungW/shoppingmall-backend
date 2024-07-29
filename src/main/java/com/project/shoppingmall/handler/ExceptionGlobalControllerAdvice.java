@@ -4,7 +4,10 @@ import com.project.shoppingmall.dto.exception.ErrorResult;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.type.ErrorCode;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -56,5 +59,25 @@ public class ExceptionGlobalControllerAdvice {
   @ExceptionHandler(FileDeleteFail.class)
   public ErrorResult FileDeleteFailExceptionHandler(FileDeleteFail e) {
     return new ErrorResult(ErrorCode.SERVER_ERROR, "파일삭제에 실패했습니다. 잠시후 다시 시도해주세요");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @InitBinder
+  public void BindExceptionHandler(WebDataBinder binder) {
+    if (binder.getBindingResult().hasErrors()) {
+      throw new InputDataBindingError("입력값이 잘못되었습니다. 한번더 확인해주세요");
+    }
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(InputDataBindingError.class)
+  public ErrorResult InputDataBindingErrorHandler(InputDataBindingError e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "입력값이 잘못되었습니다. 한번더 확인해주세요");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ErrorResult MethodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "입력값이 잘못되었습니다. 한번더 확인해주세요");
   }
 }
