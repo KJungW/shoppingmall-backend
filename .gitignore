@@ -41,3 +41,4 @@ infra/local/dbdata
 infra/local/s3data
 infra/test/dbdata
 infra/test/s3data
+infra/stage/dbdata
