@@ -5,7 +5,12 @@ import com.project.shoppingmall.controller.email.input.InputRequestEmailRegister
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.service.EmailRegistrationService;
 import jakarta.validation.Valid;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("email")
 @RequiredArgsConstructor
 public class EmailController {
+  @Value("${frontend.address}")
+  private String frontAddress;
+
   private final EmailRegistrationService emailRegistrationService;
 
   @PostMapping("/registration/request")
@@ -25,9 +33,13 @@ public class EmailController {
   }
 
   @GetMapping("/registration")
-  public String registerEmail(@Valid @ModelAttribute InputRegisterEmail input) {
+  public ResponseEntity<?> registerEmail(@Valid @ModelAttribute InputRegisterEmail input) {
     emailRegistrationService.registerEmail(
         input.getMemberId(), input.getCertificationNumber(), input.getEmail());
-    return "이메일 등록이 완료되었습니다.";
+
+    String redirectUrlString = frontAddress + "/" + "mail/" + input.getMemberId();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setLocation(URI.create(redirectUrlString));
+    return new ResponseEntity<>(headers, HttpStatus.FOUND);
   }
 }
