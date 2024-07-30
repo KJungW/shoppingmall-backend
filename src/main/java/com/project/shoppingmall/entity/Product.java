@@ -44,10 +44,6 @@ public class Product extends BaseEntity {
   public Product(
       Member seller,
       ProductType productType,
-      List<ProductImage> productImages,
-      List<ProductContent> contents,
-      ProductSingleOption singleOption,
-      List<ProductMultipleOption> multipleOptions,
       String name,
       Integer price,
       Integer discountAmount,
@@ -55,14 +51,35 @@ public class Product extends BaseEntity {
       Boolean isBan) {
     this.seller = seller;
     this.productType = productType;
-    this.productImages = productImages;
-    this.contents = contents;
-    this.singleOption = singleOption;
-    this.multipleOptions = multipleOptions;
     this.name = name;
     this.price = price;
     this.discountAmount = discountAmount;
     this.discountRate = discountRate;
     this.isBan = isBan;
+  }
+
+  public void updateProductImages(List<ProductImage> productImages) {
+    this.productImages = productImages;
+    for (ProductImage image : productImages) {
+      image.updateProduct(this);
+    }
+  }
+
+  public void updateContents(List<ProductContent> productContents) {
+    this.contents = productContents;
+    for (ProductContent content : productContents) {
+      content.updateProduct(this);
+    }
+  }
+
+  public void updateSingleOption(ProductSingleOption singleOption) {
+    this.singleOption = singleOption;
+  }
+
+  public void updateMultiOptions(List<ProductMultipleOption> multipleOptions) {
+    this.multipleOptions = multipleOptions;
+    for (ProductMultipleOption option : multipleOptions) {
+      option.updateProduct(this);
+    }
   }
 }

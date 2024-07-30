@@ -23,4 +23,8 @@ public class ProductContent extends BaseEntity {
     this.product = product;
     this.content = content;
   }
+
+  public void updateProduct(Product product) {
+    this.product = product;
+  }
 }

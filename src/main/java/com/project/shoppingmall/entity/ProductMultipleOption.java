@@ -25,4 +25,8 @@ public class ProductMultipleOption extends BaseEntity {
     this.optionName = optionName;
     this.priceChangeAmount = priceChangeAmount;
   }
+
+  public void updateProduct(Product product) {
+    this.product = product;
+  }
 }

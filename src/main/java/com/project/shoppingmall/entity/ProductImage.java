@@ -26,4 +26,8 @@ public class ProductImage extends BaseEntity {
     this.imageUri = imageUri;
     this.downLoadUrl = downLoadUrl;
   }
+
+  public void updateProduct(Product product) {
+    this.product = product;
+  }
 }
