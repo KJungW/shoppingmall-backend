@@ -13,6 +13,10 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 public class ProductMakeDataBuilder {
+  public static final Integer PRODUCT_IMAGE_COUNT = 3;
+  public static final Integer TextBlockCount = 1;
+  public static final Integer ImageBlockCount = 3;
+
   public static ProductMakeData.ProductMakeDataBuilder fullData() throws IOException {
     Long givenProductTypeId = 1L;
     String givenName = "testProduct";

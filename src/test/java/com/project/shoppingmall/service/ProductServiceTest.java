@@ -3,12 +3,15 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ProductMakeDataBuilder;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -139,5 +142,77 @@ class ProductServiceTest {
 
     // - Product.scoreAvg 검증
     assertEquals(0d, savedProduct.getScoreAvg());
+  }
+
+  @Test
+  @DisplayName("update() : 정상흐름")
+  public void update_ok() throws IOException {
+    // given
+    Long givenMemberId = 10L;
+    Long givenProductId = 13L;
+    ProductMakeData givenProductMakeData = ProductMakeDataBuilder.fullData().build();
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
+    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    ProductType givenProductType = new ProductType("test/detail");
+    ReflectionTestUtils.setField(givenProductType, "id", 5L);
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+
+    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+
+    when(jsonUtil.convertJsonToObject(any(), any()))
+        .thenReturn(new ImageBlock(1L, "test/serverUri", "test/downUri"));
+
+    // when
+    productService.update(givenMemberId, givenProductId, givenProductMakeData);
+
+    // then
+    verify(s3Service, times(ProductBuilder.PRODUCT_IMAGE_COUNT + ProductBuilder.ImageBlockCount))
+        .deleteFile(any());
+    verify(jsonUtil, times(ProductBuilder.ImageBlockCount)).convertJsonToObject(any(), any());
+    verify(
+            jsonUtil,
+            times(ProductMakeDataBuilder.TextBlockCount + ProductMakeDataBuilder.ImageBlockCount))
+        .convertObjectToJson(any());
+    verify(
+            s3Service,
+            times(
+                ProductMakeDataBuilder.ImageBlockCount
+                    + ProductMakeDataBuilder.PRODUCT_IMAGE_COUNT))
+        .uploadFile(any(), any());
+  }
+
+  @Test
+  @DisplayName("update() : 다른 회원의 제품을 수정하려고 시도")
+  public void update_otherMemberProduct() throws IOException {
+    // given
+    Long givenMemberId = 10L;
+    Long givenProductId = 13L;
+    ProductMakeData givenProductMakeData = ProductMakeDataBuilder.fullData().build();
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    Long givenProductSellerId = 30L;
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenProductSellerId);
+    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    ProductType givenProductType = new ProductType("test/detail");
+    ReflectionTestUtils.setField(givenProductType, "id", 5L);
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+
+    // when
+    assertThrows(
+        DataNotFound.class,
+        () -> productService.update(givenMemberId, givenProductId, givenProductMakeData));
+
+    // then
+    verify(s3Service, times(0)).deleteFile(any());
+    verify(jsonUtil, times(0)).convertJsonToObject(any(), any());
+    verify(jsonUtil, times(0)).convertObjectToJson(any());
+    verify(s3Service, times(0)).uploadFile(any(), any());
   }
 }
