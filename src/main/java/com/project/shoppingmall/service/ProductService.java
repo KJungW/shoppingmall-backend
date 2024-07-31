@@ -41,6 +41,15 @@ public class ProductService {
             .findById(productData.getProductTypeId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
 
+    ProductSingleOption productSingleOption =
+        makeProductSingleOption(productData.getSingleOption());
+    List<ProductMultipleOption> productMultipleOptions =
+        makeProductMultipleOptionList(productData.getMultiOptions());
+    ArrayList<ProductImage> productImages =
+        makeProductImageList(productData.getProductImages(), "productImage/" + seller.getId());
+    ArrayList<ProductContent> productContents =
+        makeProductContentsList(productData.getContentBlocks(), "blockImage/" + seller.getId());
+
     Product newProduct =
         Product.builder()
             .seller(seller)
@@ -50,21 +59,12 @@ public class ProductService {
             .discountAmount(productData.getDiscountAmount())
             .discountRate(productData.getDiscountRate())
             .isBan(false)
+            .scoreAvg(0.0)
+            .singleOption(productSingleOption)
+            .multipleOptions(productMultipleOptions)
+            .productImages(productImages)
+            .contents(productContents)
             .build();
-
-    ArrayList<ProductImage> productImages =
-        makeProductImageList(productData.getProductImages(), "productImage/" + seller.getId());
-    ArrayList<ProductContent> productContents =
-        makeProductContentsList(productData.getContentBlocks(), "blockImage/" + seller.getId());
-    ProductSingleOption productSingleOption =
-        makeProductSingleOption(productData.getSingleOption());
-    List<ProductMultipleOption> productMultipleOptions =
-        makeProductMultipleOptionList(productData.getMultiOptions());
-
-    newProduct.updateProductImages(productImages);
-    newProduct.updateContents(productContents);
-    newProduct.updateSingleOption(productSingleOption);
-    newProduct.updateMultiOptions(productMultipleOptions);
 
     productRepository.save(newProduct);
     return newProduct;
@@ -102,7 +102,6 @@ public class ProductService {
     product.changeProductName(productData.getName());
     product.changePrice(
         productData.getPrice(), productData.getDiscountAmount(), productData.getDiscountRate());
-
     product.updateProductImages(productImages);
     product.updateContents(productContents);
     product.updateMultiOptions(productMultipleOptions);
