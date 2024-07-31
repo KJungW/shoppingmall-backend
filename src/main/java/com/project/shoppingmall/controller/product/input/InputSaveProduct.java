@@ -11,7 +11,7 @@ import lombok.Getter;
 public class InputSaveProduct {
   @NotNull private Long productTypeId;
   @NotEmpty private String name;
-  @NotNull private InputProductOption singleOption;
+  private List<InputProductOption> singleOptions;
   private List<InputProductOption> multiOptions;
   private List<InputBlockData> blockDataList;
   @NotNull private Integer price;

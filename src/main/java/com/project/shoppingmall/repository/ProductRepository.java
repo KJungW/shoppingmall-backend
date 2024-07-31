@@ -13,7 +13,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           + "left join fetch p.seller "
           + "left join fetch p.productType "
           + "left join fetch p.contents "
-          + "left join fetch p.singleOption "
           + "where p.id = :productId ")
   public Optional<Product> findByIdWithAll(@Param("productId") Long productId);
 }

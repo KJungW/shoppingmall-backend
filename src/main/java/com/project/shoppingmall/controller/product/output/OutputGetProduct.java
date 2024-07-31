@@ -21,8 +21,8 @@ public class OutputGetProduct {
   private Long ProductTypeId;
   private List<String> productImageDownloadUrlList;
   private List<OutputBlockData> blockDataList;
-  private OutputProductOption singleOption;
-  private List<OutputProductOption> multipleOption;
+  private List<OutputProductOption> singleOptions;
+  private List<OutputProductOption> multipleOptions;
   private String name;
   private Integer price;
   private Integer discountAmount;
@@ -37,8 +37,8 @@ public class OutputGetProduct {
     this.productImageDownloadUrlList =
         product.getProductImages().stream().map(ProductImage::getDownLoadUrl).toList();
     this.blockDataList = makeOutputBlockDataList(product.getContents());
-    this.singleOption = new OutputProductOption(product.getSingleOption());
-    this.multipleOption =
+    this.singleOptions = product.getSingleOptions().stream().map(OutputProductOption::new).toList();
+    this.multipleOptions =
         product.getMultipleOptions().stream().map(OutputProductOption::new).toList();
     this.name = product.getName();
     this.price = product.getPrice();

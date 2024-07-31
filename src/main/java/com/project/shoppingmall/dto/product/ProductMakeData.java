@@ -20,25 +20,25 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductMakeData {
   private Long productTypeId;
   private String name;
-  private ProductOption singleOption;
   private Integer price;
   private Integer discountAmount;
   private Double discountRate;
 
-  private List<MultipartFile> productImages;
-  private List<ProductOption> multiOptions;
-  private List<ContentBlock> contentBlocks;
+  private List<ProductOption> singleOptions = new ArrayList<>();
+  private List<ProductOption> multiOptions = new ArrayList<>();
+  private List<MultipartFile> productImages = new ArrayList<>();
+  private List<ContentBlock> contentBlocks = new ArrayList<>();
 
   @Builder
   public ProductMakeData(
       Long productTypeId,
       String name,
-      InputProductOption singleOption,
       Integer price,
       Integer discountAmount,
       Double discountRate,
-      List<MultipartFile> productImages,
+      List<InputProductOption> singleOptions,
       List<InputProductOption> multiOptions,
+      List<MultipartFile> productImages,
       List<InputBlockData> blockDataList,
       List<MultipartFile> blockImages) {
     this.productTypeId = productTypeId;
@@ -46,22 +46,22 @@ public class ProductMakeData {
     this.price = price;
     this.discountAmount = discountAmount;
     this.discountRate = discountRate;
-    initSingleProductOption(singleOption);
-    initMultipleProductOption(multiOptions);
+    initSingleProductOptions(singleOptions);
+    initMultipleProductOptions(multiOptions);
     initProductImages(productImages);
     initContentBlocks(blockDataList, blockImages);
   }
 
-  private void initSingleProductOption(InputProductOption singleOption) {
-    this.singleOption =
-        new ProductOption(singleOption.getOptionName(), singleOption.getPriceChangeAmount());
+  private void initSingleProductOptions(List<InputProductOption> singleOption) {
+    if (singleOption == null) return;
+    this.singleOptions =
+        singleOption.stream()
+            .map(input -> new ProductOption(input.getOptionName(), input.getPriceChangeAmount()))
+            .collect(Collectors.toList());
   }
 
-  private void initMultipleProductOption(List<InputProductOption> multiOptions) {
-    if (multiOptions == null) {
-      this.multiOptions = new ArrayList<>();
-      return;
-    }
+  private void initMultipleProductOptions(List<InputProductOption> multiOptions) {
+    if (multiOptions == null) return;
     this.multiOptions =
         multiOptions.stream()
             .map(input -> new ProductOption(input.getOptionName(), input.getPriceChangeAmount()))
@@ -69,25 +69,16 @@ public class ProductMakeData {
   }
 
   private void initProductImages(List<MultipartFile> productImages) {
-    if (productImages == null) {
-      this.productImages = new ArrayList<>();
-      return;
-    }
-
+    if (productImages == null) return;
     FileUtils.sortMultiPartFilesByName(productImages);
     this.productImages = productImages;
   }
 
   private void initContentBlocks(
       List<InputBlockData> blockDataList, List<MultipartFile> blockImages) {
-    if (blockDataList == null && blockImages == null) {
-      this.contentBlocks = new ArrayList<>();
-      return;
-    }
-
-    if (blockDataList == null || blockImages == null) {
+    if (blockDataList == null && blockImages == null) return;
+    if (blockDataList == null || blockImages == null)
       throw new NotMatchBlockAndImage("블록과 이미지가 매치되지 않습니다.");
-    }
 
     ArrayList<ContentBlock> resultBlockList = new ArrayList<>();
     for (InputBlockData blockData : blockDataList) {

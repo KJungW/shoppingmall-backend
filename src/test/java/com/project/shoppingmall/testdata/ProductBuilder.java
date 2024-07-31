@@ -15,8 +15,27 @@ public class ProductBuilder {
   public static Product.ProductBuilder fullData() throws IOException {
     ProductType givenType = new ProductType("test/type");
     ReflectionTestUtils.setField(givenType, "id", 1L);
-    ProductSingleOption givenSingleOption =
-        ProductSingleOption.builder().optionName("singleOption").priceChangeAmount(-1000).build();
+    List<ProductSingleOption> givenSingleOptions =
+        new ArrayList() {
+          {
+            add(
+                ProductSingleOption.builder()
+                    .optionName("singleOption1")
+                    .priceChangeAmount(1000)
+                    .build());
+            add(
+                ProductSingleOption.builder()
+                    .optionName("singleOption2")
+                    .priceChangeAmount(2000)
+                    .build());
+            add(
+                ProductSingleOption.builder()
+                    .optionName("singleOption3")
+                    .priceChangeAmount(3000)
+                    .build());
+          }
+        };
+
     ArrayList<ProductMultipleOption> givenMultiOptions =
         new ArrayList() {
           {
@@ -77,7 +96,7 @@ public class ProductBuilder {
         .discountRate(10.5)
         .isBan(false)
         .scoreAvg(0.0)
-        .singleOption(givenSingleOption)
+        .singleOptions(givenSingleOptions)
         .multipleOptions(givenMultiOptions)
         .productImages(givenProductImageList)
         .contents(givenContents);

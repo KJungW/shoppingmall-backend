@@ -40,8 +40,8 @@ public class ProductService {
             .findById(productData.getProductTypeId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
 
-    ProductSingleOption productSingleOption =
-        makeProductSingleOption(productData.getSingleOption());
+    List<ProductSingleOption> productSingleOptions =
+        makeProductSingleOptionList(productData.getSingleOptions());
     List<ProductMultipleOption> productMultipleOptions =
         makeProductMultipleOptionList(productData.getMultiOptions());
     ArrayList<ProductImage> productImages =
@@ -59,7 +59,7 @@ public class ProductService {
             .discountRate(productData.getDiscountRate())
             .isBan(false)
             .scoreAvg(0.0)
-            .singleOption(productSingleOption)
+            .singleOptions(productSingleOptions)
             .multipleOptions(productMultipleOptions)
             .productImages(productImages)
             .contents(productContents)
@@ -92,8 +92,8 @@ public class ProductService {
     ArrayList<ProductContent> productContents =
         makeProductContentsList(
             productData.getContentBlocks(), "blockImage/" + product.getSeller().getId());
-    ProductSingleOption productSingleOption =
-        makeProductSingleOption(productData.getSingleOption());
+    List<ProductSingleOption> productSingleOption =
+        makeProductSingleOptionList(productData.getSingleOptions());
     List<ProductMultipleOption> productMultipleOptions =
         makeProductMultipleOptionList(productData.getMultiOptions());
 
@@ -101,10 +101,10 @@ public class ProductService {
     product.changeProductName(productData.getName());
     product.changePrice(
         productData.getPrice(), productData.getDiscountAmount(), productData.getDiscountRate());
+    product.updateSingleOption(productSingleOption);
+    product.updateMultiOptions(productMultipleOptions);
     product.updateProductImages(productImages);
     product.updateContents(productContents);
-    product.updateMultiOptions(productMultipleOptions);
-    product.updateSingleOption(productSingleOption);
   }
 
   public Product findById(Long productId) {
@@ -119,6 +119,7 @@ public class ProductService {
             .findByIdWithAll(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다"));
     int productImageSize = product.getProductImages().size();
+    int singleOptionSize = product.getSingleOptions().size();
     int multiOptionSize = product.getMultipleOptions().size();
     return product;
   }
@@ -200,11 +201,17 @@ public class ProductService {
         .build();
   }
 
-  private ProductSingleOption makeProductSingleOption(ProductOption option) {
-    return ProductSingleOption.builder()
-        .optionName(option.getOptionName())
-        .priceChangeAmount(option.getPriceChangeAmount())
-        .build();
+  private List<ProductSingleOption> makeProductSingleOptionList(List<ProductOption> options) {
+    List<ProductSingleOption> productSingleOptions = new ArrayList<>();
+    for (ProductOption optionData : options) {
+      ProductSingleOption newProductSingleOption =
+          ProductSingleOption.builder()
+              .optionName(optionData.getOptionName())
+              .priceChangeAmount(optionData.getPriceChangeAmount())
+              .build();
+      productSingleOptions.add(newProductSingleOption);
+    }
+    return productSingleOptions;
   }
 
   private List<ProductMultipleOption> makeProductMultipleOptionList(List<ProductOption> options) {

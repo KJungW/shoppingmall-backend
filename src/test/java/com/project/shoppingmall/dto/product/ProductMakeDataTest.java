@@ -22,11 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 class ProductMakeDataTest {
   private Long givenProductTypeId;
   private String givenName;
-  private InputProductOption givenSingleOption;
+  private List<InputProductOption> givenSingleOption = new ArrayList<>();
   private Integer givenPrice;
   private Integer givenDiscountAmount;
   private Double givenDiscountRate;
-  private ArrayList<MultipartFile> givenProductImageList = new ArrayList<>();
+  private List<MultipartFile> givenProductImageList = new ArrayList<>();
   private List<InputProductOption> givenMulitpleOptions = new ArrayList<>();
   private List<InputBlockData> givenBlockDataList = new ArrayList<>();
   private List<MultipartFile> givenBlockImages = new ArrayList<>();
@@ -35,7 +35,6 @@ class ProductMakeDataTest {
   public void beforeEach() throws IOException {
     givenProductTypeId = 1L;
     givenName = "testProduct";
-    givenSingleOption = new InputProductOption("singleOption", -1000);
     givenPrice = 10000;
     givenDiscountAmount = 500;
     givenDiscountRate = 10.5;
@@ -62,9 +61,16 @@ class ProductMakeDataTest {
     givenProductImageList.add(givenProductImage2);
     givenProductImageList.add(givenProductImage3);
 
+    InputProductOption singleOption1 = new InputProductOption("singleOption1", 1000);
+    InputProductOption singleOption2 = new InputProductOption("singleOption2", 2000);
+    InputProductOption singleOption3 = new InputProductOption("singleOption3", 3000);
+    givenSingleOption.add(singleOption1);
+    givenSingleOption.add(singleOption2);
+    givenSingleOption.add(singleOption3);
+
     InputProductOption multiOption1 = new InputProductOption("multiOption1", 1000);
-    InputProductOption multiOption2 = new InputProductOption("multiOption2", 1000);
-    InputProductOption multiOption3 = new InputProductOption("multiOption3", 1000);
+    InputProductOption multiOption2 = new InputProductOption("multiOption2", 2000);
+    InputProductOption multiOption3 = new InputProductOption("multiOption3", 3000);
     givenMulitpleOptions.add(multiOption1);
     givenMulitpleOptions.add(multiOption2);
     givenMulitpleOptions.add(multiOption3);
@@ -109,7 +115,7 @@ class ProductMakeDataTest {
         ProductMakeData.builder()
             .productTypeId(givenProductTypeId)
             .name(givenName)
-            .singleOption(givenSingleOption)
+            .singleOptions(givenSingleOption)
             .price(givenPrice)
             .discountAmount(givenDiscountAmount)
             .discountRate(givenDiscountRate)
@@ -122,9 +128,14 @@ class ProductMakeDataTest {
     // then
     assertEquals(givenProductTypeId, result.getProductTypeId());
     assertEquals(givenName, result.getName());
-    assertEquals(givenSingleOption.getOptionName(), result.getSingleOption().getOptionName());
+
     assertEquals(
-        givenSingleOption.getPriceChangeAmount(), result.getSingleOption().getPriceChangeAmount());
+        givenSingleOption.get(0).getOptionName(), result.getSingleOptions().get(0).getOptionName());
+    assertEquals(
+        givenSingleOption.get(1).getOptionName(), result.getSingleOptions().get(1).getOptionName());
+    assertEquals(
+        givenSingleOption.get(2).getOptionName(), result.getSingleOptions().get(2).getOptionName());
+
     assertEquals(givenPrice, result.getPrice());
     assertEquals(givenDiscountAmount, result.getDiscountAmount());
     assertEquals(
@@ -197,7 +208,7 @@ class ProductMakeDataTest {
         ProductMakeData.builder()
             .productTypeId(givenProductTypeId)
             .name(givenName)
-            .singleOption(givenSingleOption)
+            .singleOptions(givenSingleOption)
             .price(givenPrice)
             .discountAmount(givenDiscountAmount)
             .discountRate(givenDiscountRate)
@@ -227,7 +238,7 @@ class ProductMakeDataTest {
         ProductMakeData.builder()
             .productTypeId(givenProductTypeId)
             .name(givenName)
-            .singleOption(givenSingleOption)
+            .singleOptions(givenSingleOption)
             .price(givenPrice)
             .discountAmount(givenDiscountAmount)
             .discountRate(givenDiscountRate)
@@ -249,7 +260,7 @@ class ProductMakeDataTest {
         ProductMakeData.builder()
             .productTypeId(givenProductTypeId)
             .name(givenName)
-            .singleOption(givenSingleOption)
+            .singleOptions(givenSingleOption)
             .price(givenPrice)
             .discountAmount(givenDiscountAmount)
             .discountRate(givenDiscountRate)
@@ -273,7 +284,7 @@ class ProductMakeDataTest {
           ProductMakeData.builder()
               .productTypeId(givenProductTypeId)
               .name(givenName)
-              .singleOption(givenSingleOption)
+              .singleOptions(givenSingleOption)
               .price(givenPrice)
               .discountAmount(givenDiscountAmount)
               .discountRate(givenDiscountRate)
@@ -295,7 +306,7 @@ class ProductMakeDataTest {
           ProductMakeData.builder()
               .productTypeId(givenProductTypeId)
               .name(givenName)
-              .singleOption(givenSingleOption)
+              .singleOptions(givenSingleOption)
               .price(givenPrice)
               .discountAmount(givenDiscountAmount)
               .discountRate(givenDiscountRate)
@@ -315,7 +326,7 @@ class ProductMakeDataTest {
         ProductMakeData.builder()
             .productTypeId(givenProductTypeId)
             .name(givenName)
-            .singleOption(givenSingleOption)
+            .singleOptions(givenSingleOption)
             .price(givenPrice)
             .discountAmount(givenDiscountAmount)
             .discountRate(givenDiscountRate)
@@ -357,7 +368,7 @@ class ProductMakeDataTest {
           ProductMakeData.builder()
               .productTypeId(givenProductTypeId)
               .name(givenName)
-              .singleOption(givenSingleOption)
+              .singleOptions(givenSingleOption)
               .price(givenPrice)
               .discountAmount(givenDiscountAmount)
               .discountRate(givenDiscountRate)

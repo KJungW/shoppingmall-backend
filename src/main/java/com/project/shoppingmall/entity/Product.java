@@ -28,9 +28,8 @@ public class Product extends BaseEntity {
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ProductContent> contents = new ArrayList<>();
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "SINGLE_OPTION_ID")
-  private ProductSingleOption singleOption;
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ProductSingleOption> singleOptions = new ArrayList<>();
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ProductMultipleOption> multipleOptions = new ArrayList<>();
@@ -48,7 +47,7 @@ public class Product extends BaseEntity {
       ProductType productType,
       List<ProductImage> productImages,
       List<ProductContent> contents,
-      ProductSingleOption singleOption,
+      List<ProductSingleOption> singleOptions,
       List<ProductMultipleOption> multipleOptions,
       String name,
       Integer price,
@@ -64,7 +63,7 @@ public class Product extends BaseEntity {
     this.discountRate = discountRate;
     this.isBan = isBan;
     this.scoreAvg = scoreAvg;
-    updateSingleOption(singleOption);
+    updateSingleOption(singleOptions);
     updateMultiOptions(multipleOptions);
     updateProductImages(productImages);
     updateContents(contents);
@@ -100,8 +99,12 @@ public class Product extends BaseEntity {
     }
   }
 
-  public void updateSingleOption(ProductSingleOption singleOption) {
-    this.singleOption = singleOption;
+  public void updateSingleOption(List<ProductSingleOption> singleOptions) {
+    this.singleOptions.clear();
+    for (ProductSingleOption option : singleOptions) {
+      this.singleOptions.add(option);
+      option.updateProduct(this);
+    }
   }
 
   public void updateMultiOptions(List<ProductMultipleOption> multipleOptions) {

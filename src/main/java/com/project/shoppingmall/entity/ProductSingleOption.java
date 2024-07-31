@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 public class ProductSingleOption extends BaseEntity {
   @Id @GeneratedValue private Long id;
 
-  @OneToOne(mappedBy = "singleOption")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "PRODUCT_ID")
   private Product product;
 
   private String optionName;

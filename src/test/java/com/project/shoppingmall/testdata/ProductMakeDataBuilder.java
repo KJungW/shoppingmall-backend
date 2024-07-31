@@ -20,80 +20,96 @@ public class ProductMakeDataBuilder {
   public static ProductMakeData.ProductMakeDataBuilder fullData() throws IOException {
     Long givenProductTypeId = 1L;
     String givenName = "testProduct";
-    InputProductOption givenSingleOption = new InputProductOption("singleOption", -1000);
     Integer givenPrice = 10000;
     Integer givenDiscountAmount = 500;
     Double givenDiscountRate = 10.5;
-    ArrayList<MultipartFile> givenProductImageList = new ArrayList<>();
-    List<InputProductOption> givenMulitpleOptions = new ArrayList<>();
-    List<InputBlockData> givenBlockDataList = new ArrayList<>();
-    List<MultipartFile> givenBlockImages = new ArrayList<>();
-    MockMultipartFile givenProductImage1 =
-        new MockMultipartFile(
-            "file",
-            "1.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/1.png")));
-    MockMultipartFile givenProductImage2 =
-        new MockMultipartFile(
-            "file",
-            "2.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/2.png")));
-    MockMultipartFile givenProductImage3 =
-        new MockMultipartFile(
-            "file",
-            "3.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/3.png")));
-    givenProductImageList.add(givenProductImage1);
-    givenProductImageList.add(givenProductImage2);
-    givenProductImageList.add(givenProductImage3);
-    InputProductOption multiOption1 = new InputProductOption("multiOption1", 1000);
-    InputProductOption multiOption2 = new InputProductOption("multiOption2", 1000);
-    InputProductOption multiOption3 = new InputProductOption("multiOption3", 1000);
-    givenMulitpleOptions.add(multiOption1);
-    givenMulitpleOptions.add(multiOption2);
-    givenMulitpleOptions.add(multiOption3);
-    InputBlockData inputBlockData1 = new InputBlockData(1L, BlockType.IMAGE_TYPE, "image1.png");
-    InputBlockData inputBlockData2 = new InputBlockData(2L, BlockType.TEXT_TYPE, "test text");
-    InputBlockData inputBlockData3 = new InputBlockData(3L, BlockType.IMAGE_TYPE, "image2.png");
-    InputBlockData inputBlockData4 = new InputBlockData(4L, BlockType.IMAGE_TYPE, "image3.png");
-    givenBlockDataList.add(inputBlockData1);
-    givenBlockDataList.add(inputBlockData2);
-    givenBlockDataList.add(inputBlockData3);
-    givenBlockDataList.add(inputBlockData4);
-    MockMultipartFile givenBlockData1 =
-        new MockMultipartFile(
-            "file",
-            "image1.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/image1.png")));
-    MockMultipartFile givenBlockData2 =
-        new MockMultipartFile(
-            "file",
-            "image2.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/image2.png")));
-    MockMultipartFile givenBlockData3 =
-        new MockMultipartFile(
-            "file",
-            "image3.png",
-            "image/png",
-            Files.readAllBytes(Paths.get("src/test/resources/static/product_image/image3.png")));
-    givenBlockImages.add(givenBlockData1);
-    givenBlockImages.add(givenBlockData2);
-    givenBlockImages.add(givenBlockData3);
+    ArrayList<MultipartFile> givenProductImageList =
+        new ArrayList<>() {
+          {
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "1.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/1.png"))));
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "2.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/2.png"))));
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "3.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/3.png"))));
+          }
+        };
+    List<InputProductOption> givenSigleOptions =
+        new ArrayList<>() {
+          {
+            add(new InputProductOption("multiOption1", -1000));
+            add(new InputProductOption("multiOption2", -2000));
+            add(new InputProductOption("multiOption3", -3000));
+          }
+        };
+    List<InputProductOption> givenMultipleOptions =
+        new ArrayList<>() {
+          {
+            add(new InputProductOption("multiOption1", 1000));
+            add(new InputProductOption("multiOption2", 2000));
+            add(new InputProductOption("multiOption3", 3000));
+          }
+        };
+    List<InputBlockData> givenBlockDataList =
+        new ArrayList<>() {
+          {
+            add(new InputBlockData(1L, BlockType.IMAGE_TYPE, "image1.png"));
+            add(new InputBlockData(2L, BlockType.TEXT_TYPE, "test text"));
+            add(new InputBlockData(3L, BlockType.IMAGE_TYPE, "image2.png"));
+            add(new InputBlockData(4L, BlockType.IMAGE_TYPE, "image3.png"));
+          }
+        };
+    List<MultipartFile> givenBlockImages =
+        new ArrayList<>() {
+          {
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "image1.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/image1.png"))));
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "image2.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/image2.png"))));
+            add(
+                new MockMultipartFile(
+                    "file",
+                    "image3.png",
+                    "image/png",
+                    Files.readAllBytes(
+                        Paths.get("src/test/resources/static/product_image/image3.png"))));
+          }
+        };
 
     return ProductMakeData.builder()
         .productTypeId(givenProductTypeId)
         .name(givenName)
-        .singleOption(givenSingleOption)
+        .singleOptions(givenSigleOptions)
         .price(givenPrice)
         .discountAmount(givenDiscountAmount)
         .discountRate(givenDiscountRate)
         .productImages(givenProductImageList)
-        .multiOptions(givenMulitpleOptions)
+        .multiOptions(givenMultipleOptions)
         .blockDataList(givenBlockDataList)
         .blockImages(givenBlockImages);
   }

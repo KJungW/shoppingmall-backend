@@ -108,12 +108,21 @@ class ProductServiceTest {
         .uploadFile(any(), any());
 
     // - Product.singleOption 검증
-    assertEquals(
-        givenProductMakeData.getSingleOption().getOptionName(),
-        savedProduct.getSingleOption().getOptionName());
-    assertEquals(
-        givenProductMakeData.getSingleOption().getPriceChangeAmount(),
-        savedProduct.getSingleOption().getPriceChangeAmount());
+    List<String> expectedSingleOptionNames =
+        givenProductMakeData.getSingleOptions().stream().map(ProductOption::getOptionName).toList();
+    List<String> resultSingleOptionNames =
+        savedProduct.getSingleOptions().stream().map(ProductSingleOption::getOptionName).toList();
+    assertArrayEquals(expectedSingleOptionNames.toArray(), resultSingleOptionNames.toArray());
+    List<Integer> expectedSingleOptionPriceChange =
+        givenProductMakeData.getSingleOptions().stream()
+            .map(ProductOption::getPriceChangeAmount)
+            .toList();
+    List<Integer> resultSingleOptionPriceChange =
+        savedProduct.getSingleOptions().stream()
+            .map(ProductSingleOption::getPriceChangeAmount)
+            .toList();
+    assertArrayEquals(
+        expectedSingleOptionPriceChange.toArray(), resultSingleOptionPriceChange.toArray());
 
     // - Product.multipleOptions 검증
     List<String> expectedOptionNames =
