@@ -80,4 +80,16 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult MethodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "입력값이 잘못되었습니다. 한번더 확인해주세요");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(NotMatchBlockAndImage.class)
+  public ErrorResult NotMatchBlockAndImageExceptionHandler(NotMatchBlockAndImage e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미지블록과 이미지 파일이 매칭되지 않습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(InvalidEnumType.class)
+  public ErrorResult InvalidEnumTypeExceptionHandler(InvalidEnumType e) {
+    return new ErrorResult(ErrorCode.SERVER_ERROR, "예상치 못한 서버에러입니다.");
+  }
 }
