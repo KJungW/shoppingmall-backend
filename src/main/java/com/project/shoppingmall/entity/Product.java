@@ -1,6 +1,7 @@
 package com.project.shoppingmall.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,17 +23,17 @@ public class Product extends BaseEntity {
   private ProductType productType;
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ProductImage> productImages;
+  private List<ProductImage> productImages = new ArrayList<>();
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ProductContent> contents;
+  private List<ProductContent> contents = new ArrayList<>();
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "SINGLE_OPTION_ID")
   private ProductSingleOption singleOption;
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ProductMultipleOption> multipleOptions;
+  private List<ProductMultipleOption> multipleOptions = new ArrayList<>();
 
   private String name;
   private Integer price;
@@ -60,16 +61,32 @@ public class Product extends BaseEntity {
     this.scoreAvg = 0.0;
   }
 
+  public void changeProductType(ProductType type) {
+    this.productType = type;
+  }
+
+  public void changeProductName(String name) {
+    this.name = name;
+  }
+
+  public void changePrice(Integer price, Integer discountAmount, Double discountRate) {
+    this.price = price;
+    this.discountAmount = discountAmount;
+    this.discountRate = discountRate;
+  }
+
   public void updateProductImages(List<ProductImage> productImages) {
-    this.productImages = productImages;
+    this.productImages.clear();
     for (ProductImage image : productImages) {
+      this.productImages.add(image);
       image.updateProduct(this);
     }
   }
 
   public void updateContents(List<ProductContent> productContents) {
-    this.contents = productContents;
+    this.contents.clear();
     for (ProductContent content : productContents) {
+      this.contents.add(content);
       content.updateProduct(this);
     }
   }
@@ -79,8 +96,9 @@ public class Product extends BaseEntity {
   }
 
   public void updateMultiOptions(List<ProductMultipleOption> multipleOptions) {
-    this.multipleOptions = multipleOptions;
+    this.multipleOptions.clear();
     for (ProductMultipleOption option : multipleOptions) {
+      this.multipleOptions.add(option);
       option.updateProduct(this);
     }
   }

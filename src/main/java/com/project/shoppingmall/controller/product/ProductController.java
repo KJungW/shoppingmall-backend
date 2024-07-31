@@ -1,6 +1,7 @@
 package com.project.shoppingmall.controller.product;
 
 import com.project.shoppingmall.controller.product.input.InputSaveProduct;
+import com.project.shoppingmall.controller.product.input.InputUpdateProduct;
 import com.project.shoppingmall.controller.product.output.OutputSaveProduct;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
@@ -43,5 +44,29 @@ public class ProductController {
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Product savedProduct = productService.save(userDetail.getId(), productMakeData);
     return new OutputSaveProduct(savedProduct.getId());
+  }
+
+  @PutMapping()
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void updateProduct(
+      @Valid @RequestPart("productData") InputUpdateProduct productData,
+      @RequestPart(value = "productImages", required = false) List<MultipartFile> productImages,
+      @RequestPart(value = "blockImages", required = false) List<MultipartFile> blockImages) {
+    ProductMakeData productMakeData =
+        ProductMakeData.builder()
+            .productTypeId(productData.getProductTypeId())
+            .name(productData.getName())
+            .singleOption(productData.getSingleOption())
+            .multiOptions(productData.getMultiOptions())
+            .blockDataList(productData.getBlockDataList())
+            .price(productData.getPrice())
+            .discountAmount(productData.getDiscountAmount())
+            .discountRate(productData.getDiscountRate())
+            .productImages(productImages)
+            .blockImages(blockImages)
+            .build();
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    productService.update(userDetail.getId(), productData.getProductId(), productMakeData);
   }
 }

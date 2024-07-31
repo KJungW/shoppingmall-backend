@@ -70,6 +70,67 @@ public class ProductService {
     return newProduct;
   }
 
+  @Transactional
+  public void update(Long memberId, Long productId, ProductMakeData productData) {
+    Product product =
+        productRepository
+            .findById(productId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
+    ProductType productType =
+        productTypeService
+            .findById(productData.getProductTypeId())
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
+    if (!validateMemberIsProductSeller(product, memberId)) {
+      throw new DataNotFound("회원에게 해당하는 productId를 가진 제품이 존재하지 않습니다.");
+    }
+
+    removeOriginProductImages(product);
+    removeOriginProductContentImage(product);
+
+    ArrayList<ProductImage> productImages =
+        makeProductImageList(
+            productData.getProductImages(), "productImage/" + product.getSeller().getId());
+    ArrayList<ProductContent> productContents =
+        makeProductContentsList(
+            productData.getContentBlocks(), "blockImage/" + product.getSeller().getId());
+    ProductSingleOption productSingleOption =
+        makeProductSingleOption(productData.getSingleOption());
+    List<ProductMultipleOption> productMultipleOptions =
+        makeProductMultipleOptionList(productData.getMultiOptions());
+
+    product.changeProductType(productType);
+    product.changeProductName(productData.getName());
+    product.changePrice(
+        productData.getPrice(), productData.getDiscountAmount(), productData.getDiscountRate());
+
+    product.updateProductImages(productImages);
+    product.updateContents(productContents);
+    product.updateMultiOptions(productMultipleOptions);
+    product.updateSingleOption(productSingleOption);
+  }
+
+  public boolean validateMemberIsProductSeller(Product product, Long memberId) {
+    return product.getSeller().getId().equals(memberId);
+  }
+
+  private void removeOriginProductImages(Product product) {
+    List<ProductImage> originProductImage = product.getProductImages();
+    for (ProductImage productImage : originProductImage) {
+      s3Service.deleteFile(productImage.getImageUri());
+    }
+  }
+
+  private void removeOriginProductContentImage(Product product) {
+    List<ProductContent> originProductContents = product.getContents();
+    for (ProductContent productContent : originProductContents) {
+      if (productContent.getType().equals(BlockType.IMAGE_TYPE)) {
+        ImageBlock imageBlock =
+            jsonUtil.convertJsonToObject(productContent.getContent(), ImageBlock.class);
+        s3Service.deleteFile(imageBlock.getImageUri());
+      }
+    }
+  }
+
   private ArrayList<ProductImage> makeProductImageList(
       List<MultipartFile> images, String imageUploadUri) {
     ArrayList<ProductImage> productImagesList = new ArrayList<>();
