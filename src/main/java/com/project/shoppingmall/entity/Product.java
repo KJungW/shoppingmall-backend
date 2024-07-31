@@ -39,6 +39,7 @@ public class Product extends BaseEntity {
   private Integer discountAmount;
   private Double discountRate;
   private Boolean isBan;
+  private Double scoreAvg;
 
   @Builder
   public Product(
@@ -56,6 +57,7 @@ public class Product extends BaseEntity {
     this.discountAmount = discountAmount;
     this.discountRate = discountRate;
     this.isBan = isBan;
+    this.scoreAvg = 0.0;
   }
 
   public void updateProductImages(List<ProductImage> productImages) {
