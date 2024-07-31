@@ -15,6 +15,7 @@ import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,21 +108,21 @@ public class ProductService {
     product.updateContents(productContents);
   }
 
-  public Product findById(Long productId) {
-    return productRepository
-        .findById(productId)
-        .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다"));
+  public Optional<Product> findById(Long productId) {
+    return productRepository.findById(productId);
   }
 
-  public Product findByIdWithAll(Long productId) {
-    Product product =
-        productRepository
-            .findByIdWithAll(productId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다"));
-    int productImageSize = product.getProductImages().size();
-    int singleOptionSize = product.getSingleOptions().size();
-    int multiOptionSize = product.getMultipleOptions().size();
-    return product;
+  public Optional<Product> findByIdWithAll(Long productId) {
+    Optional<Product> result = productRepository.findByIdWithAll(productId);
+    if (result.isPresent()) {
+      Product product = result.get();
+      int productImageSize = product.getProductImages().size();
+      int singleOptionSize = product.getSingleOptions().size();
+      int multiOptionSize = product.getMultipleOptions().size();
+      return Optional.of(product);
+    } else {
+      return Optional.empty();
+    }
   }
 
   public boolean validateMemberIsProductSeller(Product product, Long memberId) {

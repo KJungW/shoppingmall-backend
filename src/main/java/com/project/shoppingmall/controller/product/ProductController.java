@@ -7,6 +7,7 @@ import com.project.shoppingmall.controller.product.output.OutputSaveProduct;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,7 +25,10 @@ public class ProductController {
 
   @GetMapping("/{productId}")
   public OutputGetProduct getProduct(@PathVariable("productId") Long productId) {
-    Product product = productService.findByIdWithAll(productId);
+    Product product =
+        productService
+            .findByIdWithAll(productId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품을 찾을 수 없습니다."));
     return new OutputGetProduct(product);
   }
 
