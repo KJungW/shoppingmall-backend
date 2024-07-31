@@ -2,6 +2,7 @@ package com.project.shoppingmall.controller.product;
 
 import com.project.shoppingmall.controller.product.input.InputSaveProduct;
 import com.project.shoppingmall.controller.product.input.InputUpdateProduct;
+import com.project.shoppingmall.controller.product.output.OutputGetProduct;
 import com.project.shoppingmall.controller.product.output.OutputSaveProduct;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
@@ -20,6 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ProductController {
   private final ProductService productService;
+
+  @GetMapping("/{productId}")
+  public OutputGetProduct getProduct(@PathVariable("productId") Long productId) {
+    Product product = productService.findByIdWithAll(productId);
+    return new OutputGetProduct(product);
+  }
 
   @PostMapping()
   @PreAuthorize("hasRole('ROLE_MEMBER')")

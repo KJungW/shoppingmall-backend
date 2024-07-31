@@ -107,6 +107,22 @@ public class ProductService {
     product.updateSingleOption(productSingleOption);
   }
 
+  public Product findById(Long productId) {
+    return productRepository
+        .findById(productId)
+        .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다"));
+  }
+
+  public Product findByIdWithAll(Long productId) {
+    Product product =
+        productRepository
+            .findByIdWithAll(productId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다"));
+    int productImageSize = product.getProductImages().size();
+    int multiOptionSize = product.getMultipleOptions().size();
+    return product;
+  }
+
   public boolean validateMemberIsProductSeller(Product product, Long memberId) {
     return product.getSeller().getId().equals(memberId);
   }
