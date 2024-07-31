@@ -9,8 +9,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 public class ProductBuilder {
   public static final Integer PRODUCT_IMAGE_COUNT = 3;
-  public static final Integer TextBlockCount = 1;
-  public static final Integer ImageBlockCount = 3;
+  public static final Integer TEXT_BLOCK_COUNT = 1;
+  public static final Integer IMAGE_BLOCK_COUNT = 3;
 
   public static Product.ProductBuilder fullData() throws IOException {
     ProductType givenType = new ProductType("test/type");
@@ -45,7 +45,8 @@ public class ProductBuilder {
             add(ProductImage.builder().imageUri("test/uri3").downLoadUrl("test/down3").build());
           }
         };
-    List<ProductContent> givenBlockImages =
+
+    List<ProductContent> givenContents =
         new ArrayList() {
           {
             add(
@@ -79,6 +80,6 @@ public class ProductBuilder {
         .singleOption(givenSingleOption)
         .multipleOptions(givenMultiOptions)
         .productImages(givenProductImageList)
-        .contents(givenBlockImages);
+        .contents(givenContents);
   }
 }

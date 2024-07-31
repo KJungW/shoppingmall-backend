@@ -5,17 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class JsonUtilTest {
-  public JsonUtil jsonUtil;
-
-  @BeforeEach
-  public void beforeEach() {
-    jsonUtil = new JsonUtil();
-  }
 
   @Test
   @DisplayName("JsonUtil.convertObjectToJson() / convertJsonToObject : 정상흐름")
@@ -27,8 +20,8 @@ class JsonUtilTest {
     JsonTestDto givenDto = new JsonTestDto(givenId, givenTitle, givenContent);
 
     // when
-    String resultJson = jsonUtil.convertObjectToJson(givenDto);
-    JsonTestDto resultDto = jsonUtil.convertJsonToObject(resultJson, JsonTestDto.class);
+    String resultJson = JsonUtil.convertObjectToJson(givenDto);
+    JsonTestDto resultDto = JsonUtil.convertJsonToObject(resultJson, JsonTestDto.class);
 
     // then
     assertEquals(givenId, resultDto.getId());

@@ -23,7 +23,6 @@ class EmailRegistrationServiceTest {
   private RandomNumberGenerator mockRandomNumberGenerator;
   private EmailService mockEmailService;
   private MemberService mockMemberService;
-  private JsonUtil jsonUtil;
   private Long expirationTime;
   private String domain;
   private String cacheName;
@@ -34,14 +33,9 @@ class EmailRegistrationServiceTest {
     mockRandomNumberGenerator = mock(RandomNumberGenerator.class);
     mockEmailService = mock(EmailService.class);
     mockMemberService = mock(MemberService.class);
-    jsonUtil = new JsonUtil();
     target =
         new EmailRegistrationService(
-            mockCacheRepository,
-            mockRandomNumberGenerator,
-            mockEmailService,
-            mockMemberService,
-            jsonUtil);
+            mockCacheRepository, mockRandomNumberGenerator, mockEmailService, mockMemberService);
 
     expirationTime = 180L;
     domain = "https://domain";
@@ -59,7 +53,7 @@ class EmailRegistrationServiceTest {
     String givenRandomNum = "010101";
     EmailRegistrationCache givenEmailRegistrationCache =
         new EmailRegistrationCache(givenMemberId, givenRandomNum);
-    String givenCacheJson = jsonUtil.convertObjectToJson(givenEmailRegistrationCache);
+    String givenCacheJson = JsonUtil.convertObjectToJson(givenEmailRegistrationCache);
     String expectedContent =
         String.format(
             "%s/email/registration?memberId=%s&certificationNumber=%s&email=%s  (3분 이내에 클릭)",
@@ -97,7 +91,7 @@ class EmailRegistrationServiceTest {
     String givenEmail = "test@test.com";
     EmailRegistrationCache givenEmailRegistrationCache =
         new EmailRegistrationCache(givenMemberId, givenCertificationNumber);
-    String givenCacheJson = jsonUtil.convertObjectToJson(givenEmailRegistrationCache);
+    String givenCacheJson = JsonUtil.convertObjectToJson(givenEmailRegistrationCache);
     Member givenMember = MemberBuilder.fullData().email(null).build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
 
@@ -133,7 +127,7 @@ class EmailRegistrationServiceTest {
     String givenEmail = "test@test.com";
     EmailRegistrationCache givenCache =
         new EmailRegistrationCache(givenMemberId, givenRightCertificationNumber);
-    String givenCacheJson = jsonUtil.convertObjectToJson(givenCache);
+    String givenCacheJson = JsonUtil.convertObjectToJson(givenCache);
     when(mockCacheRepository.getCache(any())).thenReturn(Optional.of(givenCacheJson));
 
     // when then
@@ -152,7 +146,7 @@ class EmailRegistrationServiceTest {
     String givenEmail = "test@test.com";
     EmailRegistrationCache givenCache =
         new EmailRegistrationCache(givenMemberId, givenRightCertificationNumber);
-    String givenCacheJson = jsonUtil.convertObjectToJson(givenCache);
+    String givenCacheJson = JsonUtil.convertObjectToJson(givenCache);
     when(mockCacheRepository.getCache(any())).thenReturn(Optional.of(givenCacheJson));
 
     // when then

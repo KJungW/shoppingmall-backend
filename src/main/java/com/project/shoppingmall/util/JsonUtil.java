@@ -3,15 +3,11 @@ package com.project.shoppingmall.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.shoppingmall.exception.ServerLogicError;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-@Component
-@RequiredArgsConstructor
 public class JsonUtil {
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  public String convertObjectToJson(Object obj) {
+  public static String convertObjectToJson(Object obj) {
     try {
       return objectMapper.writeValueAsString(obj);
     } catch (JsonProcessingException ex) {
@@ -19,7 +15,7 @@ public class JsonUtil {
     }
   }
 
-  public <T> T convertJsonToObject(String json, Class<T> clazz) {
+  public static <T> T convertJsonToObject(String json, Class<T> clazz) {
     try {
       return objectMapper.readValue(json, clazz);
     } catch (JsonProcessingException ex) {

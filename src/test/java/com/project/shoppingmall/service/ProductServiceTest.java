@@ -18,9 +18,11 @@ import com.project.shoppingmall.util.JsonUtil;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class ProductServiceTest {
@@ -29,7 +31,7 @@ class ProductServiceTest {
   private ProductTypeService productTypeService;
   private ProductRepository productRepository;
   private S3Service s3Service;
-  private JsonUtil jsonUtil;
+  private static MockedStatic<JsonUtil> jsonUtil;
 
   @BeforeEach
   public void beforeEach() {
@@ -37,10 +39,14 @@ class ProductServiceTest {
     productTypeService = mock(ProductTypeService.class);
     productRepository = mock(ProductRepository.class);
     s3Service = mock(S3Service.class);
-    jsonUtil = mock(JsonUtil.class);
+    jsonUtil = mockStatic(JsonUtil.class);
     productService =
-        new ProductService(
-            memberService, productTypeService, productRepository, s3Service, jsonUtil);
+        new ProductService(memberService, productTypeService, productRepository, s3Service);
+  }
+
+  @AfterEach
+  public void afterEach() {
+    jsonUtil.close();
   }
 
   @Test
@@ -94,8 +100,10 @@ class ProductServiceTest {
             .size();
     assertEquals(
         expectedTextBlockCount + expectedImageBlockCount, savedProduct.getContents().size());
-    verify(jsonUtil, times(expectedTextBlockCount + expectedImageBlockCount))
-        .convertObjectToJson(any());
+
+    jsonUtil.verify(
+        () -> JsonUtil.convertObjectToJson(any()),
+        times(expectedTextBlockCount + expectedImageBlockCount));
     verify(s3Service, times(expectedImageBlockCount + expectedProductImgCount))
         .uploadFile(any(), any());
 
@@ -164,24 +172,25 @@ class ProductServiceTest {
     FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
     when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
 
-    when(jsonUtil.convertJsonToObject(any(), any()))
+    jsonUtil
+        .when(() -> JsonUtil.convertJsonToObject(any(), any()))
         .thenReturn(new ImageBlock(1L, "test/serverUri", "test/downUri"));
 
     // when
     productService.update(givenMemberId, givenProductId, givenProductMakeData);
 
     // then
-    verify(s3Service, times(ProductBuilder.PRODUCT_IMAGE_COUNT + ProductBuilder.ImageBlockCount))
+    verify(s3Service, times(ProductBuilder.PRODUCT_IMAGE_COUNT + ProductBuilder.IMAGE_BLOCK_COUNT))
         .deleteFile(any());
-    verify(jsonUtil, times(ProductBuilder.ImageBlockCount)).convertJsonToObject(any(), any());
-    verify(
-            jsonUtil,
-            times(ProductMakeDataBuilder.TextBlockCount + ProductMakeDataBuilder.ImageBlockCount))
-        .convertObjectToJson(any());
+    jsonUtil.verify(
+        () -> JsonUtil.convertJsonToObject(any(), any()), times(ProductBuilder.IMAGE_BLOCK_COUNT));
+    jsonUtil.verify(
+        () -> JsonUtil.convertObjectToJson(any()),
+        times(ProductMakeDataBuilder.TEXT_BLOCK_COUNT + ProductMakeDataBuilder.IMAGE_BLOCK_COUNT));
     verify(
             s3Service,
             times(
-                ProductMakeDataBuilder.ImageBlockCount
+                ProductMakeDataBuilder.IMAGE_BLOCK_COUNT
                     + ProductMakeDataBuilder.PRODUCT_IMAGE_COUNT))
         .uploadFile(any(), any());
   }
@@ -211,8 +220,8 @@ class ProductServiceTest {
 
     // then
     verify(s3Service, times(0)).deleteFile(any());
-    verify(jsonUtil, times(0)).convertJsonToObject(any(), any());
-    verify(jsonUtil, times(0)).convertObjectToJson(any());
+    jsonUtil.verify(() -> JsonUtil.convertJsonToObject(any(), any()), times(0));
+    jsonUtil.verify(() -> JsonUtil.convertObjectToJson(any()), times(0));
     verify(s3Service, times(0)).uploadFile(any(), any());
   }
 }

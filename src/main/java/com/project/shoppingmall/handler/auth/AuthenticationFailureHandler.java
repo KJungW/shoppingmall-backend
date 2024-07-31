@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthenticationFailureHandler implements AuthenticationEntryPoint {
-  private final JsonUtil jsonUtil;
-
   @Override
   public void commence(
       HttpServletRequest request,
@@ -23,7 +21,7 @@ public class AuthenticationFailureHandler implements AuthenticationEntryPoint {
       AuthenticationException authException)
       throws IOException {
     String content =
-        jsonUtil.convertObjectToJson(
+        JsonUtil.convertObjectToJson(
             new ErrorResult(ErrorCode.UNAUTHORIZED, "계정정보가 올바르지 않습니다. 다시 로그인을 해주세요"));
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType("application/json");

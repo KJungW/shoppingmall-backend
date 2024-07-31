@@ -28,7 +28,6 @@ public class ProductService {
   private final ProductTypeService productTypeService;
   private final ProductRepository productRepository;
   private final S3Service s3Service;
-  private final JsonUtil jsonUtil;
 
   @Transactional
   public Product save(Long memberId, ProductMakeData productData) {
@@ -124,7 +123,7 @@ public class ProductService {
     for (ProductContent productContent : originProductContents) {
       if (productContent.getType().equals(BlockType.IMAGE_TYPE)) {
         ImageBlock imageBlock =
-            jsonUtil.convertJsonToObject(productContent.getContent(), ImageBlock.class);
+            JsonUtil.convertJsonToObject(productContent.getContent(), ImageBlock.class);
         s3Service.deleteFile(imageBlock.getImageUri());
       }
     }
@@ -166,7 +165,7 @@ public class ProductService {
   private ProductContent makeProductTextContent(TextBlock textBlock) {
     return ProductContent.builder()
         .type(BlockType.TEXT_TYPE)
-        .content(jsonUtil.convertObjectToJson(textBlock))
+        .content(JsonUtil.convertObjectToJson(textBlock))
         .build();
   }
 
@@ -181,7 +180,7 @@ public class ProductService {
             uploadResult.getDownLoadUrl());
     return ProductContent.builder()
         .type(BlockType.IMAGE_TYPE)
-        .content(jsonUtil.convertObjectToJson(imageBlock))
+        .content(JsonUtil.convertObjectToJson(imageBlock))
         .build();
   }
 

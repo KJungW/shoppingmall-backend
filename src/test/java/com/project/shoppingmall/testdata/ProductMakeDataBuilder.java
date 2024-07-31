@@ -14,8 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ProductMakeDataBuilder {
   public static final Integer PRODUCT_IMAGE_COUNT = 3;
-  public static final Integer TextBlockCount = 1;
-  public static final Integer ImageBlockCount = 3;
+  public static final Integer TEXT_BLOCK_COUNT = 1;
+  public static final Integer IMAGE_BLOCK_COUNT = 3;
 
   public static ProductMakeData.ProductMakeDataBuilder fullData() throws IOException {
     Long givenProductTypeId = 1L;

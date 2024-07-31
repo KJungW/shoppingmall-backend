@@ -26,7 +26,6 @@ public class EmailRegistrationService {
   private final RandomNumberGenerator randomNumberGenerator;
   private final EmailService emailService;
   private final MemberService memberService;
-  private final JsonUtil jsonUtil;
 
   @Transactional
   public void sendCertificationEmail(Long memberId, String email) {
@@ -38,7 +37,7 @@ public class EmailRegistrationService {
             domain, memberId.toString(), certificationNumber, email);
 
     String cacheJson =
-        jsonUtil.convertObjectToJson(new EmailRegistrationCache(memberId, certificationNumber));
+        JsonUtil.convertObjectToJson(new EmailRegistrationCache(memberId, certificationNumber));
     cacheRepository.saveCache(cacheName + email, cacheJson, expirationTime);
     emailService.sendMail(email, title, content);
   }
@@ -49,7 +48,7 @@ public class EmailRegistrationService {
       String cacheJson = cacheRepository.getCache(cacheName + email).get();
       cacheRepository.removeCache(cacheName + email);
       EmailRegistrationCache cache =
-          jsonUtil.convertJsonToObject(cacheJson, EmailRegistrationCache.class);
+          JsonUtil.convertJsonToObject(cacheJson, EmailRegistrationCache.class);
       validateEmailCache(cache, new EmailRegistrationCache(memberId, certificationNumber));
       Member member = memberService.findById(memberId).get();
       member.registerEmail(email);

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthorizationFailureHandler implements AccessDeniedHandler {
-  private final JsonUtil jsonUtil;
-
   @Override
   public void handle(
       HttpServletRequest request,
@@ -23,7 +21,7 @@ public class AuthorizationFailureHandler implements AccessDeniedHandler {
       AccessDeniedException accessDeniedException)
       throws IOException {
     String content =
-        jsonUtil.convertObjectToJson(new ErrorResult(ErrorCode.FORBIDDEN, "권한이 없습니다."));
+        JsonUtil.convertObjectToJson(new ErrorResult(ErrorCode.FORBIDDEN, "권한이 없습니다."));
     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     response.setContentType("application/json");
     response.setCharacterEncoding("utf-8");
