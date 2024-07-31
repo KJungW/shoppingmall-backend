@@ -1,5 +1,6 @@
 package com.project.shoppingmall.entity;
 
+import com.project.shoppingmall.type.BlockType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,11 +17,15 @@ public class ProductContent extends BaseEntity {
   @JoinColumn(name = "PRODUCT_ID")
   private Product product;
 
+  @Enumerated(EnumType.STRING)
+  private BlockType type;
+
   private String content;
 
   @Builder
-  public ProductContent(Product product, String content) {
+  public ProductContent(Product product, BlockType type, String content) {
     this.product = product;
+    this.type = type;
     this.content = content;
   }
 

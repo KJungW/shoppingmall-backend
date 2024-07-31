@@ -104,7 +104,10 @@ public class ProductService {
   }
 
   private ProductContent makeProductTextContent(TextBlock textBlock) {
-    return ProductContent.builder().content(jsonUtil.convertObjectToJson(textBlock)).build();
+    return ProductContent.builder()
+        .type(BlockType.TEXT_TYPE)
+        .content(jsonUtil.convertObjectToJson(textBlock))
+        .build();
   }
 
   private ProductContent makeProductImageContent(
@@ -116,7 +119,10 @@ public class ProductService {
             imageBlockBefore.getIndex(),
             uploadResult.getFileServerUri(),
             uploadResult.getDownLoadUrl());
-    return ProductContent.builder().content(jsonUtil.convertObjectToJson(imageBlock)).build();
+    return ProductContent.builder()
+        .type(BlockType.IMAGE_TYPE)
+        .content(jsonUtil.convertObjectToJson(imageBlock))
+        .build();
   }
 
   private ProductSingleOption makeProductSingleOption(ProductOption option) {
