@@ -136,5 +136,8 @@ class ProductServiceTest {
 
     // - Product.isBan 검증
     assertEquals(false, savedProduct.getIsBan());
+
+    // - Product.scoreAvg 검증
+    assertEquals(0d, savedProduct.getScoreAvg());
   }
 }
