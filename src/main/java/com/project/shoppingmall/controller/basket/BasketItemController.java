@@ -10,10 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/member/basket")
@@ -35,5 +32,13 @@ public class BasketItemController {
             .build();
     BasketItem basketItem = basketItemService.saveBasketItem(basketItemMakeData);
     return new OutputSaveBasketItem(basketItem.getId());
+  }
+
+  @DeleteMapping
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void deleteBasketItem(@Valid @RequestBody InputDeleteBasketItem input) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    basketItemService.deleteBasketItem(userDetail.getId(), input.getBasketItemIdList());
   }
 }

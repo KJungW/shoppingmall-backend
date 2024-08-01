@@ -44,6 +44,18 @@ public class BasketItemService {
     return basketItem;
   }
 
+  @Transactional
+  public void deleteBasketItem(Long memberId, List<Long> basketItemIdList) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
+    List<BasketItem> findAllResult = basketItemRepository.findAllById(basketItemIdList);
+    validateInvalidBasketIdInput(basketItemIdList, findAllResult);
+    validateMemberIsBasketItemOwner(member.getId(), findAllResult);
+    basketItemRepository.deleteAllInBatch(findAllResult);
+  }
+
   private void validateSingleOption(Long optionId, Product product) {
     if (optionId == null) return;
     product.getSingleOptions().stream()
@@ -60,5 +72,21 @@ public class BasketItemService {
           .findFirst()
           .orElseThrow(() -> new DataNotFound("제품의 다중옵션 ID 입력값이 유효하지 않습니다."));
     }
+  }
+
+  public void validateInvalidBasketIdInput(
+      List<Long> inputBasketItemIdList, List<BasketItem> finaAllResult) {
+    if (finaAllResult.size() != inputBasketItemIdList.size()) {
+      throw new DataNotFound("ID에 해당하는 장바구니 아이템이 존재하지 않습니다.");
+    }
+  }
+
+  private void validateMemberIsBasketItemOwner(Long memberId, List<BasketItem> basketItems) {
+    int invalidBasketItemCount =
+        basketItems.stream()
+            .filter(basketItem -> !memberId.equals(basketItem.getMember().getId()))
+            .toList()
+            .size();
+    if (invalidBasketItemCount != 0) throw new DataNotFound("장바구니 아이템들이 유효하지 않습니다");
   }
 }
