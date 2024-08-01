@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.basket;
+package com.project.shoppingmall.controller.basket.input;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
