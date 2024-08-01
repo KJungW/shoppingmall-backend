@@ -4,6 +4,7 @@ import com.project.shoppingmall.controller.basket.input.InputDeleteBasketItem;
 import com.project.shoppingmall.controller.basket.input.InputSaveBasketItem;
 import com.project.shoppingmall.controller.basket.output.OutputSaveBasketItem;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.basket.BasketDto;
 import com.project.shoppingmall.dto.basket.BasketItemDto;
 import com.project.shoppingmall.dto.basket.BasketItemMakeData;
 import com.project.shoppingmall.entity.BasketItem;
@@ -28,6 +29,14 @@ public class BasketItemController {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return basketItemRetrieveService.getBasketItemDetail(userDetail.getId(), basketId);
+  }
+
+  @GetMapping("")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public BasketDto getBasket() {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    return basketItemRetrieveService.getBasket(userDetail.getId());
   }
 
   @PostMapping

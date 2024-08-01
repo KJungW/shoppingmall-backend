@@ -1,11 +1,13 @@
 package com.project.shoppingmall.service;
 
+import com.project.shoppingmall.dto.basket.BasketDto;
 import com.project.shoppingmall.dto.basket.BasketItemDto;
 import com.project.shoppingmall.dto.basket.BasketItemPriceCalcResult;
 import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRetrieveRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +35,26 @@ public class BasketItemRetrieveService {
     return new BasketItemDto(basketItem, basketItemPriceCalcResult);
   }
 
+  public BasketDto getBasket(Long memberId) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원정보가 없습니다."));
+    List<BasketItem> basketItem = basketItemRetrieveRepository.retrieveBasketByMemberId(memberId);
+    List<BasketItemDto> basketItemDtoList =
+        basketItem.stream().map(this::makeBasketItemDto).toList();
+    return new BasketDto(basketItemDtoList);
+  }
+
   private void validateBasketItemOwner(BasketItem basketItem, Member member) {
     if (!basketItem.getMember().getId().equals(member.getId())) {
       throw new DataNotFound("현재 회원에게 속해있지않은 장바구니 아이템입니다.");
     }
+  }
+
+  private BasketItemDto makeBasketItemDto(BasketItem basketItem) {
+    BasketItemPriceCalcResult priceCalcResult =
+        basketItemService.calculateBasketItemPrice(basketItem);
+    return new BasketItemDto(basketItem, priceCalcResult);
   }
 }
