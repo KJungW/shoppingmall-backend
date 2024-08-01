@@ -125,6 +125,18 @@ public class ProductService {
     }
   }
 
+  public Optional<Product> findByIdWithOption(Long productId) {
+    Optional<Product> result = findById(productId);
+    if (result.isPresent()) {
+      Product product = result.get();
+      int singleOptionSize = product.getSingleOptions().size();
+      int multiOptionSize = product.getMultipleOptions().size();
+      return Optional.of(product);
+    } else {
+      return Optional.empty();
+    }
+  }
+
   public boolean validateMemberIsProductSeller(Product product, Long memberId) {
     return product.getSeller().getId().equals(memberId);
   }
