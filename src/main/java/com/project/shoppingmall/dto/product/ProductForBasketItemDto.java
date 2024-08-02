@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ProductDto {
+public class ProductForBasketItemDto {
   private Long productId;
   private Long sellerId;
   private String sellerNickname;
@@ -20,7 +20,7 @@ public class ProductDto {
   private Boolean isBan;
   private Double scoreAvg;
 
-  public ProductDto(Product product) {
+  public ProductForBasketItemDto(Product product) {
     this.productId = product.getId();
     this.sellerId = product.getSeller().getId();
     this.sellerNickname = product.getSeller().getNickName();
