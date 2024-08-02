@@ -23,6 +23,12 @@ public class ProductRetrieveService {
     return productRetrieveRepository.findByProductTypeId(productTypeId, pageRequest);
   }
 
+  public Slice<Product> retrieveBySearchWordWithFilter(
+      String searchWord, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
+    PageRequest pageRequest = makePageRequest(sliceSize, sliceNum, filterType);
+    return productRetrieveRepository.findByNameContainingIgnoreCase(searchWord, pageRequest);
+  }
+
   private PageRequest makePageRequest(
       int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
     PageRequest pageRequest = null;

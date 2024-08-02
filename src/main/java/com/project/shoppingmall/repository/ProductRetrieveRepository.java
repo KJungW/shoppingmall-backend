@@ -10,4 +10,7 @@ public interface ProductRetrieveRepository extends JpaRepository<Product, Long> 
 
   @EntityGraph(attributePaths = {"seller", "productType", "productImages"})
   Slice<Product> findByProductTypeId(Long productTypeId, Pageable pageable);
+
+  @EntityGraph(attributePaths = {"seller", "productType", "productImages"})
+  Slice<Product> findByNameContainingIgnoreCase(String searchWord, Pageable pageable);
 }
