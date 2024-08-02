@@ -9,12 +9,14 @@ import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ProductMakeDataBuilder;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
+import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -159,6 +161,46 @@ class ProductServiceTest {
 
     // - Product.scoreAvg 검증
     assertEquals(0d, savedProduct.getScoreAvg());
+
+    // - Product.finalPrice 검증
+    int expectedFinalPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenProductMakeData.getPrice(),
+            givenProductMakeData.getDiscountAmount(),
+            givenProductMakeData.getDiscountRate());
+    assertEquals(expectedFinalPrice, savedProduct.getFinalPrice());
+  }
+
+  @Test
+  @DisplayName("save() : 잘못된 가격과 할인")
+  public void save_wrongPriceAndDiscount() throws IOException {
+    // given
+    Long givenMemberId = 1L;
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+
+    Long givenProductTypeId = 2L;
+    ProductType givenProductType = new ProductType("test/detail");
+    ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
+
+    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
+
+    ProductMakeData givenProductMakeData =
+        ProductMakeDataBuilder.fullData()
+            .productTypeId(givenProductTypeId)
+            .price(10000)
+            .discountAmount(5000)
+            .discountRate(50d)
+            .build();
+
+    when(memberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+
+    // when
+    assertThrows(
+        WrongPriceAndDiscount.class,
+        () -> productService.save(givenMemberId, givenProductMakeData));
   }
 
   @Test
@@ -202,6 +244,13 @@ class ProductServiceTest {
                 ProductMakeDataBuilder.IMAGE_BLOCK_COUNT
                     + ProductMakeDataBuilder.PRODUCT_IMAGE_COUNT))
         .uploadFile(any(), any());
+
+    int expectedFinalPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenProductMakeData.getPrice(),
+            givenProductMakeData.getDiscountAmount(),
+            givenProductMakeData.getDiscountRate());
+    assertEquals(expectedFinalPrice, givenProduct.getFinalPrice());
   }
 
   @Test
@@ -232,5 +281,40 @@ class ProductServiceTest {
     jsonUtil.verify(() -> JsonUtil.convertJsonToObject(any(), any()), times(0));
     jsonUtil.verify(() -> JsonUtil.convertObjectToJson(any()), times(0));
     verify(s3Service, times(0)).uploadFile(any(), any());
+  }
+
+  @Test
+  @DisplayName("update() : 잘못된 가격과 할인으로 수정을 시도")
+  public void update_wrongPriceAndDiscount() throws IOException {
+    // given
+    Long givenMemberId = 10L;
+    Long givenProductId = 13L;
+    ProductMakeData givenProductMakeData =
+        ProductMakeDataBuilder.fullData()
+            .price(10000)
+            .discountAmount(5000)
+            .discountRate(50d)
+            .build();
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
+    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    ProductType givenProductType = new ProductType("test/detail");
+    ReflectionTestUtils.setField(givenProductType, "id", 5L);
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+
+    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+
+    jsonUtil
+        .when(() -> JsonUtil.convertJsonToObject(any(), any()))
+        .thenReturn(new ImageBlock(1L, "test/serverUri", "test/downUri"));
+
+    // when
+    assertThrows(
+        WrongPriceAndDiscount.class,
+        () -> productService.update(givenMemberId, givenProductId, givenProductMakeData));
   }
 }

@@ -1,5 +1,6 @@
 package com.project.shoppingmall.entity;
 
+import com.project.shoppingmall.util.PriceCalculateUtil;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class Product extends BaseEntity {
   private Double discountRate;
   private Boolean isBan;
   private Double scoreAvg;
+  private Integer finalPrice;
 
   @Builder
   public Product(
@@ -69,6 +71,7 @@ public class Product extends BaseEntity {
     updateMultiOptions(multipleOptions);
     updateProductImages(productImages);
     updateContents(contents);
+    CalcFinalPrice();
   }
 
   public void changeProductType(ProductType type) {
@@ -83,6 +86,8 @@ public class Product extends BaseEntity {
     this.price = price;
     this.discountAmount = discountAmount;
     this.discountRate = discountRate;
+    this.finalPrice =
+        PriceCalculateUtil.calculatePrice(this.price, this.discountAmount, this.discountRate);
   }
 
   public void updateProductImages(List<ProductImage> productImages) {
@@ -115,5 +120,10 @@ public class Product extends BaseEntity {
       this.multipleOptions.add(option);
       option.updateProduct(this);
     }
+  }
+
+  public void CalcFinalPrice() {
+    this.finalPrice =
+        PriceCalculateUtil.calculatePrice(this.price, this.discountAmount, this.discountRate);
   }
 }

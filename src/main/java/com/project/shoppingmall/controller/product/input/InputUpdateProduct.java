@@ -2,6 +2,8 @@ package com.project.shoppingmall.controller.product.input;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +17,7 @@ public class InputUpdateProduct {
   private List<InputProductOption> singleOptions;
   private List<InputProductOption> multiOptions;
   private List<InputBlockData> blockDataList;
-  @NotNull private Integer price;
-  @NotNull private Integer discountAmount;
-  @NotNull private Double discountRate;
+  @NotNull @Positive private Integer price;
+  @NotNull @PositiveOrZero private Integer discountAmount;
+  @NotNull @PositiveOrZero private Double discountRate;
 }

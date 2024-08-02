@@ -52,9 +52,9 @@ public class ProductMakeDataBuilder {
     List<InputProductOption> givenSigleOptions =
         new ArrayList<>() {
           {
-            add(new InputProductOption("multiOption1", -1000));
-            add(new InputProductOption("multiOption2", -2000));
-            add(new InputProductOption("multiOption3", -3000));
+            add(new InputProductOption("multiOption1", 1000));
+            add(new InputProductOption("multiOption2", 2000));
+            add(new InputProductOption("multiOption3", 3000));
           }
         };
     List<InputProductOption> givenMultipleOptions =

@@ -3,6 +3,7 @@ package com.project.shoppingmall.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,6 +65,22 @@ class PriceCalculateUtilTest {
   }
 
   @Test
+  @DisplayName("calculatePrice() : 계산결과 가격이 0이하인 경우")
+  public void calculatePrice_resultMinus() {
+    // given
+    Integer givenOriginPrice = 10000;
+    Integer givenDiscountAmount = 5000;
+    Double givenDiscountRate = 50.0;
+
+    // when
+    assertThrows(
+        WrongPriceAndDiscount.class,
+        () ->
+            PriceCalculateUtil.calculatePrice(
+                givenOriginPrice, givenDiscountAmount, givenDiscountRate));
+  }
+
+  @Test
   @DisplayName("calculatePrice() : 할인율이 음수일 경우")
   public void calculatePrice_discountRateIsMinus() {
     // given
@@ -107,6 +124,19 @@ class PriceCalculateUtilTest {
     // when
     assertThrows(
         ServerLogicError.class,
+        () -> PriceCalculateUtil.addOptionPrice(givenOriginPrice, givenOptionPrices));
+  }
+
+  @Test
+  @DisplayName("addOptionPrice() : 계산결과 가격이 0이하인 경우")
+  public void addOptionPrice_resultMinus() {
+    // given
+    Integer givenOriginPrice = 1500;
+    List<Integer> givenOptionPrices = new ArrayList<>(Arrays.asList(-500, -1000));
+
+    // when
+    assertThrows(
+        WrongPriceAndDiscount.class,
         () -> PriceCalculateUtil.addOptionPrice(givenOriginPrice, givenOptionPrices));
   }
 }
