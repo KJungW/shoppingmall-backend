@@ -37,11 +37,14 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<Long> productTypeIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByProductTypeId(productTypeIdCaptor.capture(), pageRequestCaptor.capture());
+        .findByProductTypeIdAndIsBan(
+            productTypeIdCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenProductTypeId, productTypeIdCaptor.getValue());
+    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -67,11 +70,14 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<Long> productTypeIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByProductTypeId(productTypeIdCaptor.capture(), pageRequestCaptor.capture());
+        .findByProductTypeIdAndIsBan(
+            productTypeIdCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenProductTypeId, productTypeIdCaptor.getValue());
+    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -97,11 +103,14 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<String> searchWordCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByNameContainingIgnoreCase(searchWordCaptor.capture(), pageRequestCaptor.capture());
+        .findByNameContainingIgnoreCaseAndIsBan(
+            searchWordCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenSearchWord, searchWordCaptor.getValue());
+    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -126,11 +135,14 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<String> searchWordCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByNameContainingIgnoreCase(searchWordCaptor.capture(), pageRequestCaptor.capture());
+        .findByNameContainingIgnoreCaseAndIsBan(
+            searchWordCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenSearchWord, searchWordCaptor.getValue());
+    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(

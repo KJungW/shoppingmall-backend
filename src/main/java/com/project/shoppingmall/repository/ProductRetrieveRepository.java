@@ -9,8 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProductRetrieveRepository extends JpaRepository<Product, Long> {
 
   @EntityGraph(attributePaths = {"seller", "productType", "productImages"})
-  Slice<Product> findByProductTypeId(Long productTypeId, Pageable pageable);
+  Slice<Product> findByProductTypeIdAndIsBan(Long productTypeId, boolean isban, Pageable pageable);
 
   @EntityGraph(attributePaths = {"seller", "productType", "productImages"})
-  Slice<Product> findByNameContainingIgnoreCase(String searchWord, Pageable pageable);
+  Slice<Product> findByNameContainingIgnoreCaseAndIsBan(
+      String searchWord, boolean isban, Pageable pageable);
 }
