@@ -40,12 +40,11 @@ public class AuthTokenService {
 
   @Transactional
   public void deleteRefreshToken(Long memberId) {
-    try {
-      Member member = memberService.findById(memberId).get();
-      member.deleteRefreshToken();
-    } catch (DataNotFound ex) {
-      throw new DataNotFound("Id에 해당하는 유저가 존재하지 않습니다.");
-    }
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 유저가 존재하지 않습니다."));
+    member.deleteRefreshToken();
   }
 
   private RefreshAndAccessToken makeNewRefreshAndAccess(RefreshTokenData tokenData) {
