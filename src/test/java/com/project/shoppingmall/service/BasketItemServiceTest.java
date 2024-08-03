@@ -1,15 +1,19 @@
 package com.project.shoppingmall.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.dto.basket.BasketItemMakeData;
+import com.project.shoppingmall.dto.basket.BasketItemPriceCalcResult;
 import com.project.shoppingmall.dto.basket.ProductOptionObjForBasket;
+import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.testdata.*;
 import com.project.shoppingmall.util.JsonUtil;
+import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -272,5 +276,310 @@ class BasketItemServiceTest {
     // when then
     assertThrows(
         DataNotFound.class, () -> target.deleteBasketItem(givenMemberId, givenBasketItemList));
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 단일옵션과 다중옵션이 모두 유효할때")
+  public void calculateBasketItemPrice_IncorrectSingleAndMulti() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
+    int givenOptionPrice = 1000;
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    Long rightSingleOptionId = 10L;
+    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
+    String rightOptionJson =
+        JsonUtil.convertObjectToJson(
+            new ProductOptionObjForBasket(rightSingleOptionId, rightMultiOptionIdList));
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
+            + givenOptionPrice
+            + (rightMultiOptionIdList.size() * givenOptionPrice);
+    assertEquals(expectedPrice, result.getPrice());
+    assertTrue(result.isOptionAvailable());
+    assertEquals(rightSingleOptionId, result.getSingleOption().getOptionId());
+    List<Long> resultMultiOptionIdList =
+        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
+    assertArrayEquals(rightMultiOptionIdList.toArray(), resultMultiOptionIdList.toArray());
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 단일옵션과 다중옵션이 모두 비어있을때")
+  public void calculateBasketItemPrice_BlankSingleAndMulti() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(Arrays.asList(10L, 20L, 30L), 1000);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(Arrays.asList(10L, 20L, 30L), 1000);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    String blankOptionJson = JsonUtil.convertObjectToJson(new ProductOptionObjForBasket());
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(blankOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenProductPrice, givenDiscountAmount, givenDiscountRate);
+    assertEquals(expectedPrice, result.getPrice());
+    assertTrue(result.isOptionAvailable());
+    assertNull(result.getSingleOption());
+    assertEquals(0, result.getMultipleOptions().size());
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 단일옵션은 비어있고, 다중옵션은 유효할때")
+  public void calculateBasketItemPrice_blankSingle() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
+    int givenOptionPrice = 1000;
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
+    String rightOptionJson =
+        JsonUtil.convertObjectToJson(new ProductOptionObjForBasket(null, rightMultiOptionIdList));
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
+            + (rightMultiOptionIdList.size() * givenOptionPrice);
+    assertEquals(expectedPrice, result.getPrice());
+    assertTrue(result.isOptionAvailable());
+    assertNull(result.getSingleOption());
+    List<Long> resultMultiOptionIdList =
+        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
+    assertArrayEquals(rightMultiOptionIdList.toArray(), resultMultiOptionIdList.toArray());
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 단일옵션이 유효하고, 다중옵션이 비어있을때")
+  public void calculateBasketItemPrice_blankMulti() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
+    int givenOptionPrice = 1000;
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    Long rightSingleOptionId = 10L;
+    List<Long> blankMultiOptionIdList = new ArrayList<>();
+    String rightOptionJson =
+        JsonUtil.convertObjectToJson(
+            new ProductOptionObjForBasket(rightSingleOptionId, blankMultiOptionIdList));
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
+            + givenOptionPrice;
+    assertEquals(expectedPrice, result.getPrice());
+    assertTrue(result.isOptionAvailable());
+    assertEquals(rightSingleOptionId, result.getSingleOption().getOptionId());
+    assertEquals(0, result.getMultipleOptions().size());
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 단일옵션이 유효하지 않을때")
+  public void calculateBasketItemPrice_IncorrectSingle() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
+    int givenOptionPrice = 1000;
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    Long wrongSingleOptionId = 100L;
+    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
+    String rightOptionJson =
+        JsonUtil.convertObjectToJson(
+            new ProductOptionObjForBasket(wrongSingleOptionId, rightMultiOptionIdList));
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenProductPrice, givenDiscountAmount, givenDiscountRate);
+    assertEquals(expectedPrice, result.getPrice());
+    assertFalse(result.isOptionAvailable());
+    assertNull(result.getSingleOption());
+    List<Long> resultMultiOptionIdList =
+        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
+    assertEquals(0, result.getMultipleOptions().size());
+  }
+
+  @Test
+  @DisplayName("calculateBasketItemPrice() : 다중옵션이 유효하지 않을때")
+  public void calculateBasketItemPrice_ok() throws IOException {
+    // given
+    // - basketItem인자.product.singleOptions / multipleOptions 세팅
+    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
+    int givenOptionPrice = 1000;
+    ArrayList<ProductSingleOption> givenSingleOptions =
+        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
+    ArrayList<ProductMultipleOption> givenMultipleOptions =
+        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
+
+    // - basketItem인자.product 세팅
+    int givenProductPrice = 10000;
+    int givenDiscountAmount = 1000;
+    double givenDiscountRate = 20d;
+    Product givenProduct =
+        ProductBuilder.fullData()
+            .price(givenProductPrice)
+            .singleOptions(givenSingleOptions)
+            .multipleOptions(givenMultipleOptions)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .build();
+
+    // - basketItem인자 세팅
+    Long rightSingleOptionId = 10L;
+    List<Long> wrongMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 100L));
+    String rightOptionJson =
+        JsonUtil.convertObjectToJson(
+            new ProductOptionObjForBasket(rightSingleOptionId, wrongMultiOptionIdList));
+    BasketItem givenBasketItem =
+        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+
+    // when
+    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+
+    // then
+    int expectedPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenProductPrice, givenDiscountAmount, givenDiscountRate);
+    assertEquals(expectedPrice, result.getPrice());
+    assertFalse(result.isOptionAvailable());
+    assertNull(result.getSingleOption());
+    assertEquals(0, result.getMultipleOptions().size());
+  }
+
+  public ArrayList<ProductSingleOption> makeProductSingleMockData(
+      List<Long> idList, int optionPrice) {
+    ArrayList<ProductSingleOption> givenSingleOptions = new ArrayList<>();
+    for (Long id : idList) {
+      ProductSingleOption makedOption =
+          ProductSingleOptionBuilder.fullData().priceChangeAmount(optionPrice).build();
+      ReflectionTestUtils.setField(makedOption, "id", id);
+      givenSingleOptions.add(makedOption);
+    }
+    return givenSingleOptions;
+  }
+
+  public ArrayList<ProductMultipleOption> makeProductMultiMockData(
+      List<Long> idList, int optionPrice) {
+    ArrayList<ProductMultipleOption> givenMultiOptions = new ArrayList<>();
+    for (Long id : idList) {
+      ProductMultipleOption makedOption =
+          ProductMultiOptionBuilder.fullData().priceChangeAmount(optionPrice).build();
+      ReflectionTestUtils.setField(makedOption, "id", id);
+      givenMultiOptions.add(makedOption);
+    }
+    return givenMultiOptions;
   }
 }
