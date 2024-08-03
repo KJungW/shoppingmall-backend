@@ -92,4 +92,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult InvalidEnumTypeExceptionHandler(InvalidEnumType e) {
     return new ErrorResult(ErrorCode.SERVER_ERROR, "예상치 못한 서버에러입니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(WrongPriceAndDiscount.class)
+  public ErrorResult WrongPriceAndDiscountExceptionHandler(WrongPriceAndDiscount e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "가격과 할인이 적절하지 않습니다. 다시 한버 확인해주세요");
+  }
 }
