@@ -1,8 +1,6 @@
 package com.project.shoppingmall.service;
 
-import com.project.shoppingmall.dto.basket.BasketItemMakeData;
-import com.project.shoppingmall.dto.basket.BasketItemPriceCalcResult;
-import com.project.shoppingmall.dto.basket.ProductOptionObjForBasket;
+import com.project.shoppingmall.dto.basket.*;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
@@ -11,7 +9,6 @@ import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,38 +60,62 @@ public class BasketItemService {
 
   public BasketItemPriceCalcResult calculateBasketItemPrice(BasketItem basketItem) {
     Product product = basketItem.getProduct();
-    Integer noOptionPrice =
+    ProductOptionObjForBasket optionObj =
+        JsonUtil.convertJsonToObject(basketItem.getOptions(), ProductOptionObjForBasket.class);
+    int noOptionPrice =
         PriceCalculateUtil.calculatePrice(
             product.getPrice(), product.getDiscountAmount(), product.getDiscountRate());
 
-    ProductOptionObjForBasket optionObj =
-        JsonUtil.convertJsonToObject(basketItem.getOptions(), ProductOptionObjForBasket.class);
-    if (validateOptionIsNull(optionObj)) return new BasketItemPriceCalcResult(noOptionPrice, true);
+    SingleOptionCalcResult singleOptionCalcResult =
+        calcSingleOption(optionObj.getSingleOptionId(), product.getSingleOptions());
+    MultiOptionsCalcResult multiOptionsCalcResult =
+        multiOptionsCalcResult(optionObj.getMultipleOptionId(), product.getMultipleOptions());
 
-    Optional<ProductSingleOption> singleOption =
-        findSingleOptionInBasketItem(optionObj.getSingleOptionId(), product.getSingleOptions());
-    if (singleOption.isEmpty()) return new BasketItemPriceCalcResult(noOptionPrice, false);
-
-    List<ProductMultipleOption> multipleOptions =
-        findMultipleOptionInBasketItem(
-            optionObj.getMultipleOptionId(), product.getMultipleOptions());
-    if (multipleOptions.isEmpty()) return new BasketItemPriceCalcResult(noOptionPrice, false);
-
-    Integer finalPrice = calculateFinalPrice(noOptionPrice, singleOption.get(), multipleOptions);
-    return new BasketItemPriceCalcResult(finalPrice, true, singleOption.get(), multipleOptions);
+    if (!singleOptionCalcResult.isSingleOptionAvailable()
+        || !multiOptionsCalcResult.isMultiOptionAvailable()) {
+      return new BasketItemPriceCalcResult(noOptionPrice, false);
+    } else {
+      List<Integer> optionPriceList = new ArrayList<>();
+      optionPriceList.addAll(multiOptionsCalcResult.getMultiOptionPrices());
+      optionPriceList.add(singleOptionCalcResult.getSingleOptionPrice());
+      int finalPrice = PriceCalculateUtil.addOptionPrice(noOptionPrice, optionPriceList);
+      return new BasketItemPriceCalcResult(
+          finalPrice,
+          true,
+          singleOptionCalcResult.getSingleOption(),
+          multiOptionsCalcResult.getMultiOptions());
+    }
   }
 
-  private boolean validateOptionIsNull(ProductOptionObjForBasket optionObj) {
-    if (optionObj.getSingleOptionId() == null && optionObj.getMultipleOptionId().isEmpty())
-      return true;
-    else return false;
+  private SingleOptionCalcResult calcSingleOption(
+      Long singleOptionId, List<ProductSingleOption> singleOptionsInProduct) {
+    if (singleOptionId == null) {
+      return new SingleOptionCalcResult(true, null);
+    } else {
+      Optional<ProductSingleOption> findSingleOption =
+          singleOptionsInProduct.stream()
+              .filter(option -> singleOptionId.equals(option.getId()))
+              .findFirst();
+      return findSingleOption
+          .map(option -> new SingleOptionCalcResult(true, option))
+          .orElseGet(() -> new SingleOptionCalcResult(false, null));
+    }
   }
 
-  private Optional<ProductSingleOption> findSingleOptionInBasketItem(
-      Long optionId, List<ProductSingleOption> optionList) {
-    if (optionId == null) return Optional.empty();
-
-    return optionList.stream().filter(option -> optionId.equals(option.getId())).findFirst();
+  private MultiOptionsCalcResult multiOptionsCalcResult(
+      List<Long> multiOptionIds, List<ProductMultipleOption> multipleOptionsInProduct) {
+    List<Integer> multiOptionPrices = new ArrayList<>();
+    if (multiOptionIds.isEmpty()) {
+      return new MultiOptionsCalcResult(true, new ArrayList<>());
+    } else {
+      List<ProductMultipleOption> multipleOptions =
+          findMultipleOptionInBasketItem(multiOptionIds, multipleOptionsInProduct);
+      if (multiOptionIds.size() == multipleOptions.size()) {
+        return new MultiOptionsCalcResult(true, multipleOptions);
+      } else {
+        return new MultiOptionsCalcResult(false, new ArrayList<>());
+      }
+    }
   }
 
   private List<ProductMultipleOption> findMultipleOptionInBasketItem(
@@ -106,18 +127,6 @@ public class BasketItemService {
       multiOption.ifPresent(multipleOptions::add);
     }
     return multipleOptions;
-  }
-
-  private Integer calculateFinalPrice(
-      int originPrice,
-      ProductSingleOption singleOption,
-      List<ProductMultipleOption> multipleOptions) {
-    List<Integer> optoinPriceList =
-        multipleOptions.stream()
-            .map(ProductMultipleOption::getPriceChangeAmount)
-            .collect(Collectors.toList());
-    optoinPriceList.add(singleOption.getPriceChangeAmount());
-    return PriceCalculateUtil.addOptionPrice(originPrice, optoinPriceList);
   }
 
   private void validateSingleOption(Long optionId, Product product) {

@@ -28,7 +28,8 @@ public class BasketItemPriceCalcResult {
       List<ProductMultipleOption> multipleOptions) {
     this.price = price;
     this.optionAvailable = optionAvailable;
-    this.singleOption = new ProductOptionDto(singleOption);
-    this.multipleOptions = multipleOptions.stream().map(ProductOptionDto::new).toList();
+    if (singleOption != null) this.singleOption = new ProductOptionDto(singleOption);
+    if (!multipleOptions.isEmpty())
+      this.multipleOptions = multipleOptions.stream().map(ProductOptionDto::new).toList();
   }
 }
