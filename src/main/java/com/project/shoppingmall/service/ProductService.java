@@ -112,6 +112,10 @@ public class ProductService {
     return productRepository.findById(productId);
   }
 
+  public Optional<Product> findByIdWithSeller(Long productId) {
+    return productRepository.findByIdWithSeller(productId);
+  }
+
   public Optional<Product> findByIdWithAll(Long productId) {
     Optional<Product> result = productRepository.findByIdWithAll(productId);
     if (result.isPresent()) {

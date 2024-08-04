@@ -1,0 +1,32 @@
+package com.project.shoppingmall.controller.report;
+
+import com.project.shoppingmall.controller.report.input.InputSaveReportAboutProduct;
+import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.service.ReportService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/report")
+@RequiredArgsConstructor
+public class ReportController {
+  private final ReportService reportService;
+
+  @PostMapping
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void saveReportAboutProduct(@Valid @RequestBody InputSaveReportAboutProduct input) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    reportService.saveProductReport(
+        userDetail.getId(),
+        input.getProductId(),
+        input.getReportTitle(),
+        input.getReportDescription());
+  }
+}

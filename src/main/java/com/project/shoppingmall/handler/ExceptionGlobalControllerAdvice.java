@@ -98,4 +98,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult WrongPriceAndDiscountExceptionHandler(WrongPriceAndDiscount e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "가격과 할인이 적절하지 않습니다. 다시 한버 확인해주세요");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ContinuousReportError.class)
+  public ErrorResult ContinuousReportErrorHandler(ContinuousReportError e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "연속으로 신고를 진행할 수 없습니다. 24시간이 지난뒤에 신고해주세요");
+  }
 }

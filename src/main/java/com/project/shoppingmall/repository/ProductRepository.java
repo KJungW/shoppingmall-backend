@@ -2,6 +2,7 @@ package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.Product;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +16,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
           + "left join fetch p.contents "
           + "where p.id = :productId ")
   public Optional<Product> findByIdWithAll(@Param("productId") Long productId);
+
+  @EntityGraph(attributePaths = {"seller"})
+  @Query("select p from Product p where p.id = :productId ")
+  public Optional<Product> findByIdWithSeller(@Param("productId") Long productId);
 }
