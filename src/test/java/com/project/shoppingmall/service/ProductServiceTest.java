@@ -18,6 +18,7 @@ import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -316,5 +317,26 @@ class ProductServiceTest {
     assertThrows(
         WrongPriceAndDiscount.class,
         () -> productService.update(givenMemberId, givenProductId, givenProductMakeData));
+  }
+
+  @Test
+  @DisplayName("findByIdWithAll() : 정상흐름")
+  public void findByIdWithAll_ok() throws IOException {
+    // given
+    Long givenProductId = 30L;
+    Product givenProduct = mock(Product.class);
+    when(productRepository.findByIdWithAll(any())).thenReturn(Optional.of(givenProduct));
+    when(givenProduct.getProductImages()).thenReturn(new ArrayList<>());
+    when(givenProduct.getSingleOptions()).thenReturn(new ArrayList<>());
+    when(givenProduct.getMultipleOptions()).thenReturn(new ArrayList<>());
+
+    // when
+    Optional<Product> result = productService.findByIdWithAll(givenProductId);
+
+    // then
+    assertTrue(result.isPresent());
+    verify(givenProduct, times(1)).getProductImages();
+    verify(givenProduct, times(1)).getSingleOptions();
+    verify(givenProduct, times(1)).getMultipleOptions();
   }
 }
