@@ -87,6 +87,26 @@ public class BasketItemService {
     }
   }
 
+  public List<BasketItem> findAllById(List<Long> productIdList) {
+    return basketItemRepository.findAllById(productIdList);
+  }
+
+  public void validateInvalidBasketIdInput(
+      List<Long> inputBasketItemIdList, List<BasketItem> finaAllResult) {
+    if (finaAllResult.size() != inputBasketItemIdList.size()) {
+      throw new DataNotFound("ID에 해당하는 장바구니 아이템이 존재하지 않습니다.");
+    }
+  }
+
+  public void validateMemberIsBasketItemOwner(Long memberId, List<BasketItem> basketItems) {
+    int invalidBasketItemCount =
+        basketItems.stream()
+            .filter(basketItem -> !memberId.equals(basketItem.getMember().getId()))
+            .toList()
+            .size();
+    if (invalidBasketItemCount != 0) throw new DataNotFound("장바구니 아이템들이 유효하지 않습니다");
+  }
+
   private SingleOptionCalcResult calcSingleOption(
       Long singleOptionId, List<ProductSingleOption> singleOptionsInProduct) {
     if (singleOptionId == null) {
@@ -145,21 +165,5 @@ public class BasketItemService {
           .findFirst()
           .orElseThrow(() -> new DataNotFound("제품의 다중옵션 ID 입력값이 유효하지 않습니다."));
     }
-  }
-
-  public void validateInvalidBasketIdInput(
-      List<Long> inputBasketItemIdList, List<BasketItem> finaAllResult) {
-    if (finaAllResult.size() != inputBasketItemIdList.size()) {
-      throw new DataNotFound("ID에 해당하는 장바구니 아이템이 존재하지 않습니다.");
-    }
-  }
-
-  private void validateMemberIsBasketItemOwner(Long memberId, List<BasketItem> basketItems) {
-    int invalidBasketItemCount =
-        basketItems.stream()
-            .filter(basketItem -> !memberId.equals(basketItem.getMember().getId()))
-            .toList()
-            .size();
-    if (invalidBasketItemCount != 0) throw new DataNotFound("장바구니 아이템들이 유효하지 않습니다");
   }
 }
