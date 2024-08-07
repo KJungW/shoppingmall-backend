@@ -1,12 +1,15 @@
 package com.project.shoppingmall.controller.purchase;
 
+import com.project.shoppingmall.controller.purchase.input.InputCompletePurchase;
 import com.project.shoppingmall.controller.purchase.input.InputReadyPurchase;
+import com.project.shoppingmall.controller.purchase.output.OutputCompletePurchase;
 import com.project.shoppingmall.controller.purchase.output.OutputReadyPurchase;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.delivery.DeliveryDto;
 import com.project.shoppingmall.dto.purchase.PurchaseItemMakeData;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.service.PurchaseService;
+import com.project.shoppingmall.type.PaymentResultType;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +46,12 @@ public class PurchaseController {
         purchase.getPurchaseTitle(),
         new DeliveryDto(purchase.getDeliveryInfo()),
         purchase.getTotalPrice());
+  }
+
+  @PostMapping("/payment")
+  public OutputCompletePurchase completePurchase(@Valid @RequestBody InputCompletePurchase input) {
+    PaymentResultType result =
+        purchaseService.completePurchase(input.getPurchaseUid(), input.getPaymentUid());
+    return new OutputCompletePurchase(result);
   }
 }

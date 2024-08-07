@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Purchase {
+public class Purchase extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -26,9 +26,14 @@ public class Purchase {
   @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
   List<PurchaseItem> purchaseItems = new ArrayList<>();
 
+  @Column(unique = true)
   private String purchaseUid;
+
   private String paymentUid;
+
+  @Enumerated(value = EnumType.STRING)
   private PurchaseStateType state;
+
   private String purchaseTitle;
   @Embedded private DeliveryInfo deliveryInfo;
   private int totalPrice;
@@ -67,8 +72,22 @@ public class Purchase {
     }
   }
 
-  public void completePurchase(String paymentUid) {
+  public void registerPaymentUid(String paymentUid) {
     this.paymentUid = paymentUid;
-    state = PurchaseStateType.COMPLETE;
+  }
+
+  public void convertStateToComplete(String paymentUid) {
+    this.paymentUid = paymentUid;
+    this.state = PurchaseStateType.COMPLETE;
+  }
+
+  public void convertStateToFail(String paymentUid) {
+    this.paymentUid = paymentUid;
+    this.state = PurchaseStateType.FAIL;
+  }
+
+  public void convertStateToDetectPriceTampering(String paymentUid) {
+    this.paymentUid = paymentUid;
+    this.state = PurchaseStateType.DETECT_PRICE_TAMPERING;
   }
 }
