@@ -2,6 +2,8 @@ package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.exception.ServerLogicError;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +30,9 @@ public class PurchaseItem extends BaseEntity {
 
   private Integer finalPrice;
 
+  @OneToMany(mappedBy = "purchaseItem", cascade = CascadeType.ALL, orphanRemoval = true)
+  public List<Refund> refunds = new ArrayList<>();
+
   @Builder
   public PurchaseItem(Product product, String productData, Integer finalPrice) {
     if (product == null || productData.isEmpty() || finalPrice <= 0) {
@@ -40,5 +45,13 @@ public class PurchaseItem extends BaseEntity {
 
   public void registerPurchase(Purchase purchase) {
     this.purchase = purchase;
+  }
+
+  public void addRefund(Refund refund) {
+    if(refund == null) {
+      throw new ServerLogicError("구매아이템에 추가할 환불데이터가 null입니다.");
+    }
+    this.refunds.add(refund);
+    refund.registerPurchaseItem(this);
   }
 }
