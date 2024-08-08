@@ -21,6 +21,6 @@ public class PurchaseRetrieveService {
     memberService.findById(memberId).orElseThrow(() -> new DataNotFound("Id에 해당하는 회원이 존재하지 않습니다."));
     PageRequest pageRequest =
         PageRequest.of(sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-    return purchaseRetrieveRepository.findAllByBuyer_Id(memberId, pageRequest);
+    return purchaseRetrieveRepository.findAllByBuyer(memberId, pageRequest);
   }
 }

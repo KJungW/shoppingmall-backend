@@ -16,5 +16,5 @@ public interface PurchaseRetrieveRepository extends JpaRepository<Purchase, Long
           + "left join fetch p.purchaseItems "
           + "where b.id = :buyerId "
           + "and p.state != 'FAIL'")
-  Slice<Purchase> findAllByBuyer_Id(@Param("buyerId") Long buyerId, Pageable pageable);
+  Slice<Purchase> findAllByBuyer(@Param("buyerId") Long buyerId, Pageable pageable);
 }
