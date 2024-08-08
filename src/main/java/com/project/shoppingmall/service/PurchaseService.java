@@ -12,6 +12,7 @@ import com.project.shoppingmall.type.PaymentResultType;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.request.CancelData;
+import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -76,7 +77,11 @@ public class PurchaseService {
       return PaymentResultType.ALREADY_PROCESSED;
     }
 
-    Payment realPaymentData = iamportClient.paymentByImpUid(paymentUid).getResponse();
+    IamportResponse<Payment> paymentResponse = iamportClient.paymentByImpUid(paymentUid);
+    if (paymentResponse == null) {
+      throw new DataNotFound("잘못된 paymentUid 입니다.");
+    }
+    Payment realPaymentData = paymentResponse.getResponse();
 
     if (!realPaymentData.getStatus().equals("paid")) {
       purchase.convertStateToFail(paymentUid);
