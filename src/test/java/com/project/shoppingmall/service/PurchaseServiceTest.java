@@ -12,8 +12,14 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.PurchaseBuilder;
+import com.project.shoppingmall.type.PaymentResultType;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -310,5 +316,163 @@ class PurchaseServiceTest {
     assertThrows(
         DataNotFound.class,
         () -> target.readyPurchase(givenMemberId, givenPurchaseItemMakeData, givenDeliveryDto));
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 정상흐름")
+  public void completePurchase_ok() throws IOException {
+    // given
+    // - 인자세팅
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    int givenPrice = 40000;
+    Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
+    ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+
+    // - iamportClient.paymentByImpUid() 세팅
+    IamportResponse mockPaymentResponse = mock(IamportResponse.class);
+    when(mockIamportClient.paymentByImpUid(any())).thenReturn(mockPaymentResponse);
+
+    // - iamportClient.paymentByImpUid(paymentUid).getResponse() 세팅
+    Payment mockRealPaymentData = mock(Payment.class);
+    when(mockRealPaymentData.getStatus()).thenReturn("paid");
+    when(mockRealPaymentData.getAmount()).thenReturn(BigDecimal.valueOf(givenPrice));
+    when(mockPaymentResponse.getResponse()).thenReturn(mockRealPaymentData);
+
+    // when
+    PaymentResultType paymentResult = target.completePurchase(givenPurchaseUid, givenPaymentUid);
+
+    // then
+    assertEquals(PaymentResultType.COMPLETE, paymentResult);
+    assertEquals(PurchaseStateType.COMPLETE, givenPurchase.getState());
+    assertEquals(givenPaymentUid, givenPurchase.getPaymentUid());
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 구매UID에 해당하는 구매 데이터가 없음")
+  public void completePurchase_noPurchase() {
+    // given
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    // when
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.empty());
+
+    // when
+    assertThrows(
+        DataNotFound.class, () -> target.completePurchase(givenPurchaseUid, givenPaymentUid));
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 이미 처리완료된 구매 데이터에 대한 완료요청")
+  public void completePurchase_alreadyProcessedPurchase() throws IOException {
+    // given
+    // - 인자세팅
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    int givenPrice = 40000;
+    Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
+    ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+
+    // when
+    PaymentResultType paymentResult = target.completePurchase(givenPurchaseUid, givenPaymentUid);
+
+    // then
+    assertEquals(PaymentResultType.ALREADY_PROCESSED, paymentResult);
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 조회된 결제정보에서 경제상태가 'paid'가 아님")
+  public void completePurchase_notPaid() throws IOException {
+    // given
+    // - 인자세팅
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    int givenPrice = 40000;
+    Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
+    ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+
+    // - iamportClient.paymentByImpUid() 세팅
+    IamportResponse mockPaymentResponse = mock(IamportResponse.class);
+    when(mockIamportClient.paymentByImpUid(any())).thenReturn(mockPaymentResponse);
+
+    // - iamportClient.paymentByImpUid(paymentUid).getResponse() 세팅
+    Payment mockRealPaymentData = mock(Payment.class);
+    when(mockRealPaymentData.getStatus()).thenReturn("cancel");
+    when(mockRealPaymentData.getAmount()).thenReturn(BigDecimal.valueOf(givenPrice));
+    when(mockPaymentResponse.getResponse()).thenReturn(mockRealPaymentData);
+
+    // when
+    PaymentResultType paymentResult = target.completePurchase(givenPurchaseUid, givenPaymentUid);
+
+    // then
+    assertEquals(PaymentResultType.FAIL_OR_CANCEL, paymentResult);
+    assertEquals(PurchaseStateType.FAIL, givenPurchase.getState());
+    assertEquals(givenPaymentUid, givenPurchase.getPaymentUid());
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 가격변조가 감지됨")
+  public void completePurchase_detectPriceTampering() throws IOException {
+    // given
+    // - 인자세팅
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    int givenPrice = 40000;
+    int wrongPrice = 30000;
+    Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
+    ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+
+    // - iamportClient.paymentByImpUid() 세팅
+    IamportResponse mockPaymentResponse = mock(IamportResponse.class);
+    when(mockIamportClient.paymentByImpUid(any())).thenReturn(mockPaymentResponse);
+
+    // - iamportClient.paymentByImpUid(paymentUid).getResponse() 세팅
+    Payment mockRealPaymentData = mock(Payment.class);
+    when(mockRealPaymentData.getStatus()).thenReturn("paid");
+    when(mockRealPaymentData.getAmount()).thenReturn(BigDecimal.valueOf(wrongPrice));
+    when(mockPaymentResponse.getResponse()).thenReturn(mockRealPaymentData);
+
+    // when
+    PaymentResultType paymentResult = target.completePurchase(givenPurchaseUid, givenPaymentUid);
+
+    // then
+    assertEquals(PaymentResultType.DETECTION_PRICE_TAMPERING, paymentResult);
+    assertEquals(PurchaseStateType.DETECT_PRICE_TAMPERING, givenPurchase.getState());
+    assertEquals(givenPaymentUid, givenPurchase.getPaymentUid());
+  }
+
+  @Test
+  @DisplayName("completePurchase() : 잘못된 결제 UID")
+  public void completePurchase_wrongPaymentUid() throws IOException {
+    // given
+    // - 인자세팅
+    String givenPurchaseUid = "testPurchaseUid123123";
+    String givenPaymentUid = "imp-12301519243012";
+
+    int givenPrice = 40000;
+    Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
+    ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
+    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+
+    // - iamportClient.paymentByImpUid() 세팅
+    when(mockIamportClient.paymentByImpUid(any())).thenReturn(null);
+
+    // when
+    assertThrows(
+        DataNotFound.class, () -> target.completePurchase(givenPurchaseUid, givenPaymentUid));
   }
 }
