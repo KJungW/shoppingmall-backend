@@ -1,6 +1,5 @@
 package com.project.shoppingmall.controller.basket;
 
-import com.project.shoppingmall.controller.basket.input.InputDeleteBasketItem;
 import com.project.shoppingmall.controller.basket.input.InputSaveBasketItem;
 import com.project.shoppingmall.controller.basket.output.OutputSaveBasketItem;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
@@ -11,6 +10,7 @@ import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.service.BasketItemRetrieveService;
 import com.project.shoppingmall.service.BasketItemService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,9 +57,10 @@ public class BasketItemController {
 
   @DeleteMapping
   @PreAuthorize("hasRole('ROLE_MEMBER')")
-  public void deleteBasketItem(@Valid @RequestBody InputDeleteBasketItem input) {
+  public void deleteBasketItem(
+      @Valid @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    basketItemService.deleteBasketItem(userDetail.getId(), input.getBasketItemIdList());
+    basketItemService.deleteBasketItem(userDetail.getId(), basketItemIdList);
   }
 }
