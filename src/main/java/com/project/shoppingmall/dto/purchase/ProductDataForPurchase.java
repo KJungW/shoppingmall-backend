@@ -34,11 +34,7 @@ public class ProductDataForPurchase {
       int price,
       int discountAmount,
       double discountRate) {
-    if (sellerName.isEmpty()
-        || productName.isEmpty()
-        || productTypeName.isEmpty()
-        || singleOption == null
-        || multiOptions.isEmpty()) {
+    if (sellerName.isEmpty() || productName.isEmpty() || productTypeName.isEmpty()) {
       throw new ServerLogicError("ProductDataForPurchase를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
     }
     this.productId = productId;
