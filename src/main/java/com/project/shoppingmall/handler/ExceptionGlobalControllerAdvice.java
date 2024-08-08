@@ -104,4 +104,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult ContinuousReportErrorHandler(ContinuousReportError e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "연속으로 신고를 진행할 수 없습니다. 24시간이 지난뒤에 신고해주세요");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ProcessOrCompleteRefund.class)
+  public ErrorResult ProcessOrCompleteRefundErrorHandler(ProcessOrCompleteRefund e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미 진행중이거나 완료된 환불처리가 있습니다.");
+  }
 }
