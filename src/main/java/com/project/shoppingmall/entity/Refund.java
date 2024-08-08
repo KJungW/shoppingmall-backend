@@ -24,6 +24,8 @@ public class Refund extends BaseEntity {
   private String requestTitle;
   private String requestContent;
   private String responseContent;
+
+  @Enumerated(EnumType.STRING)
   private RefundStateType state;
 
   @Builder

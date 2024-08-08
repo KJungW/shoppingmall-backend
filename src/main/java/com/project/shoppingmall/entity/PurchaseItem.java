@@ -48,7 +48,7 @@ public class PurchaseItem extends BaseEntity {
   }
 
   public void addRefund(Refund refund) {
-    if(refund == null) {
+    if (refund == null) {
       throw new ServerLogicError("구매아이템에 추가할 환불데이터가 null입니다.");
     }
     this.refunds.add(refund);
