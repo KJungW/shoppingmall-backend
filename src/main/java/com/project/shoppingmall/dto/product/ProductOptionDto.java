@@ -4,8 +4,10 @@ import com.project.shoppingmall.entity.ProductMultipleOption;
 import com.project.shoppingmall.entity.ProductSingleOption;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class ProductOptionDto {
   private Long optionId;
