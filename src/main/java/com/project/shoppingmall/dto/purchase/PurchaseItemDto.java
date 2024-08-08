@@ -22,6 +22,7 @@ public class PurchaseItemDto {
   private int discountAmount;
   private double discountRate;
   private int finalPrice;
+  private boolean isRefund;
 
   public PurchaseItemDto(PurchaseItem purchaseItem) {
     ProductDataForPurchase productData =
@@ -38,5 +39,6 @@ public class PurchaseItemDto {
     this.discountAmount = productData.getDiscountAmount();
     this.discountRate = productData.getDiscountRate();
     this.finalPrice = purchaseItem.getFinalPrice();
+    this.isRefund = purchaseItem.isRefund();
   }
 }

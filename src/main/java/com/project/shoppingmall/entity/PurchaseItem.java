@@ -29,6 +29,7 @@ public class PurchaseItem extends BaseEntity {
   private String productData;
 
   private Integer finalPrice;
+  private boolean isRefund;
 
   @OneToMany(mappedBy = "purchaseItem", cascade = CascadeType.ALL, orphanRemoval = true)
   public List<Refund> refunds = new ArrayList<>();
@@ -41,6 +42,7 @@ public class PurchaseItem extends BaseEntity {
     this.product = product;
     this.productData = productData;
     this.finalPrice = finalPrice;
+    this.isRefund = false;
   }
 
   public void registerPurchase(Purchase purchase) {
