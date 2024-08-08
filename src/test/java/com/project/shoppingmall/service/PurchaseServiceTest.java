@@ -77,6 +77,10 @@ class PurchaseServiceTest {
       BasketItem givenBasketItem = BasketItemBuilder.fullData().build();
       ReflectionTestUtils.setField(givenBasketItem, "id", givenBasketItemIdList.get(i));
       ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
+      ReflectionTestUtils.setField(givenBasketItem.getProduct(), "id", (long) i);
+      ReflectionTestUtils.setField(givenBasketItem.getProduct().getSeller(), "id", (long) i * 10);
+      ReflectionTestUtils.setField(
+          givenBasketItem.getProduct().getSeller(), "nickName", "seller" + i);
       givenBasketItemList.add(givenBasketItem);
     }
     when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);

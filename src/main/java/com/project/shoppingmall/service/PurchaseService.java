@@ -123,6 +123,9 @@ public class PurchaseService {
     Product product = basketItem.getProduct();
     ProductDataForPurchase productOptionObj =
         ProductDataForPurchase.builder()
+            .productId(product.getId())
+            .sellerId(product.getSeller().getId())
+            .sellerName(product.getSeller().getNickName())
             .productName(product.getName())
             .productTypeName(product.getProductType().getTypeName())
             .singleOption(priceCalcResult.getSingleOption())

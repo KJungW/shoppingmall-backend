@@ -11,33 +11,39 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ProductDataForPurchase {
-
+  private long productId;
+  private long sellerId;
+  private String sellerName;
   private String productName;
   private String productTypeName;
   private ProductOptionDto singleOption;
   private List<ProductOptionDto> multiOptions;
-  private Integer price;
-  private Integer discountAmount;
-  private Double discountRate;
+  private int price;
+  private int discountAmount;
+  private double discountRate;
 
   @Builder
   public ProductDataForPurchase(
+      long productId,
+      long sellerId,
+      String sellerName,
       String productName,
       String productTypeName,
       ProductOptionDto singleOption,
       List<ProductOptionDto> multiOptions,
-      Integer price,
-      Integer discountAmount,
-      Double discountRate) {
-    if (productName.isEmpty()
+      int price,
+      int discountAmount,
+      double discountRate) {
+    if (sellerName.isEmpty()
+        || productName.isEmpty()
         || productTypeName.isEmpty()
         || singleOption == null
-        || multiOptions.isEmpty()
-        || price <= 0
-        || discountAmount == null
-        || discountRate == null) {
+        || multiOptions.isEmpty()) {
       throw new ServerLogicError("ProductDataForPurchase를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
     }
+    this.productId = productId;
+    this.sellerId = sellerId;
+    this.sellerName = sellerName;
     this.productName = productName;
     this.productTypeName = productTypeName;
     this.singleOption = singleOption;
