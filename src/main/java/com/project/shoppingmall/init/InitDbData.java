@@ -83,9 +83,9 @@ public class InitDbData {
                 .singleOptions(new ArrayList<>())
                 .multipleOptions(new ArrayList<>())
                 .name(productName + "-임시제품-" + i)
-                .price((randomGenerator.nextInt(10) + 1) * 10000)
-                .discountAmount(randomGenerator.nextInt(6) * 1000)
-                .discountRate(randomGenerator.nextInt(5) * 10.0)
+                .price((randomGenerator.nextInt(2) + 1) * 100)
+                .discountAmount(randomGenerator.nextInt(6))
+                .discountRate(randomGenerator.nextInt(2) * 10.0)
                 .isBan(false)
                 .scoreAvg((double) randomGenerator.nextInt(6))
                 .build();
@@ -152,21 +152,21 @@ public class InitDbData {
         product.updateContents(productContents);
 
         ProductSingleOption singleOption1 =
-            ProductSingleOption.builder().optionName("임시 단일옵션1").priceChangeAmount(1000).build();
+            ProductSingleOption.builder().optionName("임시 단일옵션1").priceChangeAmount(5).build();
         ProductSingleOption singleOption2 =
-            ProductSingleOption.builder().optionName("임시 단일옵션2").priceChangeAmount(2000).build();
+            ProductSingleOption.builder().optionName("임시 단일옵션2").priceChangeAmount(5).build();
         ProductSingleOption singleOption3 =
-            ProductSingleOption.builder().optionName("임시 단일옵션3").priceChangeAmount(3000).build();
+            ProductSingleOption.builder().optionName("임시 단일옵션3").priceChangeAmount(5).build();
         List<ProductSingleOption> singleOptions =
             new ArrayList<>(Arrays.asList(singleOption1, singleOption2, singleOption3));
         product.updateSingleOption(singleOptions);
 
         ProductMultipleOption multiOption1 =
-            ProductMultipleOption.builder().optionName("임시 다중옵션1").priceChangeAmount(1000).build();
+            ProductMultipleOption.builder().optionName("임시 다중옵션1").priceChangeAmount(5).build();
         ProductMultipleOption multiOption2 =
-            ProductMultipleOption.builder().optionName("임시 다중옵션2").priceChangeAmount(2000).build();
+            ProductMultipleOption.builder().optionName("임시 다중옵션2").priceChangeAmount(5).build();
         ProductMultipleOption multiOption3 =
-            ProductMultipleOption.builder().optionName("임시 다중옵션3").priceChangeAmount(3000).build();
+            ProductMultipleOption.builder().optionName("임시 다중옵션3").priceChangeAmount(5).build();
         List<ProductMultipleOption> multiOptions =
             new ArrayList<>(Arrays.asList(multiOption1, multiOption2, multiOption3));
         product.updateMultiOptions(multiOptions);
