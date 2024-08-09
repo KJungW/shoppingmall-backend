@@ -40,7 +40,9 @@ public class RefundController {
   public OutputAcceptRefund acceptRefund(@Valid @RequestBody InputAcceptRefund input) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Refund updatedRefund = refundService.acceptRefund(userDetail.getId(), input.getRefundId());
+    Refund updatedRefund =
+        refundService.acceptRefund(
+            userDetail.getId(), input.getRefundId(), input.getResponseMessage());
     return new OutputAcceptRefund(updatedRefund.getId());
   }
 }

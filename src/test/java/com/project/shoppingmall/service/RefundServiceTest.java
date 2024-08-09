@@ -196,6 +196,7 @@ class RefundServiceTest {
     // - 인자 세팅
     long givenMemberId = 10L;
     long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
 
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
@@ -212,10 +213,11 @@ class RefundServiceTest {
         .thenReturn(Optional.of(givenRefund));
 
     // when
-    Refund result = target.acceptRefund(givenMemberId, givenRefundId);
+    Refund result = target.acceptRefund(givenMemberId, givenRefundId, givenResponseMessage);
 
     // then
     assertEquals(RefundStateType.ACCEPT, result.getState());
+    assertEquals(givenResponseMessage, result.getResponseContent());
   }
 
   @Test
@@ -225,6 +227,7 @@ class RefundServiceTest {
     // - 인자 세팅
     long givenMemberId = 10L;
     long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
 
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
@@ -242,7 +245,9 @@ class RefundServiceTest {
         .thenReturn(Optional.of(givenRefund));
 
     // when then
-    assertThrows(DataNotFound.class, () -> target.acceptRefund(givenMemberId, givenRefundId));
+    assertThrows(
+        DataNotFound.class,
+        () -> target.acceptRefund(givenMemberId, givenRefundId, givenResponseMessage));
   }
 
   @Test
@@ -252,6 +257,7 @@ class RefundServiceTest {
     // - 인자 세팅
     long givenMemberId = 10L;
     long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
 
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
@@ -269,6 +275,7 @@ class RefundServiceTest {
 
     // when then
     assertThrows(
-        NotRequestStateRefund.class, () -> target.acceptRefund(givenMemberId, givenRefundId));
+        NotRequestStateRefund.class,
+        () -> target.acceptRefund(givenMemberId, givenRefundId, givenResponseMessage));
   }
 }

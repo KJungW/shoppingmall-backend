@@ -58,7 +58,7 @@ public class RefundService {
   }
 
   @Transactional
-  public Refund acceptRefund(long memberId, long refundId) {
+  public Refund acceptRefund(long memberId, long refundId, String responseContent) {
     Member member =
         memberService
             .findById(memberId)
@@ -75,7 +75,7 @@ public class RefundService {
       throw new NotRequestStateRefund("Reqeuset상태의 환불이 아닙니다.");
     }
 
-    refund.acceptRefund();
+    refund.acceptRefund(responseContent);
     return refund;
   }
 
