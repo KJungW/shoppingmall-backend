@@ -110,4 +110,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult ProcessOrCompleteRefundErrorHandler(ProcessOrCompleteRefund e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "이미 진행중이거나 완료된 환불처리가 있습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(NotRequestStateRefund.class)
+  public ErrorResult NotRequestStateRefundErrorHandler(NotRequestStateRefund e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "요청상태의 환불에만 환불요청을 수행할 수 있습니다.");
+  }
 }

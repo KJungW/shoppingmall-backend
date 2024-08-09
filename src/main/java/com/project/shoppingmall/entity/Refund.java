@@ -43,4 +43,8 @@ public class Refund extends BaseEntity {
   public void registerPurchaseItem(PurchaseItem purchaseItem) {
     this.purchaseItem = purchaseItem;
   }
+
+  public void acceptRefund() {
+    state = RefundStateType.ACCEPT;
+  }
 }

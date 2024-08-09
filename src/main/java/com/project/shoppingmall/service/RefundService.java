@@ -4,9 +4,12 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.NotRequestStateRefund;
 import com.project.shoppingmall.exception.ProcessOrCompleteRefund;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.type.PurchaseStateType;
+import com.project.shoppingmall.type.RefundStateType;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,5 +55,31 @@ public class RefundService {
     refundRepository.save(newRefund);
 
     return newRefund;
+  }
+
+  @Transactional
+  public Refund acceptRefund(long memberId, long refundId) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+    Refund refund =
+        findByIdWithPurchaseItemProduct(refundId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+
+    if (!refund.getPurchaseItem().getProduct().getSeller().getId().equals(member.getId())) {
+      throw new DataNotFound("다른 회원의 환불데이터 입니다.");
+    }
+
+    if (!refund.getState().equals(RefundStateType.REQUEST)) {
+      throw new NotRequestStateRefund("Reqeuset상태의 환불이 아닙니다.");
+    }
+
+    refund.acceptRefund();
+    return refund;
+  }
+
+  public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
+    return refundRepository.findByIdWithPurchaseItemProduct(refundId);
   }
 }

@@ -1,6 +1,8 @@
 package com.project.shoppingmall.controller.refund;
 
+import com.project.shoppingmall.controller.refund.input.InputAcceptRefund;
 import com.project.shoppingmall.controller.refund.input.InputRequestRefund;
+import com.project.shoppingmall.controller.refund.output.OutputAcceptRefund;
 import com.project.shoppingmall.controller.refund.output.OutputRequestRefund;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Refund;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,5 +33,14 @@ public class RefundController {
             input.getRequestTitle(),
             input.getRequestContent());
     return new OutputRequestRefund(newRefund.getId());
+  }
+
+  @PutMapping("/refund/accept")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputAcceptRefund acceptRefund(@Valid @RequestBody InputAcceptRefund input) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Refund updatedRefund = refundService.acceptRefund(userDetail.getId(), input.getRefundId());
+    return new OutputAcceptRefund(updatedRefund.getId());
   }
 }
