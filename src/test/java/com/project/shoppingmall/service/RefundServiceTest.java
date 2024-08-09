@@ -8,6 +8,8 @@ import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.FailRefundException;
+import com.project.shoppingmall.exception.NotAcceptStateRefund;
 import com.project.shoppingmall.exception.NotRequestStateRefund;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.testdata.MemberBuilder;
@@ -16,11 +18,17 @@ import com.project.shoppingmall.testdata.PurchaseItemBuilder;
 import com.project.shoppingmall.testdata.RefundBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
+import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.request.CancelData;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class RefundServiceTest {
@@ -28,13 +36,17 @@ class RefundServiceTest {
   private RefundRepository mockRefundRepository;
   private MemberService mockMemberService;
   private PurchaseItemService mockPurchaseItemService;
+  private IamportClient mockIamportClient;
 
   @BeforeEach
   public void beforeEach() {
     mockRefundRepository = mock(RefundRepository.class);
     mockMemberService = mock(MemberService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
-    target = new RefundService(mockRefundRepository, mockMemberService, mockPurchaseItemService);
+    mockIamportClient = mock(IamportClient.class);
+    target =
+        new RefundService(
+            mockRefundRepository, mockMemberService, mockPurchaseItemService, mockIamportClient);
   }
 
   @Test
@@ -277,5 +289,152 @@ class RefundServiceTest {
     assertThrows(
         NotRequestStateRefund.class,
         () -> target.acceptRefund(givenMemberId, givenRefundId, givenResponseMessage));
+  }
+
+  @Test
+  @DisplayName("completeRefund() : 정상흐름")
+  public void completeRefund_ok() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    Refund givenRefund = RefundBuilder.fullData().build();
+    int givenRefundPrice = 10000;
+    ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
+    givenRefund.registerPurchaseItem(givenPurchaseItem);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // - iamportClient.cancelPaymentByImpUid() 세팅
+    IamportResponse mockiamportResponse = mock(IamportResponse.class);
+    when(mockiamportResponse.getResponse()).thenReturn(mock(Payment.class));
+    when(mockIamportClient.cancelPaymentByImpUid(any())).thenReturn(mockiamportResponse);
+
+    // when
+    Refund result = target.completeRefund(givenMemberId, givenRefundId);
+
+    // then
+    assertEquals(RefundStateType.COMPLETE, result.getState());
+    assertTrue(result.getPurchaseItem().isRefund());
+
+    ArgumentCaptor<CancelData> cancelDataCaptor = ArgumentCaptor.forClass(CancelData.class);
+    verify(mockIamportClient, times(1)).cancelPaymentByImpUid(cancelDataCaptor.capture());
+    CancelData cancelDataCaptorResult = cancelDataCaptor.getValue();
+    assertEquals(
+        givenRefund.getPurchaseItem().getPurchase().getPaymentUid(),
+        ReflectionTestUtils.getField(cancelDataCaptorResult, "imp_uid"));
+    int realRefundPrice =
+        ((BigDecimal) ReflectionTestUtils.getField(cancelDataCaptorResult, "amount")).intValue();
+    assertEquals(givenRefundPrice, realRefundPrice);
+  }
+
+  @Test
+  @DisplayName("completeRefund() : 다른 판매자의 상품에 대한 환불 완료요청")
+  public void completeRefund_otherSellerRefund() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    long wrongMemberId = 12L;
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", wrongMemberId);
+    Refund givenRefund = RefundBuilder.fullData().build();
+    int givenRefundPrice = 10000;
+    ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
+    givenRefund.registerPurchaseItem(givenPurchaseItem);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // when then
+    assertThrows(DataNotFound.class, () -> target.completeRefund(givenMemberId, givenRefundId));
+  }
+
+  @Test
+  @DisplayName("completeRefund() : Accept상태가 아닌 환불에 해당 완료요청")
+  public void completeRefund_noAccept() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    Refund givenRefund = RefundBuilder.fullData().build();
+    int givenRefundPrice = 10000;
+    ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
+    givenRefund.registerPurchaseItem(givenPurchaseItem);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // when then
+    assertThrows(
+        NotAcceptStateRefund.class, () -> target.completeRefund(givenMemberId, givenRefundId));
+  }
+
+  @Test
+  @DisplayName("completeRefund() : 정해진 금액보다 많은 금액의 환불 요청")
+  public void completeRefund_wrongRefund() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    Refund givenRefund = RefundBuilder.fullData().build();
+    int givenRefundPrice = 10000;
+    ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
+    givenRefund.registerPurchaseItem(givenPurchaseItem);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // - iamportClient.cancelPaymentByImpUid() 세팅
+    IamportResponse mockiamportResponse = mock(IamportResponse.class);
+    when(mockiamportResponse.getResponse()).thenReturn(null);
+    when(mockIamportClient.cancelPaymentByImpUid(any())).thenReturn(mockiamportResponse);
+
+    // when then
+    assertThrows(
+        FailRefundException.class, () -> target.completeRefund(givenMemberId, givenRefundId));
   }
 }
