@@ -11,10 +11,8 @@ import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.type.PaymentResultType;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.siot.IamportRestClient.IamportClient;
-import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +30,7 @@ public class PurchaseService {
   private final BasketItemService basketItemService;
   private final PurchaseRepository purchaseRepository;
   private final IamportClient iamportClient;
+  private final RefundService refundService;
 
   @Transactional
   public Purchase readyPurchase(
@@ -92,8 +91,7 @@ public class PurchaseService {
     int realPurchasePrice = realPaymentData.getAmount().intValue();
     if (expectedPurchasePrice != realPurchasePrice) {
       purchase.convertStateToDetectPriceTampering(paymentUid);
-      iamportClient.cancelPaymentByImpUid(
-          new CancelData(paymentUid, true, new BigDecimal(realPurchasePrice)));
+      refundService.processRefund(paymentUid, realPurchasePrice);
       return PaymentResultType.DETECTION_PRICE_TAMPERING;
     }
 

@@ -35,6 +35,7 @@ class PurchaseServiceTest {
   private BasketItemService mockBasketItemService;
   private PurchaseRepository mockPurchaseRepository;
   private IamportClient mockIamportClient;
+  private RefundService mockrefundService;
 
   @BeforeEach
   public void beforeEach() {
@@ -42,9 +43,15 @@ class PurchaseServiceTest {
     mockBasketItemService = mock(BasketItemService.class);
     mockPurchaseRepository = mock(PurchaseRepository.class);
     mockIamportClient = mock(IamportClient.class);
+    mockrefundService = mock(RefundService.class);
+
     target =
         new PurchaseService(
-            mockMemberService, mockBasketItemService, mockPurchaseRepository, mockIamportClient);
+            mockMemberService,
+            mockBasketItemService,
+            mockPurchaseRepository,
+            mockIamportClient,
+            mockrefundService);
   }
 
   @Test
