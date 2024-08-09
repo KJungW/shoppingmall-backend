@@ -32,7 +32,7 @@ public class PurchaseItem extends BaseEntity {
   private boolean isRefund;
 
   @OneToMany(mappedBy = "purchaseItem", cascade = CascadeType.ALL, orphanRemoval = true)
-  public List<Refund> refunds = new ArrayList<>();
+  private List<Refund> refunds = new ArrayList<>();
 
   @Builder
   public PurchaseItem(Product product, String productData, Integer finalPrice) {
