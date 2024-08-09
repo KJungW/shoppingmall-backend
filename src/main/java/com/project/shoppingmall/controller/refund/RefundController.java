@@ -1,8 +1,10 @@
 package com.project.shoppingmall.controller.refund;
 
 import com.project.shoppingmall.controller.refund.input.InputAcceptRefund;
+import com.project.shoppingmall.controller.refund.input.InputCompleteRefund;
 import com.project.shoppingmall.controller.refund.input.InputRequestRefund;
 import com.project.shoppingmall.controller.refund.output.OutputAcceptRefund;
+import com.project.shoppingmall.controller.refund.output.OutputCompleteRefund;
 import com.project.shoppingmall.controller.refund.output.OutputRequestRefund;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Refund;
@@ -44,5 +46,14 @@ public class RefundController {
         refundService.acceptRefund(
             userDetail.getId(), input.getRefundId(), input.getResponseMessage());
     return new OutputAcceptRefund(updatedRefund.getId());
+  }
+
+  @PutMapping("/refund/complete")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputCompleteRefund completeRefund(@Valid @RequestBody InputCompleteRefund input) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Refund updatedRefund = refundService.completeRefund(userDetail.getId(), input.getRefundId());
+    return new OutputCompleteRefund(updatedRefund.getId());
   }
 }

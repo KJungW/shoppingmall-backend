@@ -5,5 +5,6 @@ public enum ErrorCode {
   FORBIDDEN,
   BAD_INPUT,
   SERVER_ERROR,
-  EMAIL_SEND_FAIL
+  EMAIL_SEND_FAIL,
+  REFUND_FAIL
 }

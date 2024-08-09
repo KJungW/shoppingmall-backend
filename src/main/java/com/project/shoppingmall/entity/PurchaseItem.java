@@ -56,4 +56,8 @@ public class PurchaseItem extends BaseEntity {
     this.refunds.add(refund);
     refund.registerPurchaseItem(this);
   }
+
+  public void completeRefund() {
+    this.isRefund = true;
+  }
 }

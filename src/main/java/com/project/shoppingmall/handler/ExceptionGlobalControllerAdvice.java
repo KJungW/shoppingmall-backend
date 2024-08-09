@@ -116,4 +116,16 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult NotRequestStateRefundErrorHandler(NotRequestStateRefund e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "요청상태의 환불에만 환불요청을 수행할 수 있습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(NotAcceptStateRefund.class)
+  public ErrorResult NotAcceptStateRefundErrorHandler(NotAcceptStateRefund e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "승인이 완료된 환불에 대해서만 환불 완료요청을 수행할 수 있습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(FailRefundException.class)
+  public ErrorResult FailRefundExceptionHandler(FailRefundException e) {
+    return new ErrorResult(ErrorCode.REFUND_FAIL, "환불이 실패했습니다. 잠시후 다시 시도해주세요!");
+  }
 }

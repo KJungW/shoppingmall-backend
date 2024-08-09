@@ -1,14 +1,18 @@
 package com.project.shoppingmall.service;
 
 import com.project.shoppingmall.entity.Member;
+import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
-import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.exception.NotRequestStateRefund;
-import com.project.shoppingmall.exception.ProcessOrCompleteRefund;
+import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
+import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.request.CancelData;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
+import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,7 @@ public class RefundService {
   private final RefundRepository refundRepository;
   private final MemberService memberService;
   private final PurchaseItemService purchaseItemService;
+  private final IamportClient iamportClient;
 
   @Transactional
   public Refund saveRefund(
@@ -81,5 +86,37 @@ public class RefundService {
 
   public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
     return refundRepository.findByIdWithPurchaseItemProduct(refundId);
+  }
+
+  @Transactional
+  public Refund completeRefund(long memberId, long refundId) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+    Refund refund =
+        findByIdWithPurchaseItemProduct(refundId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+
+    if (!refund.getPurchaseItem().getProduct().getSeller().getId().equals(member.getId())) {
+      throw new DataNotFound("다른 회원의 환불데이터 입니다.");
+    }
+
+    if (!refund.getState().equals(RefundStateType.ACCEPT)) {
+      throw new NotAcceptStateRefund("Accepte 상태의 환불이 아닙니다.");
+    }
+
+    Purchase purchase = refund.getPurchaseItem().getPurchase();
+    processRefund(purchase.getPaymentUid(), refund.getRefundPrice());
+    refund.completeRefund();
+
+    return refund;
+  }
+
+  public void processRefund(String paymentUid, int refundPrice) {
+    IamportResponse<Payment> paymentIamportResponse =
+        iamportClient.cancelPaymentByImpUid(
+            new CancelData(paymentUid, true, new BigDecimal(refundPrice)));
+    if (paymentIamportResponse.getResponse() == null) throw new FailRefundException("환불에 실패했습니다.");
   }
 }
