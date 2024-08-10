@@ -44,7 +44,7 @@ public class PurchaseRetrieveController {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<PurchaseItem> sliceResult =
-        purchaseItemRetrieveService.retrieveAllByProduct(
+        purchaseItemRetrieveService.retrieveAllForSeller(
             userDetail.getId(), productId, sliceNumber, sliceSize);
     return new OutputRetrievePurchaseBySeller(sliceResult);
   }

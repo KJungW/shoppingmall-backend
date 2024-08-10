@@ -20,7 +20,7 @@ public class PurchaseItemRetrieveService {
   private final MemberService memberService;
   private final ProductService productService;
 
-  public Slice<PurchaseItem> retrieveAllByProduct(
+  public Slice<PurchaseItem> retrieveAllForSeller(
       long memberId, long productId, int sliceNumber, int sliceSize) {
     Member member =
         memberService

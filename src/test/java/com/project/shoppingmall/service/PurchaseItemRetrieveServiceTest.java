@@ -53,7 +53,7 @@ class PurchaseItemRetrieveServiceTest {
     when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
-    target.retrieveAllByProduct(givenMemberId, givenProductId, givenSliceNumber, givenSliceSize);
+    target.retrieveAllForSeller(givenMemberId, givenProductId, givenSliceNumber, givenSliceSize);
 
     // then
     ArgumentCaptor<Long> productIdCaptor = ArgumentCaptor.forClass(Long.class);
@@ -99,7 +99,7 @@ class PurchaseItemRetrieveServiceTest {
     assertThrows(
         DataNotFound.class,
         () ->
-            target.retrieveAllByProduct(
+            target.retrieveAllForSeller(
                 givenMemberId, givenProductId, givenSliceNumber, givenSliceSize));
   }
 }
