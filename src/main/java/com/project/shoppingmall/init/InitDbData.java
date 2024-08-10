@@ -2,10 +2,10 @@ package com.project.shoppingmall.init;
 
 import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.dto.block.TextBlock;
+import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.repository.MemberRepository;
-import com.project.shoppingmall.repository.ProductRepository;
-import com.project.shoppingmall.repository.ProductTypeRepository;
+import com.project.shoppingmall.entity.value.DeliveryInfo;
+import com.project.shoppingmall.repository.*;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
@@ -33,13 +33,13 @@ public class InitDbData {
   private final ProductTypeRepository productTypeRepository;
   private final MemberRepository memberRepository;
   private final ProductRepository productRepository;
+  private final PurchaseRepository purchaseRepository;
+  private final RefundRepository refundRepository;
 
   @PostConstruct
   public void init() {
-    if (envType.equals("dev") || envType.equals("stage")) {
-      if (ddlType.equals("create") || ddlType.equals("create-drop")) {
-        initData();
-      }
+    if (ddlType.equals("create") || ddlType.equals("create-drop")) {
+      initData();
     }
   }
 
@@ -57,26 +57,39 @@ public class InitDbData {
         new ArrayList<>(Arrays.asList(type1, type2, type3, type4, type5, type6));
 
     // 회원 생성
-    Member member =
+    Member seller =
         Member.builder()
             .loginType(LoginType.NAVER)
             .socialId("testMemberSocialId123123421aaa")
-            .nickName("Kim")
+            .nickName("seller")
             .profileImageUrl("init/member_profile_img.png")
             .profileImageDownLoadUrl(
                 "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
             .role(MemberRoleType.ROLE_MEMBER)
             .isBan(false)
             .build();
-    memberRepository.save(member);
+    memberRepository.save(seller);
+    Member buyer =
+        Member.builder()
+            .loginType(LoginType.NAVER)
+            .socialId("testMemberSocialIdcvv90498s0df")
+            .nickName("buyer")
+            .profileImageUrl("init/member_profile_img.png")
+            .profileImageDownLoadUrl(
+                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
+            .role(MemberRoleType.ROLE_MEMBER)
+            .isBan(false)
+            .build();
+    memberRepository.save(buyer);
 
     // 타입별로 30개의 제품 생성
+    List<Product> productListInType1 = new ArrayList<>();
     for (ProductType type : typeList) {
       String productName = type.getTypeName().replace("$", "-");
       for (int i = 0; i < 30; i++) {
         Product product =
             Product.builder()
-                .seller(member)
+                .seller(seller)
                 .productType(type)
                 .productImages(new ArrayList<>())
                 .contents(new ArrayList<>())
@@ -170,9 +183,68 @@ public class InitDbData {
         List<ProductMultipleOption> multiOptions =
             new ArrayList<>(Arrays.asList(multiOption1, multiOption2, multiOption3));
         product.updateMultiOptions(multiOptions);
-
         productRepository.save(product);
+
+        if (type.getTypeName().equals(type1.getTypeName())) productListInType1.add(product);
       }
+    }
+
+    // 50개의 구매데이터 생성
+    List<Purchase> purchaseList = new ArrayList<>();
+    for (int i = 0; i < 50; i++) {
+      List<PurchaseItem> purchaseItems = new ArrayList<>();
+      for (int k = 0; k < 3; k++) {
+        Product targetProduct = productListInType1.get(k);
+        ProductDataForPurchase productOptionObj =
+            ProductDataForPurchase.builder()
+                .productId(targetProduct.getId())
+                .sellerId(targetProduct.getSeller().getId())
+                .sellerName(targetProduct.getSeller().getNickName())
+                .productName(targetProduct.getName())
+                .productTypeName(targetProduct.getProductType().getTypeName())
+                .price(targetProduct.getPrice())
+                .discountAmount(targetProduct.getDiscountAmount())
+                .discountRate(targetProduct.getDiscountRate())
+                .build();
+        PurchaseItem purchaseItem =
+            PurchaseItem.builder()
+                .product(targetProduct)
+                .productData(productOptionObj.makeJson())
+                .finalPrice(targetProduct.getFinalPrice())
+                .build();
+        purchaseItems.add(purchaseItem);
+      }
+      int totalPrice = purchaseItems.stream().mapToInt(PurchaseItem::getFinalPrice).sum();
+      DeliveryInfo deliveryInfo =
+          new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
+      Purchase purchase =
+          Purchase.builder()
+              .buyer(buyer)
+              .purchaseItems(purchaseItems)
+              .purchaseUid(i + "testPurchaseUid1234")
+              .purchaseTitle("임시구매" + i)
+              .deliveryInfo(deliveryInfo)
+              .totalPrice(totalPrice)
+              .build();
+      purchase.convertStateToComplete(i + "testPaymentUid1234");
+      purchaseRepository.save(purchase);
+
+      if (i < 30) purchaseList.add(purchase);
+    }
+
+    // 30의 구매데이터에 대해 환불 데이터 생성
+    for (Purchase purchase : purchaseList) {
+      PurchaseItem targetItem = purchase.getPurchaseItems().get(0);
+      Refund refund =
+          Refund.builder()
+              .refundPrice(targetItem.getFinalPrice())
+              .requestTitle("환불이 필요합니다.")
+              .requestContent("환불을 해주시면 감사하겠습니다.")
+              .build();
+      targetItem.addRefund(refund);
+      refund.acceptRefund("환불을 승인합니다. 반품을 진행해주세요");
+      refund.completeRefund();
+      refundRepository.save(refund);
     }
   }
 }
