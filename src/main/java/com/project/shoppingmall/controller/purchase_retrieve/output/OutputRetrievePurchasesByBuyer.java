@@ -9,7 +9,7 @@ import org.springframework.data.domain.Slice;
 
 @Getter
 @AllArgsConstructor
-public class OutputFindAllByMember {
+public class OutputRetrievePurchasesByBuyer {
   private int currentSliceNumber;
   private int sliceSize;
   private boolean isFirst;
@@ -18,7 +18,7 @@ public class OutputFindAllByMember {
   private boolean hasPrevious;
   private List<PurchaseDto> purchaseList;
 
-  public OutputFindAllByMember(Slice<Purchase> sliceResult) {
+  public OutputRetrievePurchasesByBuyer(Slice<Purchase> sliceResult) {
     this.currentSliceNumber = sliceResult.getNumber();
     this.sliceSize = sliceResult.getSize();
     this.isFirst = sliceResult.isFirst();

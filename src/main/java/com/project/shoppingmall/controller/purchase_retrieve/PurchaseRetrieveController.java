@@ -1,6 +1,6 @@
 package com.project.shoppingmall.controller.purchase_retrieve;
 
-import com.project.shoppingmall.controller.purchase_retrieve.output.OutputFindAllByMember;
+import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrievePurchasesByBuyer;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.service.PurchaseRetrieveService;
@@ -21,13 +21,13 @@ public class PurchaseRetrieveController {
 
   @GetMapping("/purchases")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
-  public OutputFindAllByMember retrieveAllByMember(
+  public OutputRetrievePurchasesByBuyer retrievePurchasesByBuyer(
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<Purchase> sliceResult =
         purchaseRetrieveService.retrieveAllByMember(userDetail.getId(), sliceNumber, sliceSize);
-    return new OutputFindAllByMember(sliceResult);
+    return new OutputRetrievePurchasesByBuyer(sliceResult);
   }
 }
