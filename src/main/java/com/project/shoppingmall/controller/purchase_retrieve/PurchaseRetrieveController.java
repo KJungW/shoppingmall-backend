@@ -1,8 +1,11 @@
 package com.project.shoppingmall.controller.purchase_retrieve;
 
+import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrievePurchaseBySeller;
 import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrievePurchasesByBuyer;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Purchase;
+import com.project.shoppingmall.entity.PurchaseItem;
+import com.project.shoppingmall.service.PurchaseItemRetrieveService;
 import com.project.shoppingmall.service.PurchaseRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PurchaseRetrieveController {
   private final PurchaseRetrieveService purchaseRetrieveService;
+  private final PurchaseItemRetrieveService purchaseItemRetrieveService;
 
   @GetMapping("/purchases")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
@@ -29,5 +33,19 @@ public class PurchaseRetrieveController {
     Slice<Purchase> sliceResult =
         purchaseRetrieveService.retrieveAllByMember(userDetail.getId(), sliceNumber, sliceSize);
     return new OutputRetrievePurchasesByBuyer(sliceResult);
+  }
+
+  @GetMapping("/seller/product/purchases")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputRetrievePurchaseBySeller retrievePurchasesBySeller(
+      @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
+      @Positive @RequestParam("sliceSize") int sliceSize,
+      @RequestParam("productId") int productId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Slice<PurchaseItem> sliceResult =
+        purchaseItemRetrieveService.retrieveAllByProduct(
+            userDetail.getId(), productId, sliceNumber, sliceSize);
+    return new OutputRetrievePurchaseBySeller(sliceResult);
   }
 }
