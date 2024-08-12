@@ -301,6 +301,99 @@ class RefundServiceTest {
   }
 
   @Test
+  @DisplayName("rejectRefund() : 정상흐름")
+  public void rejectRefund_ok() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    Refund givenRefund = RefundBuilder.fullData().build();
+    givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
+    ReflectionTestUtils.setField(
+        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // when
+    Refund result = target.rejectRefund(givenMemberId, givenRefundId, givenResponseMessage);
+
+    // then
+    assertEquals(RefundStateType.REJECTED, result.getState());
+    assertEquals(givenResponseMessage, result.getResponseContent());
+    assertFalse(result.getPurchaseItem().isRefund());
+    assertEquals(
+        RefundStateTypeForPurchaseItem.REJECTED, result.getPurchaseItem().getFinalRefundState());
+  }
+
+  @Test
+  @DisplayName("rejectRefund() : 자신이 판매하지 않는 제품에 대한 환불데이터 반려요청")
+  public void rejectRefund_otherSellerRefund() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    long wrongMemberId = 55L;
+    Refund givenRefund = RefundBuilder.fullData().build();
+    givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
+    ReflectionTestUtils.setField(
+        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", wrongMemberId);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // when
+    assertThrows(
+        DataNotFound.class,
+        () -> target.rejectRefund(givenMemberId, givenRefundId, givenResponseMessage));
+  }
+
+  @Test
+  @DisplayName("rejectRefund() : request상태가 아닌 환불에 해당 반려요청")
+  public void rejectRefund_noRequest() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenMemberId = 10L;
+    long givenRefundId = 20L;
+    String givenResponseMessage = "testMessage";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
+    Refund givenRefund = RefundBuilder.fullData().build();
+    givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
+    ReflectionTestUtils.setField(
+        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
+    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+        .thenReturn(Optional.of(givenRefund));
+
+    // when
+    assertThrows(
+        NotRequestStateRefund.class,
+        () -> target.rejectRefund(givenMemberId, givenRefundId, givenResponseMessage));
+  }
+
+  @Test
   @DisplayName("completeRefund() : 정상흐름")
   public void completeRefund_ok() throws IOException {
     // given
