@@ -1,6 +1,7 @@
 package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.PurchaseItem;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,14 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
           + "where p.id = :productId "
           + "and pu.state = 'COMPLETE' ")
   Slice<PurchaseItem> findAllForSeller(@Param("productId") long productId, Pageable pageable);
+
+  @Query(
+      "select distinct pi "
+          + "from PurchaseItem pi "
+          + "left join fetch pi.purchase pu "
+          + "left join fetch pu.buyer b "
+          + "join fetch pi.refunds r "
+          + "where b.id = :buyerId "
+          + "and pu.state = 'Complete'")
+  Slice<PurchaseItem> findRefundedAllForBuyer(Long buyerId, PageRequest pageRequest);
 }

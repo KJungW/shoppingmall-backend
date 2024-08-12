@@ -39,4 +39,16 @@ public class PurchaseItemRetrieveService {
         PageRequest.of(sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
     return purchaseItemRetrieveRepository.findAllForSeller(product.getId(), pageRequest);
   }
+
+  public Slice<PurchaseItem> retrieveRefundedAllForBuyer(
+      long memberId, int sliceNumber, int sliceSize) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+    PageRequest pageRequest =
+        PageRequest.of(
+            sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
+    return purchaseItemRetrieveRepository.findRefundedAllForBuyer(member.getId(), pageRequest);
+  }
 }
