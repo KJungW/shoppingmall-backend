@@ -30,6 +30,7 @@ class PurchaseItemRetrieveRepositoryTest {
   @Autowired private EntityManager em;
   private Long givenProductId;
   private Long givenBuyerId;
+  private Long givenSellerId;
 
   @BeforeEach
   public void beforeEach() {
@@ -46,6 +47,7 @@ class PurchaseItemRetrieveRepositoryTest {
             .isBan(false)
             .build();
     em.persist(seller);
+    givenSellerId = seller.getId();
     Member buyer =
         Member.builder()
             .loginType(LoginType.NAVER)
@@ -291,6 +293,78 @@ class PurchaseItemRetrieveRepositoryTest {
     purchaseItems.forEach(
         item -> {
           assertEquals(givenBuyerId, item.getPurchase().getBuyer().getId());
+        });
+
+    // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+        });
+
+    // - 조회된 모든 PurchaseItem에 Refund 요청이 존재하는지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertFalse(item.getRefunds().isEmpty());
+        });
+  }
+
+  @Test
+  @DisplayName("findRefundedAllForSeller() : 정상흐름 첫번째 페이지")
+  public void findRefundedAllForSeller_ok_firstPage() {
+    // given
+    PageRequest pageRequest =
+        PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
+
+    // when
+    Slice<PurchaseItem> sliceData = target.findRefundedAllForSeller(givenSellerId, pageRequest);
+
+    // then
+    // - 페이지 정보 검증
+    assertTrue(sliceData.isFirst());
+    assertFalse(sliceData.isLast());
+    assertEquals(15, sliceData.getContent().size());
+
+    // - 조회된 PurchaseItem의 판매자 ID 검증
+    List<PurchaseItem> purchaseItems = sliceData.getContent();
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(givenSellerId, item.getProduct().getSeller().getId());
+        });
+
+    // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+        });
+
+    // - 조회된 모든 PurchaseItem에 Refund 요청이 존재하는지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertFalse(item.getRefunds().isEmpty());
+        });
+  }
+
+  @Test
+  @DisplayName("findRefundedAllForSeller() : 정상흐름 마지막 페이지")
+  public void findRefundedAllForSeller_ok_lastPage() {
+    // given
+    PageRequest pageRequest =
+        PageRequest.of(1, 15, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
+
+    // when
+    Slice<PurchaseItem> sliceData = target.findRefundedAllForSeller(givenSellerId, pageRequest);
+
+    // then
+    // - 페이지 정보 검증
+    assertFalse(sliceData.isFirst());
+    assertTrue(sliceData.isLast());
+    assertEquals(5, sliceData.getContent().size());
+
+    // - 조회된 PurchaseItem의 판매자 ID 검증
+    List<PurchaseItem> purchaseItems = sliceData.getContent();
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(givenSellerId, item.getProduct().getSeller().getId());
         });
 
     // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
