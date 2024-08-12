@@ -1,6 +1,7 @@
 package com.project.shoppingmall.controller.refund_retrieve;
 
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFinaAllByBuyer;
+import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllBySeller;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.service.PurchaseItemRetrieveService;
@@ -30,5 +31,18 @@ public class RefundRetrieveController {
         purchaseItemRetrieveService.retrieveRefundedAllForBuyer(
             userDetail.getId(), sliceNumber, sliceSize);
     return new OutputFinaAllByBuyer(sliceResult);
+  }
+
+  @GetMapping("member/product/refunds")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputFindAllBySeller findAllBySeller(
+      @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
+      @Positive @RequestParam("sliceSize") int sliceSize) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Slice<PurchaseItem> sliceResult =
+        purchaseItemRetrieveService.retrieveRefundedAllForSeller(
+            userDetail.getId(), sliceNumber, sliceSize);
+    return new OutputFindAllBySeller(sliceResult);
   }
 }
