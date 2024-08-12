@@ -40,7 +40,7 @@ public class PurchaseRetrieveController {
   public OutputRetrievePurchaseBySeller retrievePurchasesBySeller(
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize,
-      @RequestParam("productId") int productId) {
+      @RequestParam("productId") long productId) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<PurchaseItem> sliceResult =

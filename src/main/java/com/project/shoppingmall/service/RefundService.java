@@ -70,10 +70,10 @@ public class RefundService {
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
         findByIdWithPurchaseItemProduct(refundId)
-            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
 
     if (!refund.getPurchaseItem().getProduct().getSeller().getId().equals(member.getId())) {
-      throw new DataNotFound("다른 회원의 환불데이터 입니다.");
+      throw new DataNotFound("다른 회원의 판매상품에 대한 환불데이터 입니다.");
     }
 
     if (!refund.getState().equals(RefundStateType.REQUEST)) {
@@ -96,10 +96,10 @@ public class RefundService {
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
         findByIdWithPurchaseItemProduct(refundId)
-            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
 
     if (!refund.getPurchaseItem().getProduct().getSeller().getId().equals(member.getId())) {
-      throw new DataNotFound("다른 회원의 환불데이터 입니다.");
+      throw new DataNotFound("다른 회원의 판매상품에 대한 환불데이터 입니다.");
     }
 
     if (!refund.getState().equals(RefundStateType.ACCEPT)) {
