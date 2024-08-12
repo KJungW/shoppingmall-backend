@@ -18,6 +18,7 @@ import com.project.shoppingmall.testdata.PurchaseItemBuilder;
 import com.project.shoppingmall.testdata.RefundBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
+import com.project.shoppingmall.type.RefundStateTypeForPurchaseItem;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
@@ -88,7 +89,11 @@ class RefundServiceTest {
     assertEquals(givenFinalPrice, resultRefund.getRefundPrice());
     assertEquals(givenRequestTitle, resultRefund.getRequestTitle());
     assertEquals(givenRequestContent, resultRefund.getRequestContent());
+
     assertEquals(1, givenPurchaseItem.getRefunds().size());
+    assertFalse(givenPurchaseItem.isRefund());
+    assertNotNull(givenPurchaseItem.getFinalRefundCreatedDate());
+    assertEquals(RefundStateTypeForPurchaseItem.REQUEST, givenPurchaseItem.getFinalRefundState());
   }
 
   @Test
@@ -230,6 +235,10 @@ class RefundServiceTest {
     // then
     assertEquals(RefundStateType.ACCEPT, result.getState());
     assertEquals(givenResponseMessage, result.getResponseContent());
+
+    assertFalse(result.getPurchaseItem().isRefund());
+    assertEquals(
+        RefundStateTypeForPurchaseItem.ACCEPT, result.getPurchaseItem().getFinalRefundState());
   }
 
   @Test
@@ -327,7 +336,6 @@ class RefundServiceTest {
 
     // then
     assertEquals(RefundStateType.COMPLETE, result.getState());
-    assertTrue(result.getPurchaseItem().isRefund());
 
     ArgumentCaptor<CancelData> cancelDataCaptor = ArgumentCaptor.forClass(CancelData.class);
     verify(mockIamportClient, times(1)).cancelPaymentByImpUid(cancelDataCaptor.capture());
@@ -338,6 +346,10 @@ class RefundServiceTest {
     int realRefundPrice =
         ((BigDecimal) ReflectionTestUtils.getField(cancelDataCaptorResult, "amount")).intValue();
     assertEquals(givenRefundPrice, realRefundPrice);
+
+    assertTrue(result.getPurchaseItem().isRefund());
+    assertEquals(
+        RefundStateTypeForPurchaseItem.COMPLETE, result.getPurchaseItem().getFinalRefundState());
   }
 
   @Test

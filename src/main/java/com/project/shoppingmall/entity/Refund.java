@@ -47,10 +47,11 @@ public class Refund extends BaseEntity {
   public void acceptRefund(String responseContent) {
     state = RefundStateType.ACCEPT;
     this.responseContent = responseContent;
+    this.purchaseItem.processFinalRefundAccept();
   }
 
   public void completeRefund() {
     this.state = RefundStateType.COMPLETE;
-    this.purchaseItem.completeRefund();
+    this.purchaseItem.processFinalRefundComplete();
   }
 }

@@ -1,7 +1,9 @@
 package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.type.RefundStateTypeForPurchaseItem;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -34,6 +36,9 @@ public class PurchaseItem extends BaseEntity {
   @OneToMany(mappedBy = "purchaseItem", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Refund> refunds = new ArrayList<>();
 
+  private RefundStateTypeForPurchaseItem finalRefundState;
+  private LocalDateTime finalRefundCreatedDate;
+
   @Builder
   public PurchaseItem(Product product, String productData, Integer finalPrice) {
     if (product == null || productData.isEmpty() || finalPrice <= 0) {
@@ -43,6 +48,7 @@ public class PurchaseItem extends BaseEntity {
     this.productData = productData;
     this.finalPrice = finalPrice;
     this.isRefund = false;
+    this.finalRefundState = RefundStateTypeForPurchaseItem.NONE;
   }
 
   public void registerPurchase(Purchase purchase) {
@@ -55,9 +61,16 @@ public class PurchaseItem extends BaseEntity {
     }
     this.refunds.add(refund);
     refund.registerPurchaseItem(this);
+    this.finalRefundCreatedDate = LocalDateTime.now();
+    this.finalRefundState = RefundStateTypeForPurchaseItem.REQUEST;
   }
 
-  public void completeRefund() {
+  public void processFinalRefundAccept() {
+    this.finalRefundState = RefundStateTypeForPurchaseItem.ACCEPT;
+  }
+
+  public void processFinalRefundComplete() {
     this.isRefund = true;
+    this.finalRefundState = RefundStateTypeForPurchaseItem.COMPLETE;
   }
 }
