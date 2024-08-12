@@ -29,6 +29,7 @@ class PurchaseItemRetrieveRepositoryTest {
   @Autowired private PurchaseItemRetrieveRepository target;
   @Autowired private EntityManager em;
   private Long givenProductId;
+  private Long givenBuyerId;
 
   @BeforeEach
   public void beforeEach() {
@@ -57,12 +58,13 @@ class PurchaseItemRetrieveRepositoryTest {
             .isBan(false)
             .build();
     em.persist(buyer);
+    givenBuyerId = buyer.getId();
 
     // 제품 타입 생성
     ProductType type = new ProductType("test$test");
     em.persist(type);
 
-    // 구매할 제품 조회
+    // 구매할 제품 생성
     Product targetProduct =
         Product.builder()
             .seller(seller)
@@ -157,6 +159,30 @@ class PurchaseItemRetrieveRepositoryTest {
               .build();
       purchase.convertStateToComplete(i + "test-complete-PaymentUid");
       em.persist(purchase);
+
+      // Purchase마다 생성된 3개의 PurchaseItem 중 첫번째 PurchaseItem에 대해서 reqeuset 상태의 Refund 생성 (총 10개)
+      PurchaseItem requestRefundTarget = purchaseItems.get(0);
+      Refund requestRefund =
+          Refund.builder()
+              .refundPrice(requestRefundTarget.getFinalPrice())
+              .requestTitle("환불이 필요합니다.")
+              .requestContent("환불을 해주시면 감사하겠습니다.")
+              .build();
+      requestRefundTarget.addRefund(requestRefund);
+      em.persist(requestRefund);
+
+      // Purchase마다 생성된 3개의 PurchaseItem 중 두번째 PurchaseItem에 대해서 complete 상태의 Refund 생성 (총 10개)
+      PurchaseItem completeRefundTarget = purchaseItems.get(1);
+      Refund completeRefund =
+          Refund.builder()
+              .refundPrice(requestRefundTarget.getFinalPrice())
+              .requestTitle("환불이 필요합니다.")
+              .requestContent("환불을 해주시면 감사하겠습니다.")
+              .build();
+      completeRefundTarget.addRefund(completeRefund);
+      completeRefund.acceptRefund("환불을 승인합니다. 반품을 진행해주세요");
+      completeRefund.completeRefund();
+      em.persist(requestRefund);
     }
   }
 
@@ -207,6 +233,76 @@ class PurchaseItemRetrieveRepositoryTest {
     resultPurchaseItems.forEach(
         purchaseItem -> {
           assertEquals(PurchaseStateType.COMPLETE, purchaseItem.getPurchase().getState());
+        });
+  }
+
+  @Test
+  @DisplayName("findRefundedAllForBuyer() : 정상흐름 첫번째 페이지")
+  public void findRefundedAllForBuyer_ok_firstPage() {
+    // given
+    PageRequest pageRequest = PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    // when
+    Slice<PurchaseItem> sliceData = target.findRefundedAllForBuyer(givenBuyerId, pageRequest);
+
+    // then
+    // - 페이지 정보 검증
+    assertTrue(sliceData.isFirst());
+    assertFalse(sliceData.isLast());
+    assertEquals(15, sliceData.getContent().size());
+
+    // - 조회된 PurchaseItem의 구매자 ID 검증
+    List<PurchaseItem> purchaseItems = sliceData.getContent();
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(givenBuyerId, item.getPurchase().getBuyer().getId());
+        });
+
+    // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+        });
+
+    // - 조회된 모든 PurchaseItem에 Refund 요청이 존재하는지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertFalse(item.getRefunds().isEmpty());
+        });
+  }
+
+  @Test
+  @DisplayName("findRefundedAllForBuyer() : 정상흐름 마지막 페이지 페이지")
+  public void findRefundedAllForBuyer_ok_lastPage() {
+    // given
+    PageRequest pageRequest = PageRequest.of(1, 15, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    // when
+    Slice<PurchaseItem> sliceData = target.findRefundedAllForBuyer(givenBuyerId, pageRequest);
+
+    // then
+    // - 페이지 정보 검증
+    assertFalse(sliceData.isFirst());
+    assertTrue(sliceData.isLast());
+    assertEquals(5, sliceData.getContent().size());
+
+    // - 조회된 PurchaseItem의 구매자 ID 검증
+    List<PurchaseItem> purchaseItems = sliceData.getContent();
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(givenBuyerId, item.getPurchase().getBuyer().getId());
+        });
+
+    // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+        });
+
+    // - 조회된 모든 PurchaseItem에 Refund 요청이 존재하는지 검증
+    purchaseItems.forEach(
+        item -> {
+          assertFalse(item.getRefunds().isEmpty());
         });
   }
 }

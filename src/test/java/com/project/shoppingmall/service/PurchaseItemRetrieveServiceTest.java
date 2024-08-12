@@ -102,4 +102,38 @@ class PurchaseItemRetrieveServiceTest {
             target.retrieveAllForSeller(
                 givenMemberId, givenProductId, givenSliceNumber, givenSliceSize));
   }
+
+  @Test
+  @DisplayName("retrieveRefundedAllForBuyer() : 정상흐름'")
+  public void retrieveRefundedAllForBuyer_ok() {
+    // given
+    long givenBuyerId = 30L;
+    int givenSliceNumber = 1;
+    int givenSliceSize = 10;
+
+    Member givenBuyer = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenBuyer, "id", givenBuyerId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenBuyer));
+
+    // when
+    target.retrieveRefundedAllForBuyer(givenBuyerId, givenSliceNumber, givenSliceSize);
+
+    // then
+    ArgumentCaptor<Long> buyerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+    verify(mockPurchaseItemRetrieveRepository, times(1))
+        .findRefundedAllForBuyer(buyerIdCaptor.capture(), pageRequestCaptor.capture());
+
+    assertEquals(givenBuyerId, buyerIdCaptor.getValue());
+
+    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
+    assertEquals(givenSliceNumber, captoredPageRequest.getPageNumber());
+    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
+    assertEquals(
+        Sort.Direction.DESC,
+        captoredPageRequest.getSort().getOrderFor("finalRefundCreatedDate").getDirection());
+    assertEquals(
+        "finalRefundCreatedDate",
+        captoredPageRequest.getSort().getOrderFor("finalRefundCreatedDate").getProperty());
+  }
 }
