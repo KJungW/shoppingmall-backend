@@ -69,6 +69,10 @@ public class PurchaseItem extends BaseEntity {
     this.finalRefundState = RefundStateTypeForPurchaseItem.ACCEPT;
   }
 
+  public void processFinalRefundReject() {
+    this.finalRefundState = RefundStateTypeForPurchaseItem.REJECTED;
+  }
+
   public void processFinalRefundComplete() {
     this.isRefund = true;
     this.finalRefundState = RefundStateTypeForPurchaseItem.COMPLETE;

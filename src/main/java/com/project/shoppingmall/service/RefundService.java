@@ -84,8 +84,24 @@ public class RefundService {
     return refund;
   }
 
-  public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
-    return refundRepository.findByIdWithPurchaseItemProduct(refundId);
+  @Transactional
+  public Refund rejectRefund(Long memberId, long refundId, String responseContent) {
+    Member member =
+        memberService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+    Refund refund =
+        findByIdWithPurchaseItemProduct(refundId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
+
+    if (!refund.getPurchaseItem().getProduct().getSeller().getId().equals(member.getId())) {
+      throw new DataNotFound("다른 회원의 판매상품에 대한 환불데이터 입니다.");
+    }
+    if (!refund.getState().equals(RefundStateType.REQUEST)) {
+      throw new NotRequestStateRefund("Reqeuset상태의 환불이 아닙니다.");
+    }
+    refund.rejectRefund(responseContent);
+    return refund;
   }
 
   @Transactional
@@ -118,5 +134,9 @@ public class RefundService {
         iamportClient.cancelPaymentByImpUid(
             new CancelData(paymentUid, true, new BigDecimal(refundPrice)));
     if (paymentIamportResponse.getResponse() == null) throw new FailRefundException("환불에 실패했습니다.");
+  }
+
+  public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
+    return refundRepository.findByIdWithPurchaseItemProduct(refundId);
   }
 }

@@ -2,9 +2,11 @@ package com.project.shoppingmall.controller.refund;
 
 import com.project.shoppingmall.controller.refund.input.InputAcceptRefund;
 import com.project.shoppingmall.controller.refund.input.InputCompleteRefund;
+import com.project.shoppingmall.controller.refund.input.InputRejectRefund;
 import com.project.shoppingmall.controller.refund.input.InputRequestRefund;
 import com.project.shoppingmall.controller.refund.output.OutputAcceptRefund;
 import com.project.shoppingmall.controller.refund.output.OutputCompleteRefund;
+import com.project.shoppingmall.controller.refund.output.OutputRejectRefund;
 import com.project.shoppingmall.controller.refund.output.OutputRequestRefund;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Refund;
@@ -55,5 +57,16 @@ public class RefundController {
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Refund updatedRefund = refundService.completeRefund(userDetail.getId(), input.getRefundId());
     return new OutputCompleteRefund(updatedRefund.getId());
+  }
+
+  @PutMapping("/refund/reject")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputRejectRefund rejectRefund(@Valid @RequestBody InputRejectRefund input) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Refund rejecteddRefund =
+        refundService.rejectRefund(
+            userDetail.getId(), input.getRefundId(), input.getResponseMessage());
+    return new OutputRejectRefund(rejecteddRefund.getId());
   }
 }
