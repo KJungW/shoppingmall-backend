@@ -1,10 +1,13 @@
 package com.project.shoppingmall.controller.refund_retrieve;
 
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFinaAllByBuyer;
+import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllAboutPurchaseItem;
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllBySeller;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.PurchaseItem;
+import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.service.PurchaseItemRetrieveService;
+import com.project.shoppingmall.service.RefundRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RefundRetrieveController {
   private final PurchaseItemRetrieveService purchaseItemRetrieveService;
+  private final RefundRetrieveService refundRetrieveService;
 
   @GetMapping("member/purchase/refunds")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
@@ -44,5 +48,19 @@ public class RefundRetrieveController {
         purchaseItemRetrieveService.retrieveRefundedAllForSeller(
             userDetail.getId(), sliceNumber, sliceSize);
     return new OutputFindAllBySeller(sliceResult);
+  }
+
+  @GetMapping("member/purchaseItem/refunds")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputFindAllAboutPurchaseItem findAllAboutPurchaseItem(
+      @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
+      @Positive @RequestParam("sliceSize") int sliceSize,
+      @RequestParam("purchaseItemId") long purchaseItemId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Slice<Refund> sliceResult =
+        refundRetrieveService.retrieveAllByPurchaseItem(
+            userDetail.getId(), purchaseItemId, sliceNumber, sliceSize);
+    return new OutputFindAllAboutPurchaseItem(sliceResult);
   }
 }

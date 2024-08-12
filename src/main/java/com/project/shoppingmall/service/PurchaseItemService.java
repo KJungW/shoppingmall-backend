@@ -36,4 +36,8 @@ public class PurchaseItemService {
         .toList()
         .isEmpty();
   }
+
+  public Optional<PurchaseItem> findById(long purchaseItemId) {
+    return purchaseItemRepository.findById(purchaseItemId);
+  }
 }
