@@ -3,23 +3,31 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductRetrieveRepository;
+import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
+import java.util.ArrayList;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class ProductRetrieveServiceTest {
   private ProductRetrieveService target;
   private ProductRetrieveRepository mockProductRetrieveRepository;
+  private MemberService mockMemberService;
 
   @BeforeEach
   public void beforeEach() {
     mockProductRetrieveRepository = mock(ProductRetrieveRepository.class);
-    target = new ProductRetrieveService(mockProductRetrieveRepository);
+    mockMemberService = mock(MemberService.class);
+    target = new ProductRetrieveService(mockProductRetrieveRepository, mockMemberService);
   }
 
   @Test
@@ -147,6 +155,42 @@ class ProductRetrieveServiceTest {
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
         Sort.Direction.ASC,
+        pageRequestCaptor.getValue().getSort().getOrderFor("createDate").getDirection());
+    assertEquals(
+        "createDate",
+        pageRequestCaptor.getValue().getSort().getOrderFor("createDate").getProperty());
+  }
+
+  @Test
+  @DisplayName("retrieveBySeller() : 정상흐름")
+  public void retrieveBySeller_ok() {
+    // given
+    long givenSellerId = 10L;
+    int givenSliceNumber = 0;
+    int givenSliceSize = 10;
+
+    Member givenSeller = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenSeller, "id", givenSellerId);
+    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenSeller));
+
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList());
+    when(mockProductRetrieveRepository.findAllBySeller(any(), any())).thenReturn(mockSliceResult);
+
+    // when
+    target.retrieveBySeller(givenSellerId, givenSliceNumber, givenSliceSize);
+
+    // then
+    ArgumentCaptor<Member> seller = ArgumentCaptor.forClass(Member.class);
+    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+    verify(mockProductRetrieveRepository, times(1))
+        .findAllBySeller(seller.capture(), pageRequestCaptor.capture());
+
+    assertSame(givenSeller, seller.getValue());
+    assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
+    assertEquals(givenSliceNumber, pageRequestCaptor.getValue().getPageNumber());
+    assertEquals(
+        Sort.Direction.DESC,
         pageRequestCaptor.getValue().getSort().getOrderFor("createDate").getDirection());
     assertEquals(
         "createDate",
