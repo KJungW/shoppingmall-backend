@@ -81,4 +81,12 @@ public class PurchaseItem extends BaseEntity {
     this.isRefund = true;
     this.finalRefundState = RefundStateTypeForPurchaseItem.COMPLETE;
   }
+
+  public boolean writeReviewPossible() {
+    return review == null;
+  }
+
+  public void registerReview(Review review) {
+    this.review = review;
+  }
 }

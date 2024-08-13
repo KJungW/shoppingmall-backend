@@ -128,4 +128,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult FailRefundExceptionHandler(FailRefundException e) {
     return new ErrorResult(ErrorCode.REFUND_FAIL, "환불이 실패했습니다. 잠시후 다시 시도해주세요!");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AlreadyExistReview.class)
+  public ErrorResult AlreadyExistReviewHandler(AlreadyExistReview e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "해당 구매아이템에 대해 작성한 리뷰가 존재합니다.");
+  }
 }

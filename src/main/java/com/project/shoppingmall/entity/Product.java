@@ -1,5 +1,6 @@
 package com.project.shoppingmall.entity;
 
+import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -125,5 +126,11 @@ public class Product extends BaseEntity {
   public void CalcFinalPrice() {
     this.finalPrice =
         PriceCalculateUtil.calculatePrice(this.price, this.discountAmount, this.discountRate);
+  }
+
+  public void addScore(ReviewScoresCalcResult scoresCalcResult, double currentScore) {
+    double previousAvg = scoresCalcResult.getScoreAverage();
+    long previousCnt = scoresCalcResult.getReviewCount();
+    this.scoreAvg = (previousAvg * previousCnt + currentScore) / (previousCnt + 1);
   }
 }
