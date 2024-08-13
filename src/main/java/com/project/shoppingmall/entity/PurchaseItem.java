@@ -39,6 +39,10 @@ public class PurchaseItem extends BaseEntity {
   private RefundStateTypeForPurchaseItem finalRefundState;
   private LocalDateTime finalRefundCreatedDate;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "REVIEW_ID")
+  private Review review;
+
   @Builder
   public PurchaseItem(Product product, String productData, Integer finalPrice) {
     if (product == null || productData.isEmpty() || finalPrice <= 0) {
