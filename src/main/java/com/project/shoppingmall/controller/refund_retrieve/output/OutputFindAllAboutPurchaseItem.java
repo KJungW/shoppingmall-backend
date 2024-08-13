@@ -16,7 +16,7 @@ public class OutputFindAllAboutPurchaseItem {
   private boolean isLast;
   private boolean hasNext;
   private boolean hasPrevious;
-  private List<RefundDto> refundedPurchaseItemList;
+  private List<RefundDto> refundList;
 
   public OutputFindAllAboutPurchaseItem(Slice<Refund> sliceResult) {
     this.currentSliceNumber = sliceResult.getNumber();
@@ -25,6 +25,6 @@ public class OutputFindAllAboutPurchaseItem {
     this.isLast = sliceResult.isLast();
     this.hasNext = sliceResult.hasNext();
     this.hasPrevious = sliceResult.hasPrevious();
-    this.refundedPurchaseItemList = sliceResult.getContent().stream().map(RefundDto::new).toList();
+    this.refundList = sliceResult.getContent().stream().map(RefundDto::new).toList();
   }
 }
