@@ -1,6 +1,8 @@
 package com.project.shoppingmall.service;
 
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
 import com.project.shoppingmall.repository.ProductRetrieveRepository;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductRetrieveService {
   private final ProductRetrieveRepository productRetrieveRepository;
+  private final MemberService memberService;
 
   public Slice<Product> retrieveByTypeWithFilter(
       Long productTypeId, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
@@ -60,5 +63,17 @@ public class ProductRetrieveService {
         throw new InvalidEnumType("유효하지 않은 ProductRetrieveFilterType 타입입니다.");
     }
     return pageRequest;
+  }
+
+  public Slice<Product> retrieveBySeller(long sellerId, int sliceNumber, int sliceSize) {
+    Member seller =
+        memberService
+            .findById(sellerId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
+    PageRequest pageRequest =
+        PageRequest.of(sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
+    Slice<Product> sliceResult = productRetrieveRepository.findAllBySeller(seller, pageRequest);
+    sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
+    return sliceResult;
   }
 }

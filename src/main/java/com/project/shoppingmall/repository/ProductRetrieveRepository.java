@@ -1,5 +1,6 @@
 package com.project.shoppingmall.repository;
 
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -14,4 +15,7 @@ public interface ProductRetrieveRepository extends JpaRepository<Product, Long> 
   @EntityGraph(attributePaths = {"seller", "productType", "productImages"})
   Slice<Product> findByNameContainingIgnoreCaseAndIsBan(
       String searchWord, boolean isban, Pageable pageable);
+
+  @EntityGraph(attributePaths = {"seller", "productType"})
+  Slice<Product> findAllBySeller(Member seller, Pageable pageable);
 }

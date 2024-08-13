@@ -1,10 +1,13 @@
 package com.project.shoppingmall.controller.product_retrieve;
 
+import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductBySeller;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsBySearchWordWithFilter;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsByTypeWithFilter;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.service.ProductRetrieveService;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +17,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ProductRetrieveController {
   private final ProductRetrieveService productRetrieveService;
+
+  @GetMapping("seller/products")
+  public OutputGetProductBySeller getProductsBySeller(
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize,
+      @RequestParam("sellerId") Long sellerId) {
+    Slice<Product> sliceResult =
+        productRetrieveService.retrieveBySeller(sellerId, sliceNumber, sliceSize);
+    return new OutputGetProductBySeller(sliceResult);
+  }
 
   @GetMapping("{productTypeId}/products")
   public OutputGetProductsByTypeWithFilter getProductsByTypeWithFilter(
