@@ -27,7 +27,8 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
           + "left join fetch pu.buyer b "
           + "where b.id = :buyerId "
           + "and pu.state = 'Complete'")
-  Slice<PurchaseItem> findRefundedAllForBuyer(Long buyerId, PageRequest pageRequest);
+  Slice<PurchaseItem> findRefundedAllForBuyer(
+      @Param("buyerId") Long buyerId, PageRequest pageRequest);
 
   @Query(
       "select distinct pi "

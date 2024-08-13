@@ -10,12 +10,14 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRetrieveRepository;
 import com.project.shoppingmall.testdata.MemberBuilder;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
 class PurchaseRetrieveServiceTest {
@@ -39,6 +41,11 @@ class PurchaseRetrieveServiceTest {
     int givenSliceSize = 5;
     Member givenMember = MemberBuilder.fullData().build();
     when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
+    when(mockPurchaseRetrieveRepository.findAllByBuyer(anyLong(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveAllByMember(givenMemberId, givenSliceNumber, givenSliceSize);

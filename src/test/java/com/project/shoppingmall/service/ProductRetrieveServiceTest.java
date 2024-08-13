@@ -39,6 +39,11 @@ class ProductRetrieveServiceTest {
     int givenSliceNum = 10;
     ProductRetrieveFilterType givenFilterType = ProductRetrieveFilterType.LATEST;
 
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
+    when(mockProductRetrieveRepository.findByProductTypeIdAndIsBan(anyLong(), anyBoolean(), any()))
+        .thenReturn(mockSliceResult);
+
     // when
     target.retrieveByTypeWithFilter(
         givenProductTypeId, givenSliceSize, givenSliceNum, givenFilterType);
@@ -71,6 +76,11 @@ class ProductRetrieveServiceTest {
     int givenSliceSize = 5;
     int givenSliceNum = 10;
     ProductRetrieveFilterType givenFilterType = ProductRetrieveFilterType.LOW_PRICE;
+
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
+    when(mockProductRetrieveRepository.findByProductTypeIdAndIsBan(anyLong(), anyBoolean(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveByTypeWithFilter(
@@ -105,6 +115,12 @@ class ProductRetrieveServiceTest {
     int givenSliceNum = 10;
     ProductRetrieveFilterType givenFilterType = ProductRetrieveFilterType.LOW_SCORE;
 
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
+    when(mockProductRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
+            anyString(), anyBoolean(), any()))
+        .thenReturn(mockSliceResult);
+
     // when
     target.retrieveBySearchWordWithFilter(
         givenSearchWord, givenSliceSize, givenSliceNum, givenFilterType);
@@ -136,6 +152,12 @@ class ProductRetrieveServiceTest {
     int givenSliceSize = 5;
     int givenSliceNum = 10;
     ProductRetrieveFilterType givenFilterType = ProductRetrieveFilterType.OLDEST;
+
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
+    when(mockProductRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
+            anyString(), anyBoolean(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveBySearchWordWithFilter(

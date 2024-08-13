@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface RefundRetrieveRepository extends JpaRepository<Refund, Long> {
 
-  @Query("select r from Refund r where r.purchaseItem.id = :refundId")
-  Slice<Refund> findByPurchaseItem(@Param("refundId") long refundId, Pageable pageable);
+  @Query("select r from Refund r where r.purchaseItem.id = :purchaseItemId")
+  Slice<Refund> findByPurchaseItem(@Param("purchaseItemId") long purchaseItemId, Pageable pageable);
 }

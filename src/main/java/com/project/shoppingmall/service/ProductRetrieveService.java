@@ -23,14 +23,20 @@ public class ProductRetrieveService {
   public Slice<Product> retrieveByTypeWithFilter(
       Long productTypeId, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
     PageRequest pageRequest = makePageRequest(sliceSize, sliceNum, filterType);
-    return productRetrieveRepository.findByProductTypeIdAndIsBan(productTypeId, false, pageRequest);
+    Slice<Product> sliceResult =
+        productRetrieveRepository.findByProductTypeIdAndIsBan(productTypeId, false, pageRequest);
+    sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
+    return sliceResult;
   }
 
   public Slice<Product> retrieveBySearchWordWithFilter(
       String searchWord, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
     PageRequest pageRequest = makePageRequest(sliceSize, sliceNum, filterType);
-    return productRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
-        searchWord, false, pageRequest);
+    Slice<Product> sliceResult =
+        productRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
+            searchWord, false, pageRequest);
+    sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
+    return sliceResult;
   }
 
   private PageRequest makePageRequest(
