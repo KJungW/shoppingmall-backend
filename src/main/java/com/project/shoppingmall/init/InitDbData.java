@@ -38,8 +38,10 @@ public class InitDbData {
 
   @PostConstruct
   public void init() {
-    if (ddlType.equals("create") || ddlType.equals("create-drop")) {
-      initData();
+    if (envType.equals("dev") || envType.equals("prod")) {
+      if (ddlType.equals("create") || ddlType.equals("create-drop")) {
+        initData();
+      }
     }
   }
 
