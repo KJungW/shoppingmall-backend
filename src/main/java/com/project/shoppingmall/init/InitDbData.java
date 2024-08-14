@@ -38,7 +38,7 @@ public class InitDbData {
 
   @PostConstruct
   public void init() {
-    if (envType.equals("dev") || envType.equals("prod")) {
+    if (envType.equals("dev") || envType.equals("stage")) {
       if (ddlType.equals("create") || ddlType.equals("create-drop")) {
         initData();
       }
