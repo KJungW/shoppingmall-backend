@@ -120,7 +120,8 @@ class ReviewRepositoryTest {
                 .product(targetProduct)
                 .score(i < 5 ? 3 : 2)
                 .title("testTitle")
-                .reviewImageUrl("testImageUrl")
+                .reviewImageUri("testImageUri")
+                .reviewImageDownloadUrl("testImageUrl")
                 .description("testDescription")
                 .build();
         purchaseItem.registerReview(review);

@@ -121,7 +121,8 @@ class ReviewRetrieveRepositoryTest {
                 .product(targetProduct)
                 .score(3)
                 .title("testTitle")
-                .reviewImageUrl("testImageUrl")
+                .reviewImageUri("testImageUri")
+                .reviewImageDownloadUrl("testImageUrl")
                 .description("testDescription")
                 .build();
         if (k == 2) ReflectionTestUtils.setField(review, "isBan", true);

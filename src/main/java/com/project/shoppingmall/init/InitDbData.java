@@ -257,7 +257,8 @@ public class InitDbData {
               .product(targetItem.getProduct())
               .score(randomGenerator.nextInt(6))
               .title("testTitle")
-              .reviewImageUrl("testImageUrl")
+              .reviewImageUri("testImageUri")
+              .reviewImageDownloadUrl("testImageUrl")
               .description("testDescription")
               .build();
       targetItem.registerReview(review);

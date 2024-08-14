@@ -23,7 +23,7 @@ public class ReviewDto {
     this.productId = review.getProduct().getId();
     this.score = review.getScore();
     this.title = review.getTitle();
-    this.reviewImageUrl = review.getReviewImageUrl();
+    this.reviewImageUrl = review.getReviewImageDownloadUrl();
     this.description = review.getDescription();
   }
 }

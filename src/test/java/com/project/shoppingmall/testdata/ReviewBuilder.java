@@ -10,7 +10,8 @@ public class ReviewBuilder {
         .product(ProductBuilder.fullData().build())
         .score(5)
         .title("testTitle")
-        .reviewImageUrl("testImageUrl")
+        .reviewImageUri("testImageUri")
+        .reviewImageDownloadUrl("testImageUrl")
         .description("testDescription");
   }
 }

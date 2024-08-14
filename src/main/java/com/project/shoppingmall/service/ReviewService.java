@@ -52,7 +52,8 @@ public class ReviewService {
             .product(purchaseItem.getProduct())
             .score(makeData.getScore())
             .title(makeData.getTitle())
-            .reviewImageUrl(reviewImageUploadResult.getDownLoadUrl())
+            .reviewImageUri(reviewImageUploadResult.getFileServerUri())
+            .reviewImageDownloadUrl(reviewImageUploadResult.getDownLoadUrl())
             .description(makeData.getDescription())
             .build();
 

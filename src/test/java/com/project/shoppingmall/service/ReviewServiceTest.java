@@ -119,7 +119,8 @@ class ReviewServiceTest {
     assertEquals(givenScore, resultReview.getScore());
     assertEquals(givenTitle, resultReview.getTitle());
     assertFalse(resultReview.getIsBan());
-    assertEquals(givenDownloadUrl, resultReview.getReviewImageUrl());
+    assertEquals(givenImageUrl, resultReview.getReviewImageUri());
+    assertEquals(givenDownloadUrl, resultReview.getReviewImageDownloadUrl());
     assertEquals(givenDescription, resultReview.getDescription());
   }
 
@@ -183,7 +184,7 @@ class ReviewServiceTest {
     assertEquals(givenScore, resultReview.getScore());
     assertEquals(givenTitle, resultReview.getTitle());
     assertFalse(resultReview.getIsBan());
-    assertEquals("", resultReview.getReviewImageUrl());
+    assertEquals("", resultReview.getReviewImageDownloadUrl());
     assertEquals("", resultReview.getDescription());
   }
 

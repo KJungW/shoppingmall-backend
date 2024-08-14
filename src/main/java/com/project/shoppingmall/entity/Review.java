@@ -26,14 +26,16 @@ public class Review extends BaseEntity {
   private Integer score;
   private String title;
   private Boolean isBan;
-  private String reviewImageUrl;
+  private String reviewImageUri;
+  private String reviewImageDownloadUrl;
   private String description;
 
   @Builder
   public Review(
       Member writer,
       Product product,
-      String reviewImageUrl,
+      String reviewImageUri,
+      String reviewImageDownloadUrl,
       Integer score,
       String title,
       String description) {
@@ -51,8 +53,12 @@ public class Review extends BaseEntity {
     this.title = title;
     this.isBan = false;
 
-    if (reviewImageUrl == null || reviewImageUrl.isBlank()) this.reviewImageUrl = "";
-    else this.reviewImageUrl = reviewImageUrl;
+    if (reviewImageUri == null || reviewImageUri.isBlank()) this.reviewImageUri = "";
+    else this.reviewImageUri = reviewImageUri;
+
+    if (reviewImageDownloadUrl == null || reviewImageDownloadUrl.isBlank())
+      this.reviewImageDownloadUrl = "";
+    else this.reviewImageDownloadUrl = reviewImageDownloadUrl;
 
     if (description == null || description.isBlank()) this.description = "";
     else this.description = description;
