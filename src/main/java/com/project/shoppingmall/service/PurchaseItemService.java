@@ -40,4 +40,8 @@ public class PurchaseItemService {
   public Optional<PurchaseItem> findById(long purchaseItemId) {
     return purchaseItemRepository.findById(purchaseItemId);
   }
+
+  public Optional<PurchaseItem> findByReviewId(long reviewId) {
+    return purchaseItemRepository.findByReviewId(reviewId);
+  }
 }

@@ -87,6 +87,11 @@ public class PurchaseItem extends BaseEntity {
   }
 
   public void registerReview(Review review) {
+    if (review == null) throw new ServerLogicError("null인 Review를 PurchaseItem에 등록하려고 시도하고 있습니다.");
     this.review = review;
+  }
+
+  public void deleteReview() {
+    this.review = null;
   }
 }

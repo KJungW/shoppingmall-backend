@@ -12,4 +12,8 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
   @EntityGraph(attributePaths = {"purchase", "refunds"})
   @Query("select p from PurchaseItem p where p.id=:purchaseId")
   Optional<PurchaseItem> findByIdWithPurchaseAndRefund(@Param("purchaseId") Long purchaseId);
+
+  @Query(
+      "select p from PurchaseItem p " + "left join fetch p.review r " + "where r.id = :reviewId ")
+  Optional<PurchaseItem> findByReviewId(long reviewId);
 }

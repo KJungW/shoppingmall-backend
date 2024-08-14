@@ -1,6 +1,7 @@
 package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -129,8 +130,14 @@ public class Product extends BaseEntity {
   }
 
   public void addScore(ReviewScoresCalcResult scoresCalcResult, double currentScore) {
+    if (scoresCalcResult == null) throw new ServerLogicError("scoresCalcResult가 null 입니다.");
     double previousAvg = scoresCalcResult.getScoreAverage();
     long previousCnt = scoresCalcResult.getReviewCount();
     this.scoreAvg = (previousAvg * previousCnt + currentScore) / (previousCnt + 1);
+  }
+
+  public void refreshScore(ReviewScoresCalcResult scoresCalcResult) {
+    if (scoresCalcResult == null) throw new ServerLogicError("scoresCalcResult가 null 입니다.");
+    this.scoreAvg = scoresCalcResult.getScoreAverage();
   }
 }

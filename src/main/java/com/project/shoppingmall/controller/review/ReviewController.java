@@ -37,4 +37,12 @@ public class ReviewController {
     Review savedReview = reviewService.saveReview(makeData);
     return new OutputSaveReview(savedReview.getId());
   }
+
+  @DeleteMapping("/review/{reviewId}")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void deleteReview(@PathVariable("reviewId") Long reviewId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    reviewService.deleteReview(userDetail.getId(), reviewId);
+  }
 }

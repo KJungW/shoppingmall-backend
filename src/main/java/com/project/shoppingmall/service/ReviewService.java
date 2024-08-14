@@ -68,4 +68,25 @@ public class ReviewService {
   public ReviewScoresCalcResult calcReviewScoresInProduct(long productId) {
     return reviewRepository.calcReviewScoresInProduct(productId);
   }
+
+  @Transactional
+  public void deleteReview(Long writerId, Long reviewId) {
+    PurchaseItem purchaseItem =
+        purchaseItemService
+            .findByReviewId(reviewId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 리뷰가 존재하지 않습니다."));
+    Review review = purchaseItem.getReview();
+    Product product = review.getProduct();
+
+    if (!review.getWriter().getId().equals(writerId)) {
+      throw new DataNotFound("다른 회원의 리뷰입니다.");
+    }
+
+    purchaseItem.deleteReview();
+    reviewRepository.delete(review);
+    reviewRepository.flush();
+
+    ReviewScoresCalcResult scoreCalcResult = calcReviewScoresInProduct(product.getId());
+    product.refreshScore(scoreCalcResult);
+  }
 }
