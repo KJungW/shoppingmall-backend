@@ -267,4 +267,64 @@ class ReviewServiceTest {
     // when then
     assertThrows(AlreadyExistReview.class, () -> target.saveReview(givenReviewMakeData));
   }
+
+  @Test
+  @DisplayName("deleteReview() : 정상흐름")
+  public void deleteReview_ok() throws IOException {
+    // given
+    long givenWriterId = 20L;
+    long givenReviewId = 27L;
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", 23L);
+
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
+    ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "review", givenReview);
+    when(mockPurchaseItemService.findByReviewId(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
+
+    ReviewScoresCalcResult givenReviewCalcResult = new ReviewScoresCalcResult(20L, 4.5);
+    when(mockReviewRepository.calcReviewScoresInProduct(anyLong()))
+        .thenReturn(givenReviewCalcResult);
+
+    // when
+    target.deleteReview(givenWriterId, givenReviewId);
+
+    // then
+    assertNull(givenPurchaseItem.getReview());
+
+    ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
+    verify(mockReviewRepository, times(1)).delete(reviewCaptor.capture());
+    assertSame(givenReview, reviewCaptor.getValue());
+
+    assertEquals(givenReviewCalcResult.getScoreAverage(), givenProduct.getScoreAvg());
+  }
+
+  @Test
+  @DisplayName("deleteReview() : 다른 회원의 리뷰를 제거하려고 시도")
+  public void deleteReview_otherMemberReview() throws IOException {
+    // given
+    long givenWriterId = 20L;
+    long givenReviewId = 27L;
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", 23L);
+
+    long givenOtherMemberId = 50L;
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenOtherMemberId);
+    ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "review", givenReview);
+    when(mockPurchaseItemService.findByReviewId(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
+
+    // when
+    assertThrows(DataNotFound.class, () -> target.deleteReview(givenWriterId, givenReviewId));
+  }
 }
