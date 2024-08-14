@@ -76,9 +76,15 @@ public class ProductMakeData {
 
   private void initContentBlocks(
       List<InputBlockData> blockDataList, List<MultipartFile> blockImages) {
-    if (blockDataList == null && blockImages == null) return;
-    if (blockDataList == null || blockImages == null)
-      throw new NotMatchBlockAndImage("블록과 이미지가 매치되지 않습니다.");
+    if (blockDataList == null || blockDataList.isEmpty()) return;
+
+    long imageBlockCount =
+        blockDataList.stream()
+            .filter(data -> data.getBlockType().equals(BlockType.IMAGE_TYPE))
+            .count();
+    if (imageBlockCount > 0 && (blockImages == null || blockImages.isEmpty())) {
+      throw new NotMatchBlockAndImage("블록과 이미지가 매칭되지 않습니다.");
+    }
 
     ArrayList<ContentBlock> resultBlockList = new ArrayList<>();
     for (InputBlockData blockData : blockDataList) {
@@ -89,7 +95,7 @@ public class ProductMakeData {
             blockImages.stream()
                 .filter(blockImg -> blockData.getContent().equals(blockImg.getOriginalFilename()))
                 .findFirst()
-                .orElseThrow(() -> new NotMatchBlockAndImage("블록과 이미지가 매치되지 않습니다."));
+                .orElseThrow(() -> new NotMatchBlockAndImage("블록과 이미지가 매칭되지 않습니다."));
         ImageBlockBeforeImageSave imageBlock =
             new ImageBlockBeforeImageSave(blockData.getIndex(), findImage);
         resultBlockList.add(imageBlock);
