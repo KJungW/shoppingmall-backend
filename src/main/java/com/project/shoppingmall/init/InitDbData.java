@@ -35,6 +35,7 @@ public class InitDbData {
   private final ProductRepository productRepository;
   private final PurchaseRepository purchaseRepository;
   private final RefundRepository refundRepository;
+  private final ReviewRepository reviewRepository;
 
   @PostConstruct
   public void init() {
@@ -236,6 +237,7 @@ public class InitDbData {
 
     // 30의 구매데이터에 대해 환불 데이터 생성
     for (Purchase purchase : purchaseList) {
+      // 구매마다 첫번째 구매아이템에 대해 환불 데이터 생성
       PurchaseItem targetItem = purchase.getPurchaseItems().get(0);
       Refund refund =
           Refund.builder()
@@ -247,6 +249,19 @@ public class InitDbData {
       refund.acceptRefund("환불을 승인합니다. 반품을 진행해주세요");
       refund.completeRefund();
       refundRepository.save(refund);
+
+      // 구매마다 첫번째 구매아이템에 대해 리뷰 생성
+      Review review =
+          Review.builder()
+              .writer(buyer)
+              .product(targetItem.getProduct())
+              .score(randomGenerator.nextInt(6))
+              .title("testTitle")
+              .reviewImageUrl("testImageUrl")
+              .description("testDescription")
+              .build();
+      targetItem.registerReview(review);
+      reviewRepository.save(review);
     }
   }
 }
