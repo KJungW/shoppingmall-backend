@@ -1,9 +1,12 @@
 package com.project.shoppingmall.controller.review;
 
 import com.project.shoppingmall.controller.review.input.InputSaveReview;
+import com.project.shoppingmall.controller.review.input.InputUpdateReview;
 import com.project.shoppingmall.controller.review.output.OutputSaveReview;
+import com.project.shoppingmall.controller.review.output.OutputUpdateReview;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
+import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.service.ReviewService;
 import jakarta.validation.Valid;
@@ -36,6 +39,26 @@ public class ReviewController {
             .build();
     Review savedReview = reviewService.saveReview(makeData);
     return new OutputSaveReview(savedReview.getId());
+  }
+
+  @PutMapping("/review")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputUpdateReview updateReview(
+      @Valid @RequestPart(value = "reviewData") InputUpdateReview input,
+      @RequestPart(value = "reviewImage", required = false) MultipartFile reviewImage) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    ReviewUpdateData updateData =
+        ReviewUpdateData.builder()
+            .writerId(userDetail.getId())
+            .reviewID(input.getReviewId())
+            .score(input.getScore())
+            .title(input.getTitle())
+            .description(input.getDescription())
+            .reviewImage(reviewImage)
+            .build();
+    Review updateReview = reviewService.updateReview(updateData);
+    return new OutputUpdateReview(updateReview.getId());
   }
 
   @DeleteMapping("/review/{reviewId}")

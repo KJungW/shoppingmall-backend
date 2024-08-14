@@ -3,6 +3,7 @@ package com.project.shoppingmall.service;
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
+import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
@@ -10,6 +11,7 @@ import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +66,44 @@ public class ReviewService {
     product.addScore(scoreCalcResult, makeData.getScore());
 
     return newReview;
+  }
+
+  @Transactional
+  public Review updateReview(ReviewUpdateData updateData) {
+    Review review =
+        findById(updateData.getReviewID())
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 Review 데이터가 존재하지 않습니다."));
+    Product product = review.getProduct();
+
+    if (!review.getWriter().getId().equals(updateData.getWriterId())) {
+      throw new DataNotFound("다른 회원의 review를 수정하려고 시도하고 있습니다.");
+    }
+
+    if (!review.getReviewImageUri().isBlank()) {
+      s3Service.deleteFile(review.getReviewImageUri());
+    }
+
+    FileUploadResult reviewImageUploadResult = new FileUploadResult("", "");
+    if (updateData.getReviewImage() != null) {
+      reviewImageUploadResult =
+          s3Service.uploadFile(
+              updateData.getReviewImage(), "review/" + review.getProduct().getId() + "/");
+    }
+
+    review.updateScore(updateData.getScore());
+    review.updateTitle(updateData.getTitle());
+    review.updateDescription(updateData.getDescription());
+    review.updateReviewImage(
+        reviewImageUploadResult.getFileServerUri(), reviewImageUploadResult.getDownLoadUrl());
+
+    ReviewScoresCalcResult scoreCalcResult = calcReviewScoresInProduct(product.getId());
+    product.refreshScore(scoreCalcResult);
+
+    return review;
+  }
+
+  public Optional<Review> findById(long refundId) {
+    return reviewRepository.findById(refundId);
   }
 
   public ReviewScoresCalcResult calcReviewScoresInProduct(long productId) {

@@ -40,26 +40,41 @@ public class Review extends BaseEntity {
       String title,
       String description) {
 
-    if (writer == null
-        || product == null
-        || score == null
-        || score < 0
-        || score > 5
-        || title == null
-        || title.isBlank()) throw new ServerLogicError("Review를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
+    if (writer == null || product == null)
+      throw new ServerLogicError("Review를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
+
     this.writer = writer;
     this.product = product;
-    this.score = score;
-    this.title = title;
+    updateScore(score);
+    updateTitle(title);
     this.isBan = false;
+    updateReviewImage(reviewImageUri, reviewImageDownloadUrl);
+    updateDescription(description);
+  }
 
-    if (reviewImageUri == null || reviewImageUri.isBlank()) this.reviewImageUri = "";
-    else this.reviewImageUri = reviewImageUri;
+  public void updateScore(Integer score) {
+    if (score == null || score < 0 || score > 5)
+      throw new ServerLogicError("Review의 score에 0~5 범위 밖의 값이 입력되었습니다.");
+    this.score = score;
+  }
 
-    if (reviewImageDownloadUrl == null || reviewImageDownloadUrl.isBlank())
+  public void updateTitle(String title) {
+    if (title == null || title.isBlank())
+      throw new ServerLogicError("Review의 title에 비어있는 입력되었습니다.");
+    this.title = title;
+  }
+
+  public void updateReviewImage(String imageUri, String downloadUrl) {
+    if (imageUri == null || imageUri.isBlank() || downloadUrl == null || downloadUrl.isBlank()) {
+      this.reviewImageUri = "";
       this.reviewImageDownloadUrl = "";
-    else this.reviewImageDownloadUrl = reviewImageDownloadUrl;
+      return;
+    }
+    this.reviewImageUri = imageUri;
+    this.reviewImageDownloadUrl = downloadUrl;
+  }
 
+  public void updateDescription(String description) {
     if (description == null || description.isBlank()) this.description = "";
     else this.description = description;
   }
