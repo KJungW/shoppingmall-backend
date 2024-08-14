@@ -278,22 +278,22 @@ class ProductMakeDataTest {
   @DisplayName("ProductMakeData 생성 : 빌더옵션 blockDataList null일 경우")
   public void productMakeData_blockDataListNull() {
     // when then
-    assertThrows(
-        NotMatchBlockAndImage.class,
-        () -> {
-          ProductMakeData.builder()
-              .productTypeId(givenProductTypeId)
-              .name(givenName)
-              .singleOptions(givenSingleOption)
-              .price(givenPrice)
-              .discountAmount(givenDiscountAmount)
-              .discountRate(givenDiscountRate)
-              .productImages(givenProductImageList)
-              .multiOptions(givenMulitpleOptions)
-              .blockDataList(null)
-              .blockImages(givenBlockImages)
-              .build();
-        });
+    ProductMakeData result =
+        ProductMakeData.builder()
+            .productTypeId(givenProductTypeId)
+            .name(givenName)
+            .singleOptions(givenSingleOption)
+            .price(givenPrice)
+            .discountAmount(givenDiscountAmount)
+            .discountRate(givenDiscountRate)
+            .productImages(givenProductImageList)
+            .multiOptions(givenMulitpleOptions)
+            .blockDataList(null)
+            .blockImages(givenBlockImages)
+            .build();
+
+    // then
+    assertEquals(0, result.getContentBlocks().size());
   }
 
   @Test
