@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
+import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
@@ -267,6 +268,164 @@ class ReviewServiceTest {
 
     // when then
     assertThrows(AlreadyExistReview.class, () -> target.saveReview(givenReviewMakeData));
+  }
+
+  @Test
+  @DisplayName("updateReview(): 정상흐름")
+  public void updateReview_ok() throws IOException {
+    // given
+    long givenWriterId = 30L;
+    long givenReviewId = 40L;
+    int givenScore = 5;
+    String givenTitle = "test review title";
+    String givenDescription = "test review description";
+    MultipartFile givenMockFile =
+        new MockMultipartFile(
+            "reviewSampleImage.png",
+            new FileInputStream(new ClassPathResource("static/reviewSampleImage.png").getFile()));
+    ReviewUpdateData givenUpdateData =
+        ReviewUpdateData.builder()
+            .writerId(givenWriterId)
+            .reviewID(givenReviewId)
+            .score(givenScore)
+            .title(givenTitle)
+            .description(givenDescription)
+            .reviewImage(givenMockFile)
+            .build();
+
+    long givenProductId = 40L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    String givenImageUriBeforeUpdate = "testImageUriBeforeUpdate";
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+    ReflectionTestUtils.setField(givenReview, "reviewImageUri", givenImageUriBeforeUpdate);
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
+    when(mockReviewRepository.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    String givenImageUrl = "test image url";
+    String givenDownloadUrl = "test download url";
+    when(mockS3Service.uploadFile(any(), anyString()))
+        .thenReturn(new FileUploadResult(givenImageUrl, givenDownloadUrl));
+
+    ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(20L, 3.5d);
+    when(mockReviewRepository.calcReviewScoresInProduct(anyLong()))
+        .thenReturn(givenScoreCalcResult);
+
+    // when
+    Review updateResult = target.updateReview(givenUpdateData);
+
+    // then
+    ArgumentCaptor<String> imageUriCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).deleteFile(imageUriCaptor.capture());
+    assertEquals(givenImageUriBeforeUpdate, imageUriCaptor.getValue());
+
+    ArgumentCaptor<MultipartFile> imageCaptor = ArgumentCaptor.forClass(MultipartFile.class);
+    ArgumentCaptor<String> imagePathCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).uploadFile(imageCaptor.capture(), imagePathCaptor.capture());
+    assertSame(givenMockFile, imageCaptor.getValue());
+    assertEquals("review/" + givenReview.getProduct().getId() + "/", imagePathCaptor.getValue());
+
+    assertEquals(givenScore, updateResult.getScore());
+    assertEquals(givenTitle, updateResult.getTitle());
+    assertEquals(givenImageUrl, updateResult.getReviewImageUri());
+    assertEquals(givenDownloadUrl, updateResult.getReviewImageDownloadUrl());
+    assertEquals(givenDescription, updateResult.getDescription());
+    assertEquals(givenScoreCalcResult.getScoreAverage(), givenReview.getProduct().getScoreAvg());
+  }
+
+  @Test
+  @DisplayName("updateReview(): 업데이트 데이터에서 필수값이 아닌 필드에 빈값을 넣음")
+  public void updateReview_inputNull() throws IOException {
+    // given
+    long givenWriterId = 30L;
+    long givenReviewId = 40L;
+    int givenScore = 5;
+    String givenTitle = "test review title";
+    String givenDescription = null;
+    MultipartFile givenMockFile = null;
+    ReviewUpdateData givenUpdateData =
+        ReviewUpdateData.builder()
+            .writerId(givenWriterId)
+            .reviewID(givenReviewId)
+            .score(givenScore)
+            .title(givenTitle)
+            .description(givenDescription)
+            .reviewImage(givenMockFile)
+            .build();
+
+    long givenProductId = 40L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    String givenImageUriBeforeUpdate = "testImageUriBeforeUpdate";
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+    ReflectionTestUtils.setField(givenReview, "reviewImageUri", givenImageUriBeforeUpdate);
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
+    when(mockReviewRepository.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(20L, 3.5d);
+    when(mockReviewRepository.calcReviewScoresInProduct(anyLong()))
+        .thenReturn(givenScoreCalcResult);
+
+    // when
+    Review updateResult = target.updateReview(givenUpdateData);
+
+    // then
+    ArgumentCaptor<String> imageUriCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).deleteFile(imageUriCaptor.capture());
+    assertEquals(givenImageUriBeforeUpdate, imageUriCaptor.getValue());
+
+    verify(mockS3Service, times(0)).uploadFile(any(), any());
+
+    assertEquals(givenScore, updateResult.getScore());
+    assertEquals(givenTitle, updateResult.getTitle());
+    assertEquals("", updateResult.getReviewImageUri());
+    assertEquals("", updateResult.getReviewImageDownloadUrl());
+    assertEquals("", updateResult.getDescription());
+    assertEquals(givenScoreCalcResult.getScoreAverage(), givenReview.getProduct().getScoreAvg());
+  }
+
+  @Test
+  @DisplayName("updateReview(): 다른 회원의 리뷰 수정시도")
+  public void updateReview_otherMemberReview() throws IOException {
+    // given
+    long givenWriterId = 30L;
+    long givenReviewId = 40L;
+    int givenScore = 5;
+    String givenTitle = "test review title";
+    String givenDescription = "test review description";
+    MultipartFile givenMockFile =
+        new MockMultipartFile(
+            "reviewSampleImage.png",
+            new FileInputStream(new ClassPathResource("static/reviewSampleImage.png").getFile()));
+    ReviewUpdateData givenUpdateData =
+        ReviewUpdateData.builder()
+            .writerId(givenWriterId)
+            .reviewID(givenReviewId)
+            .score(givenScore)
+            .title(givenTitle)
+            .description(givenDescription)
+            .reviewImage(givenMockFile)
+            .build();
+
+    long givenProductId = 40L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    long otherMemberId = 25L;
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", otherMemberId);
+    when(mockReviewRepository.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    // when
+    assertThrows(DataNotFound.class, () -> target.updateReview(givenUpdateData));
   }
 
   @Test
