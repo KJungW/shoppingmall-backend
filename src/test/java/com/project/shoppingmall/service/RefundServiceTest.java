@@ -91,7 +91,7 @@ class RefundServiceTest {
     assertEquals(givenRequestContent, resultRefund.getRequestContent());
 
     assertEquals(1, givenPurchaseItem.getRefunds().size());
-    assertFalse(givenPurchaseItem.isRefund());
+    assertFalse(givenPurchaseItem.getIsRefund());
     assertNotNull(givenPurchaseItem.getFinalRefundCreatedDate());
     assertEquals(RefundStateTypeForPurchaseItem.REQUEST, givenPurchaseItem.getFinalRefundState());
   }
@@ -223,8 +223,7 @@ class RefundServiceTest {
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -236,7 +235,7 @@ class RefundServiceTest {
     assertEquals(RefundStateType.ACCEPT, result.getState());
     assertEquals(givenResponseMessage, result.getResponseContent());
 
-    assertFalse(result.getPurchaseItem().isRefund());
+    assertFalse(result.getPurchaseItem().getIsRefund());
     assertEquals(
         RefundStateTypeForPurchaseItem.ACCEPT, result.getPurchaseItem().getFinalRefundState());
   }
@@ -259,8 +258,7 @@ class RefundServiceTest {
     long wrongMemberId = 40;
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", wrongMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", wrongMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -288,8 +286,7 @@ class RefundServiceTest {
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -317,8 +314,7 @@ class RefundServiceTest {
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -329,7 +325,7 @@ class RefundServiceTest {
     // then
     assertEquals(RefundStateType.REJECTED, result.getState());
     assertEquals(givenResponseMessage, result.getResponseContent());
-    assertFalse(result.getPurchaseItem().isRefund());
+    assertFalse(result.getPurchaseItem().getIsRefund());
     assertEquals(
         RefundStateTypeForPurchaseItem.REJECTED, result.getPurchaseItem().getFinalRefundState());
   }
@@ -352,8 +348,7 @@ class RefundServiceTest {
     long wrongMemberId = 55L;
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", wrongMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", wrongMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -381,8 +376,7 @@ class RefundServiceTest {
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenRefund.getPurchaseItem().getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
     when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
@@ -410,7 +404,7 @@ class RefundServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
-    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "sellerId", givenMemberId);
     Refund givenRefund = RefundBuilder.fullData().build();
     int givenRefundPrice = 10000;
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
@@ -440,7 +434,7 @@ class RefundServiceTest {
         ((BigDecimal) ReflectionTestUtils.getField(cancelDataCaptorResult, "amount")).intValue();
     assertEquals(givenRefundPrice, realRefundPrice);
 
-    assertTrue(result.getPurchaseItem().isRefund());
+    assertTrue(result.getPurchaseItem().getIsRefund());
     assertEquals(
         RefundStateTypeForPurchaseItem.COMPLETE, result.getPurchaseItem().getFinalRefundState());
   }
@@ -463,7 +457,7 @@ class RefundServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
-    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", wrongMemberId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "sellerId", wrongMemberId);
     Refund givenRefund = RefundBuilder.fullData().build();
     int givenRefundPrice = 10000;
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
@@ -493,7 +487,7 @@ class RefundServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
-    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "sellerId", givenMemberId);
     Refund givenRefund = RefundBuilder.fullData().build();
     int givenRefundPrice = 10000;
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
@@ -524,7 +518,7 @@ class RefundServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
-    ReflectionTestUtils.setField(givenPurchaseItem.getProduct().getSeller(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "sellerId", givenMemberId);
     Refund givenRefund = RefundBuilder.fullData().build();
     int givenRefundPrice = 10000;
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);

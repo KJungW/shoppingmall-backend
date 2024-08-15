@@ -9,6 +9,7 @@ import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
 import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
@@ -29,14 +30,18 @@ class ReviewServiceTest {
   private ReviewService target;
   private ReviewRepository mockReviewRepository;
   private PurchaseItemService mockPurchaseItemService;
+  private ProductService mockProductService;
   private S3Service mockS3Service;
 
   @BeforeEach
   public void beforeEach() {
     mockReviewRepository = mock(ReviewRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockProductService = mock(ProductService.class);
     mockS3Service = mock(S3Service.class);
-    target = new ReviewService(mockReviewRepository, mockPurchaseItemService, mockS3Service);
+    target =
+        new ReviewService(
+            mockReviewRepository, mockPurchaseItemService, mockProductService, mockS3Service);
   }
 
   @Test
@@ -64,19 +69,25 @@ class ReviewServiceTest {
             .build();
 
     // - purchaseItemService.findById() 세팅
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
 
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+
+    long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", 20L);
-    ReflectionTestUtils.setField(givenPurchaseItem, "product", givenProduct);
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+
+    // - productService.findById() 세팅
+    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // - s3Service.uploadFile() 세팅
     String givenImageUrl = "test image url";
@@ -147,19 +158,25 @@ class ReviewServiceTest {
             .build();
 
     // - purchaseItemService.findById() 세팅
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
 
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
+    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+
+    long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", 20L);
-    ReflectionTestUtils.setField(givenPurchaseItem, "product", givenProduct);
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+
+    // - productService.findById() 세팅
+    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // - reviewRepository.calcReviewScoresInProduct() 세팅
     ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(5L, 3.0);
@@ -211,20 +228,26 @@ class ReviewServiceTest {
             .build();
 
     // - purchaseItemService.findById() 세팅
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-
-    long givenBuyerId = 11L;
+    long otherMemberId = 40L;
     Member givenBuyer = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenBuyer, "id", givenBuyerId);
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenBuyer, "id", otherMemberId);
 
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
+    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+
+    long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", 20L);
-    ReflectionTestUtils.setField(givenPurchaseItem, "product", givenProduct);
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+
+    // - productService.findById() 세팅
+    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when then
     assertThrows(DataNotFound.class, () -> target.saveReview(givenReviewMakeData));
@@ -252,22 +275,71 @@ class ReviewServiceTest {
             .build();
 
     // - purchaseItemService.findById() 세팅
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
 
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
+    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+
+    long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", 20L);
-    ReflectionTestUtils.setField(givenPurchaseItem, "product", givenProduct);
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", ReviewBuilder.fullData().build());
 
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
+    // - productService.findById() 세팅
+    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+
     // when then
     assertThrows(AlreadyExistReview.class, () -> target.saveReview(givenReviewMakeData));
+  }
+
+  @Test
+  @DisplayName("saveReview() : 이미 삭제된 상품에 대한 리뷰 작성")
+  public void saveReview_alreadyDeletedProduct() throws IOException {
+    // given
+    // - 인자 세팅
+    long givenWriterId = 30L;
+    long givenPurchaseItemId = 40L;
+    int givenScore = 5;
+    String givenTitle = "test title";
+    String givenDescription = null;
+    MultipartFile givenMockFile = null;
+    ReviewMakeData givenReviewMakeData =
+        ReviewMakeData.builder()
+            .writerId(givenWriterId)
+            .purchaseItemId(givenPurchaseItemId)
+            .score(givenScore)
+            .title(givenTitle)
+            .description(givenDescription)
+            .reviewImage(givenMockFile)
+            .build();
+
+    // - purchaseItemService.findById() 세팅
+    Member givenBuyer = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
+
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
+    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+
+    long givenProductId = 20L;
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
+
+    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+
+    // - productService.findById() 세팅
+    when(mockProductService.findById(anyLong())).thenReturn(Optional.empty());
+
+    // when then
+    assertThrows(AlreadyDeletedProduct.class, () -> target.saveReview(givenReviewMakeData));
   }
 
   @Test

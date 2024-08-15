@@ -107,8 +107,7 @@ class ReviewRetrieveRepositoryTest {
                 .build();
         PurchaseItem purchaseItem =
             PurchaseItem.builder()
-                .product(targetProduct)
-                .productData(productOptionObj.makeJson())
+                .productData(productOptionObj)
                 .finalPrice(targetProduct.getFinalPrice())
                 .build();
         purchaseItems.add(purchaseItem);

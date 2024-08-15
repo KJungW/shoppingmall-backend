@@ -102,8 +102,7 @@ class PurchaseItemRetrieveRepositoryTest {
                 .build();
         PurchaseItem purchaseItem =
             PurchaseItem.builder()
-                .product(targetProduct)
-                .productData(productOptionObj.makeJson())
+                .productData(productOptionObj)
                 .finalPrice(targetProduct.getFinalPrice())
                 .build();
         purchaseItems.add(purchaseItem);
@@ -141,8 +140,7 @@ class PurchaseItemRetrieveRepositoryTest {
                 .build();
         PurchaseItem purchaseItem =
             PurchaseItem.builder()
-                .product(targetProduct)
-                .productData(productOptionObj.makeJson())
+                .productData(productOptionObj)
                 .finalPrice(targetProduct.getFinalPrice())
                 .build();
         purchaseItems.add(purchaseItem);
@@ -205,7 +203,7 @@ class PurchaseItemRetrieveRepositoryTest {
     assertEquals(20, resultPurchaseItems.size());
     resultPurchaseItems.forEach(
         purchaseItem -> {
-          assertEquals(givenProductId, purchaseItem.getProduct().getId());
+          assertEquals(givenProductId, purchaseItem.getProductId());
         });
     resultPurchaseItems.forEach(
         purchaseItem -> {
@@ -230,7 +228,7 @@ class PurchaseItemRetrieveRepositoryTest {
     assertEquals(10, resultPurchaseItems.size());
     resultPurchaseItems.forEach(
         purchaseItem -> {
-          assertEquals(givenProductId, purchaseItem.getProduct().getId());
+          assertEquals(givenProductId, purchaseItem.getProductId());
         });
     resultPurchaseItems.forEach(
         purchaseItem -> {
@@ -328,7 +326,7 @@ class PurchaseItemRetrieveRepositoryTest {
     List<PurchaseItem> purchaseItems = sliceData.getContent();
     purchaseItems.forEach(
         item -> {
-          assertEquals(givenSellerId, item.getProduct().getSeller().getId());
+          assertEquals(givenSellerId, item.getSellerId());
         });
 
     // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
@@ -364,7 +362,7 @@ class PurchaseItemRetrieveRepositoryTest {
     List<PurchaseItem> purchaseItems = sliceData.getContent();
     purchaseItems.forEach(
         item -> {
-          assertEquals(givenSellerId, item.getProduct().getSeller().getId());
+          assertEquals(givenSellerId, item.getSellerId());
         });
 
     // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
