@@ -5,36 +5,48 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ProductReport;
+import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.ContinuousReportError;
 import com.project.shoppingmall.repository.ProductReportRepository;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.ProductReportBuilder;
+import com.project.shoppingmall.repository.ReviewReportRepository;
+import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class ReportServiceTest {
   private ReportService target;
-  private ProductService mockedProductService;
   private MemberService mockedMemberService;
+  private ProductService mockedProductService;
+  private ReviewService mockedReviewService;
   private ProductReportRepository mockedProductReportRepository;
+  private ReviewReportRepository mockedReviewReportRepository;
 
   @BeforeEach
   public void beforeEach() {
-    mockedProductService = mock(ProductService.class);
     mockedMemberService = mock(MemberService.class);
+    mockedProductService = mock(ProductService.class);
+    mockedReviewService = mock(ReviewService.class);
     mockedProductReportRepository = mock(ProductReportRepository.class);
+    mockedReviewReportRepository = mock(ReviewReportRepository.class);
     target =
-        new ReportService(mockedProductService, mockedMemberService, mockedProductReportRepository);
+        new ReportService(
+            mockedMemberService,
+            mockedProductService,
+            mockedReviewService,
+            mockedProductReportRepository,
+            mockedReviewReportRepository);
   }
 
   @Test
@@ -159,5 +171,127 @@ class ReportServiceTest {
     assertEquals(rightDescription, reportResult.getDescription());
     assertFalse(reportResult.isProcessedComplete());
     assertEquals(givenProductId, reportResult.getProduct().getId());
+  }
+
+  @Test
+  @DisplayName("saveReviewReport() : 정상흐름")
+  public void saveReviewReport_ok() throws IOException {
+    // given
+    // - 인자세팅
+    long givenReporterId = 10L;
+    long givenReviewId = 20L;
+    String givenTitle = "test Title";
+    String givenDesc = "test Description";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
+    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    // - reviewService.findById() 세팅
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    // - reviewReportRepository.findLatestReport() 세팅
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>());
+    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
+
+    // when
+    target.saveReviewReport(givenReporterId, givenReviewId, givenTitle, givenDesc);
+
+    // then
+    ArgumentCaptor<ReviewReport> reportCaptor = ArgumentCaptor.forClass(ReviewReport.class);
+    verify(mockedReviewReportRepository, times(1)).save(reportCaptor.capture());
+    ReviewReport reportResult = reportCaptor.getValue();
+
+    assertEquals(givenReporterId, reportResult.getReporter().getId());
+    assertEquals(givenTitle, reportResult.getTitle());
+    assertEquals(givenDesc, reportResult.getDescription());
+    assertFalse(reportResult.isProcessedComplete());
+    assertEquals(givenReviewId, reportResult.getReview().getId());
+  }
+
+  @Test
+  @DisplayName("saveReviewReport() : 24시간 이내의 같은 제품 연속신고")
+  public void saveReviewReport_continuousReportIn24Hour() throws IOException {
+    // given
+    // - 인자세팅
+    long givenReporterId = 10L;
+    long givenReviewId = 20L;
+    String givenTitle = "test Title";
+    String givenDesc = "test Description";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
+    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    // - reviewService.findById() 세팅
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    // - reviewReportRepository.findLatestReport() 세팅
+    ReviewReport givenLatestReport = ReviewReportBuilder.fullData().build();
+    ReflectionTestUtils.setField(
+        givenLatestReport, "createDate", LocalDateTime.now().minusHours(15));
+
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
+    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
+
+    // when then
+    assertThrows(
+        ContinuousReportError.class,
+        () -> target.saveReviewReport(givenReporterId, givenReviewId, givenTitle, givenDesc));
+  }
+
+  @Test
+  @DisplayName("saveReviewReport() : 24시간 이후의 같은 제품 연속신고")
+  public void saveReviewReport_continuousReportAfter24Hour() throws IOException {
+    // given
+    // - 인자세팅
+    long givenReporterId = 10L;
+    long givenReviewId = 20L;
+    String givenTitle = "test Title";
+    String givenDesc = "test Description";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
+    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    // - reviewService.findById() 세팅
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    // - reviewReportRepository.findLatestReport() 세팅
+    ReviewReport givenLatestReport = ReviewReportBuilder.fullData().build();
+    ReflectionTestUtils.setField(
+        givenLatestReport, "createDate", LocalDateTime.now().minusHours(30));
+
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
+    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
+
+    // when
+    target.saveReviewReport(givenReporterId, givenReviewId, givenTitle, givenDesc);
+
+    // then
+    ArgumentCaptor<ReviewReport> reportCaptor = ArgumentCaptor.forClass(ReviewReport.class);
+    verify(mockedReviewReportRepository, times(1)).save(reportCaptor.capture());
+    ReviewReport reportResult = reportCaptor.getValue();
+
+    assertEquals(givenReporterId, reportResult.getReporter().getId());
+    assertEquals(givenTitle, reportResult.getTitle());
+    assertEquals(givenDesc, reportResult.getDescription());
+    assertFalse(reportResult.isProcessedComplete());
+    assertEquals(givenReviewId, reportResult.getReview().getId());
   }
 }
