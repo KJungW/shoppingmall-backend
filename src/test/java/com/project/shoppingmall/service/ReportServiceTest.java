@@ -15,7 +15,6 @@ import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,8 +72,10 @@ class ReportServiceTest {
     when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
-    when(mockedProductReportRepository.findLatestReport(any(), any(), any()))
-        .thenReturn(new ArrayList<>());
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>());
+    when(mockedProductReportRepository.findLatestReports(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
 
     // when
     target.saveProductReport(rightMemberId, rightProductId, rightTitle, rightDescription);
@@ -115,11 +116,14 @@ class ReportServiceTest {
     when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
-    ProductReport givenProductReport = ProductReportBuilder.fullData().build();
+    ProductReport givenLatestReport = ProductReportBuilder.fullData().build();
     ReflectionTestUtils.setField(
-        givenProductReport, "createDate", LocalDateTime.now().minusHours(15));
-    when(mockedProductReportRepository.findLatestReport(any(), any(), any()))
-        .thenReturn(new ArrayList<>(Arrays.asList(givenProductReport)));
+        givenLatestReport, "createDate", LocalDateTime.now().minusHours(15));
+
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
+    when(mockedProductReportRepository.findLatestReports(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
 
     // when
     assertThrows(
@@ -152,11 +156,14 @@ class ReportServiceTest {
     when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
-    ProductReport givenProductReport = ProductReportBuilder.fullData().build();
+    ProductReport givenLatestReport = ProductReportBuilder.fullData().build();
     ReflectionTestUtils.setField(
-        givenProductReport, "createDate", LocalDateTime.now().minusHours(30));
-    when(mockedProductReportRepository.findLatestReport(any(), any(), any()))
-        .thenReturn(new ArrayList<>(Arrays.asList(givenProductReport)));
+        givenLatestReport, "createDate", LocalDateTime.now().minusHours(30));
+
+    Slice mockedSlice = mock(Slice.class);
+    when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
+    when(mockedProductReportRepository.findLatestReports(anyLong(), anyLong(), any()))
+        .thenReturn(mockedSlice);
 
     // when
     target.saveProductReport(rightMemberId, rightProductId, rightTitle, rightDescription);
@@ -196,7 +203,7 @@ class ReportServiceTest {
     // - reviewReportRepository.findLatestReport() 세팅
     Slice mockedSlice = mock(Slice.class);
     when(mockedSlice.getContent()).thenReturn(new ArrayList<>());
-    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+    when(mockedReviewReportRepository.findLatestReports(anyLong(), anyLong(), any()))
         .thenReturn(mockedSlice);
 
     // when
@@ -241,7 +248,7 @@ class ReportServiceTest {
 
     Slice mockedSlice = mock(Slice.class);
     when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
-    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+    when(mockedReviewReportRepository.findLatestReports(anyLong(), anyLong(), any()))
         .thenReturn(mockedSlice);
 
     // when then
@@ -277,7 +284,7 @@ class ReportServiceTest {
 
     Slice mockedSlice = mock(Slice.class);
     when(mockedSlice.getContent()).thenReturn(new ArrayList<>(List.of(givenLatestReport)));
-    when(mockedReviewReportRepository.findLatestReport(anyLong(), anyLong(), any()))
+    when(mockedReviewReportRepository.findLatestReports(anyLong(), anyLong(), any()))
         .thenReturn(mockedSlice);
 
     // when

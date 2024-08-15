@@ -12,6 +12,6 @@ public interface ReviewReportRepository extends JpaRepository<ReviewReport, Long
       "select r from ReviewReport r "
           + "where r.reporter.id = :reporterId "
           + "and r.review.id = :reviewId ")
-  Slice<ReviewReport> findLatestReport(
-      @Param("reporterId") Long reporterId, @Param("reviewId") Long reviewId, Pageable pageable);
+  Slice<ReviewReport> findLatestReports(
+      @Param("reporterId") long reporterId, @Param("reviewId") long reviewId, Pageable pageable);
 }

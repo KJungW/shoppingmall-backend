@@ -10,7 +10,6 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -80,11 +79,11 @@ public class ReportService {
 
   private boolean checkProductReportIsWithinOneDay(Long memberId, Long productId) {
     PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createDate"));
-    List<ProductReport> latestReport =
-        productReportRepository.findLatestReport(memberId, productId, pageRequest);
-    if (!latestReport.isEmpty()) {
-      LocalDateTime reportCreatedDate = latestReport.get(0).getCreateDate();
-      return reportCreatedDate.isAfter(LocalDateTime.now().minusDays(1));
+    Slice<ProductReport> sliceResult =
+        productReportRepository.findLatestReports(memberId, productId, pageRequest);
+    if (!sliceResult.getContent().isEmpty()) {
+      ProductReport latestReport = sliceResult.getContent().get(0);
+      return latestReport.getCreateDate().isAfter(LocalDateTime.now().minusDays(1));
     }
     return false;
   }
@@ -92,7 +91,7 @@ public class ReportService {
   private boolean checkReviewReportIsWithinOneDay(Long memberId, Long reviewId) {
     PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createDate"));
     Slice<ReviewReport> sliceResult =
-        reviewReportRepository.findLatestReport(memberId, reviewId, pageRequest);
+        reviewReportRepository.findLatestReports(memberId, reviewId, pageRequest);
     if (!sliceResult.getContent().isEmpty()) {
       ReviewReport latestReport = sliceResult.getContent().get(0);
       return latestReport.getCreateDate().isAfter(LocalDateTime.now().minusDays(1));
