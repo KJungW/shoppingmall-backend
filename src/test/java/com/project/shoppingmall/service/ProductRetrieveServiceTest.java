@@ -218,4 +218,25 @@ class ProductRetrieveServiceTest {
         "createDate",
         pageRequestCaptor.getValue().getSort().getOrderFor("createDate").getProperty());
   }
+
+  @Test
+  @DisplayName("retrieveByRandom : 정상흐름()")
+  public void retrieveByRandom_ok() {
+    // given
+    int givenSliceNumber = 20;
+    int givenSliceSize = 30;
+
+    Slice mockSliceResult = mock(Slice.class);
+    when(mockSliceResult.getContent()).thenReturn(new ArrayList());
+    when(mockProductRetrieveRepository.findAllByRandom(any())).thenReturn(mockSliceResult);
+
+    // when
+    target.retrieveByRandom(givenSliceNumber, givenSliceSize);
+
+    // then
+    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+    verify(mockProductRetrieveRepository, times(1)).findAllByRandom(pageRequestCaptor.capture());
+    assertEquals(givenSliceNumber, pageRequestCaptor.getValue().getPageNumber());
+    assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
+  }
 }
