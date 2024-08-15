@@ -5,6 +5,7 @@ import com.project.shoppingmall.dto.block.TextBlock;
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.value.DeliveryInfo;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.*;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.LoginType;
@@ -211,8 +212,7 @@ public class InitDbData {
                 .build();
         PurchaseItem purchaseItem =
             PurchaseItem.builder()
-                .product(targetProduct)
-                .productData(productOptionObj.makeJson())
+                .productData(productOptionObj)
                 .finalPrice(targetProduct.getFinalPrice())
                 .build();
         purchaseItems.add(purchaseItem);
@@ -251,10 +251,14 @@ public class InitDbData {
       refundRepository.save(refund);
 
       // 구매마다 첫번째 구매아이템에 대해 리뷰 생성
+      Product product =
+          productRepository
+              .findById(targetItem.getProductId())
+              .orElseThrow(() -> new ServerLogicError("초기 리뷰데이터 세팅중, 존재하지 않는 Product 조회를 시도"));
       Review review =
           Review.builder()
               .writer(buyer)
-              .product(targetItem.getProduct())
+              .product(product)
               .score(randomGenerator.nextInt(6))
               .title("testTitle")
               .reviewImageUri("testImageUri")

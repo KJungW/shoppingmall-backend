@@ -58,7 +58,7 @@ public class RefundPurchaseItemForSeller {
     this.discountAmount = productData.getDiscountAmount();
     this.discountRate = productData.getDiscountRate();
     this.finalPrice = item.getFinalPrice();
-    this.isRefund = item.isRefund();
+    this.isRefund = item.getIsRefund();
     this.refundState = item.getFinalRefundState();
   }
 }

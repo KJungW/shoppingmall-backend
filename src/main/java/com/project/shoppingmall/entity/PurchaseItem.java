@@ -1,5 +1,6 @@
 package com.project.shoppingmall.entity;
 
+import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.RefundStateTypeForPurchaseItem;
 import jakarta.persistence.*;
@@ -23,15 +24,15 @@ public class PurchaseItem extends BaseEntity {
   @JoinColumn(name = "PURCHASE_ID")
   private Purchase purchase;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "PRODUCT_ID")
-  private Product product;
+  private Long productId;
+  private Long sellerId;
 
   @Column(columnDefinition = "JSON")
   private String productData;
 
   private Integer finalPrice;
-  private boolean isRefund;
+
+  private Boolean isRefund;
 
   @OneToMany(mappedBy = "purchaseItem", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Refund> refunds = new ArrayList<>();
@@ -44,15 +45,28 @@ public class PurchaseItem extends BaseEntity {
   private Review review;
 
   @Builder
-  public PurchaseItem(Product product, String productData, Integer finalPrice) {
-    if (product == null || productData.isEmpty() || finalPrice <= 0) {
-      throw new ServerLogicError("PurchaseItem를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
-    }
-    this.product = product;
-    this.productData = productData;
-    this.finalPrice = finalPrice;
+  public PurchaseItem(ProductDataForPurchase productData, Integer finalPrice) {
+    registerProductData(productData);
+    registerFinalPrice(finalPrice);
     this.isRefund = false;
+    this.refunds = new ArrayList<>();
     this.finalRefundState = RefundStateTypeForPurchaseItem.NONE;
+    this.finalRefundCreatedDate = null;
+    this.review = null;
+  }
+
+  private void registerProductData(ProductDataForPurchase productData) {
+    if (productData == null)
+      throw new ServerLogicError("PurchaseItem의 비어있는 ProductDataForPurchase가 입력되었습니다.");
+    this.productId = productData.getProductId();
+    this.sellerId = productData.getSellerId();
+    this.productData = productData.makeJson();
+  }
+
+  private void registerFinalPrice(Integer finalPrice) {
+    if (finalPrice == null || finalPrice <= 0)
+      throw new ServerLogicError("PurchaseItem에 적절하지 않은 finalPrice가 입력되었습니다.");
+    this.finalPrice = finalPrice;
   }
 
   public void registerPurchase(Purchase purchase) {

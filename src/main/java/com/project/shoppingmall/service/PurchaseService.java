@@ -133,11 +133,7 @@ public class PurchaseService {
             .discountRate(product.getDiscountRate())
             .build();
 
-    return PurchaseItem.builder()
-        .product(basketItem.getProduct())
-        .productData(productOptionObj.makeJson())
-        .finalPrice(realPrice)
-        .build();
+    return PurchaseItem.builder().productData(productOptionObj).finalPrice(realPrice).build();
   }
 
   private PurchaseItemMakeData selectPurchaseMakeDataByBasketId(

@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Review;
+import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final PurchaseItemService purchaseItemService;
+  private final ProductService productService;
   private final S3Service s3Service;
 
   @Transactional
@@ -30,8 +32,11 @@ public class ReviewService {
         purchaseItemService
             .findById(makeData.getPurchaseItemId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 구매아이템이 존재하지 않습니다."));
+    Product product =
+        productService
+            .findById(purchaseItem.getProductId())
+            .orElseThrow(() -> new AlreadyDeletedProduct("이미 삭제된 상품입니다."));
     Member buyer = purchaseItem.getPurchase().getBuyer();
-    Product product = purchaseItem.getProduct();
 
     if (!buyer.getId().equals(makeData.getWriterId())) {
       throw new DataNotFound("다른 회원의 구매아이템에 대해 리뷰작성을 시도하고 있습니다.");
@@ -43,15 +48,14 @@ public class ReviewService {
     FileUploadResult reviewImageUploadResult = new FileUploadResult("", "");
     if (makeData.getReviewImage() != null) {
       reviewImageUploadResult =
-          s3Service.uploadFile(
-              makeData.getReviewImage(), "review/" + purchaseItem.getProduct().getId() + "/");
+          s3Service.uploadFile(makeData.getReviewImage(), "review/" + product.getId() + "/");
     }
     ;
 
     Review newReview =
         Review.builder()
             .writer(buyer)
-            .product(purchaseItem.getProduct())
+            .product(product)
             .score(makeData.getScore())
             .title(makeData.getTitle())
             .reviewImageUri(reviewImageUploadResult.getFileServerUri())

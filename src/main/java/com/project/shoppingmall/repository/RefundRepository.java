@@ -9,9 +9,6 @@ import org.springframework.data.repository.query.Param;
 public interface RefundRepository extends JpaRepository<Refund, Long> {
 
   @Query(
-      "select r from Refund r "
-          + "left join fetch r.purchaseItem i "
-          + "left join fetch i.product "
-          + "where r.id = :refundId ")
+      "select r from Refund r " + "left join fetch r.purchaseItem i " + "where r.id = :refundId ")
   Optional<Refund> findByIdWithPurchaseItemProduct(@Param("refundId") long refundId);
 }

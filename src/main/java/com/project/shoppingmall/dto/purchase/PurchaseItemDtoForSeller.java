@@ -34,13 +34,13 @@ public class PurchaseItemDtoForSeller {
     this.deliveryInfo = new DeliveryDto(targetPurchase.getDeliveryInfo());
     this.dateTime = targetPurchase.getCreateDate();
     this.purchaseItemId = purchaseItem.getId();
-    this.productId = purchaseItem.getProduct().getId();
+    this.productId = purchaseItem.getProductId();
     this.selectedSingleOption = productData.getSingleOption();
     this.selectedMultiOptions = productData.getMultiOptions();
     this.price = productData.getPrice();
     this.discountAmount = productData.getDiscountAmount();
     this.discountRate = productData.getDiscountRate();
     this.finalPrice = purchaseItem.getFinalPrice();
-    this.isRefund = purchaseItem.isRefund();
+    this.isRefund = purchaseItem.getIsRefund();
   }
 }
