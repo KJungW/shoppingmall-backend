@@ -40,7 +40,6 @@ public class ReportService {
     ProductReport report =
         ProductReport.builder()
             .reporter(reporter)
-            .targetMember(product.getSeller())
             .title(title)
             .description(description)
             .product(product)

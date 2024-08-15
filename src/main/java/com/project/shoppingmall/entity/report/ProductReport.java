@@ -19,14 +19,13 @@ public class ProductReport extends Report {
   private Product product;
 
   @Builder
-  public ProductReport(
-      Member reporter, Member targetMember, String title, String description, Product product) {
-    super(reporter, targetMember, title, description, false);
-    if (reporter == null
-        || targetMember == null
-        || title.isEmpty()
-        || description.isEmpty()
-        || product == null) throw new ServerLogicError("ProductReport를 생성할때 필수값을 넣어주지 않았습니다.");
+  public ProductReport(Member reporter, String title, String description, Product product) {
+    super(reporter, title, description);
+    updateProduct(product);
+  }
+
+  private void updateProduct(Product product) {
+    if (product == null) throw new ServerLogicError("ProductReport의 product에 빈값이 들어왔습니다.");
     this.product = product;
   }
 }

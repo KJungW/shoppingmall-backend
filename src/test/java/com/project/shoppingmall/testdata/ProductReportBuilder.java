@@ -11,7 +11,6 @@ public class ProductReportBuilder {
     Product givenProduct = ProductBuilder.fullData().build();
     return ProductReport.builder()
         .reporter(givenMember)
-        .targetMember(givenProduct.getSeller())
         .title("Test Title")
         .description("Test Description")
         .product(givenProduct);

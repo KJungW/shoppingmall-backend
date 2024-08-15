@@ -73,7 +73,6 @@ class ReportServiceTest {
     ProductReport reportResult = reportCaptor.getValue();
 
     assertEquals(rightMemberId, reportResult.getReporter().getId());
-    assertEquals(givenSellerId, reportResult.getTargetMember().getId());
     assertEquals(rightTitle, reportResult.getTitle());
     assertEquals(rightDescription, reportResult.getDescription());
     assertFalse(reportResult.isProcessedComplete());
@@ -156,7 +155,6 @@ class ReportServiceTest {
     ProductReport reportResult = reportCaptor.getValue();
 
     assertEquals(rightMemberId, reportResult.getReporter().getId());
-    assertEquals(givenSellerId, reportResult.getTargetMember().getId());
     assertEquals(rightTitle, reportResult.getTitle());
     assertEquals(rightDescription, reportResult.getDescription());
     assertFalse(reportResult.isProcessedComplete());
