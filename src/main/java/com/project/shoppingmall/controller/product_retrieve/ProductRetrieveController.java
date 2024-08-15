@@ -3,6 +3,7 @@ package com.project.shoppingmall.controller.product_retrieve;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductBySeller;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsBySearchWordWithFilter;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsByTypeWithFilter;
+import com.project.shoppingmall.controller.product_retrieve.output.OutputGetRandomProducts;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.service.ProductRetrieveService;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
@@ -50,5 +51,13 @@ public class ProductRetrieveController {
         productRetrieveService.retrieveBySearchWordWithFilter(
             searchWord, sliceSize, sliceNumber, filterType);
     return new OutputGetProductsBySearchWordWithFilter(sliceResult);
+  }
+
+  @GetMapping("/products/random")
+  public OutputGetRandomProducts getRandomProducts(
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize) {
+    Slice<Product> sliceResult = productRetrieveService.retrieveByRandom(sliceNumber, sliceSize);
+    return new OutputGetRandomProducts(sliceResult);
   }
 }

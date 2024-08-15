@@ -82,4 +82,11 @@ public class ProductRetrieveService {
     sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
     return sliceResult;
   }
+
+  public Slice<Product> retrieveByRandom(Integer sliceNumber, Integer sliceSize) {
+    PageRequest pageRequest = PageRequest.of(sliceNumber, sliceSize);
+    Slice<Product> sliceResult = productRetrieveRepository.findAllByRandom(pageRequest);
+    sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
+    return sliceResult;
+  }
 }
