@@ -123,6 +123,10 @@ public class ReviewService {
       throw new DataNotFound("다른 회원의 리뷰입니다.");
     }
 
+    if (!review.getReviewImageUri().isBlank()) {
+      s3Service.deleteFile(review.getReviewImageUri());
+    }
+
     purchaseItem.deleteReview();
     reviewRepository.delete(review);
     reviewRepository.flush();

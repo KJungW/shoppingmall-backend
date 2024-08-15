@@ -438,9 +438,12 @@ class ReviewServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", 23L);
 
+    String givenReviewImageUri = "testReviewImageUri";
     Review givenReview = ReviewBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    ReflectionTestUtils.setField(givenReview, "reviewImageUri", givenReviewImageUri);
     ReflectionTestUtils.setField(givenReview, "product", givenProduct);
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
 
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "review", givenReview);
@@ -455,6 +458,10 @@ class ReviewServiceTest {
     target.deleteReview(givenWriterId, givenReviewId);
 
     // then
+    ArgumentCaptor<String> imageUriCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).deleteFile(imageUriCaptor.capture());
+    assertEquals(givenReviewImageUri, imageUriCaptor.getValue());
+
     assertNull(givenPurchaseItem.getReview());
 
     ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
