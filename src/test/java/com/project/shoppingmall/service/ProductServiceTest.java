@@ -15,6 +15,7 @@ import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ProductMakeDataBuilder;
 import com.project.shoppingmall.type.BlockType;
+import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
@@ -338,5 +339,49 @@ class ProductServiceTest {
     verify(givenProduct, times(1)).getProductImages();
     verify(givenProduct, times(1)).getSingleOptions();
     verify(givenProduct, times(1)).getMultipleOptions();
+  }
+
+  @Test
+  @DisplayName("changeProductToOnSale() : 정상흐름")
+  public void changeProductToOnSale_ok() throws IOException {
+    // given
+    long givenMemberId = 10L;
+    long givenProductId = 32L;
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.DISCONTINUED);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
+    when(productService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    Product product = productService.changeProductToOnSale(givenMemberId, givenProductId);
+
+    // then
+    assertEquals(givenProductId, product.getId());
+    assertEquals(givenMemberId, product.getSeller().getId());
+    assertEquals(ProductSaleType.ON_SALE, givenProduct.getSaleState());
+  }
+
+  @Test
+  @DisplayName("changeProductToDiscontinued() : 정상흐름")
+  public void changeProductToDiscontinued_ok() throws IOException {
+    // given
+    long givenMemberId = 10L;
+    long givenProductId = 32L;
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.ON_SALE);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
+    when(productService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    Product product = productService.changeProductToDiscontinued(givenMemberId, givenProductId);
+
+    // then
+    assertEquals(givenProductId, product.getId());
+    assertEquals(givenMemberId, product.getSeller().getId());
+    assertEquals(ProductSaleType.DISCONTINUED, givenProduct.getSaleState());
   }
 }
