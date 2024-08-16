@@ -2,6 +2,7 @@ package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -47,6 +48,9 @@ public class Product extends BaseEntity {
   private Double scoreAvg;
   private Integer finalPrice;
 
+  @Enumerated(EnumType.STRING)
+  private ProductSaleType saleState;
+
   @Builder
   public Product(
       Member seller,
@@ -69,6 +73,7 @@ public class Product extends BaseEntity {
     this.discountRate = discountRate;
     this.isBan = isBan;
     this.scoreAvg = scoreAvg;
+    changeSalesStateToOnSale();
     updateSingleOption(singleOptions);
     updateMultiOptions(multipleOptions);
     updateProductImages(productImages);
@@ -139,5 +144,13 @@ public class Product extends BaseEntity {
   public void refreshScore(ReviewScoresCalcResult scoresCalcResult) {
     if (scoresCalcResult == null) throw new ServerLogicError("scoresCalcResult가 null 입니다.");
     this.scoreAvg = scoresCalcResult.getScoreAverage();
+  }
+
+  public void changeSalesStateToOnSale() {
+    this.saleState = ProductSaleType.ON_SALE;
+  }
+
+  public void changeSalesStateToDiscontinued() {
+    this.saleState = ProductSaleType.DISCONTINUED;
   }
 }

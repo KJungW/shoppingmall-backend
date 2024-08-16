@@ -2,6 +2,8 @@ package com.project.shoppingmall.controller.product;
 
 import com.project.shoppingmall.controller.product.input.InputSaveProduct;
 import com.project.shoppingmall.controller.product.input.InputUpdateProduct;
+import com.project.shoppingmall.controller.product.output.OutputChangeProductToDiscontinued;
+import com.project.shoppingmall.controller.product.output.OutputChangeProductToOnSale;
 import com.project.shoppingmall.controller.product.output.OutputGetProduct;
 import com.project.shoppingmall.controller.product.output.OutputSaveProduct;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
@@ -79,5 +81,25 @@ public class ProductController {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     productService.update(userDetail.getId(), productData.getProductId(), productMakeData);
+  }
+
+  @PutMapping("{productId}/sale-state/on-sale")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputChangeProductToOnSale ChangeProductToOnSale(
+      @PathVariable("productId") Long productId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Product product = productService.changeProductToOnSale(userDetail.getId(), productId);
+    return new OutputChangeProductToOnSale(product.getId());
+  }
+
+  @PutMapping("{productId}/sale-state/discontinued")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputChangeProductToDiscontinued ChangeProductToDiscontinued(
+      @PathVariable("productId") Long productId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Product product = productService.changeProductToDiscontinued(userDetail.getId(), productId);
+    return new OutputChangeProductToDiscontinued(product.getId());
   }
 }

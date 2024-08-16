@@ -231,4 +231,28 @@ public class ProductService {
     }
     return productMultipleOptions;
   }
+
+  @Transactional
+  public Product changeProductToOnSale(long memberId, long productId) {
+    Product product =
+        findByIdWithSeller(productId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
+    if (!product.getSeller().getId().equals(memberId)) {
+      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
+    }
+    product.changeSalesStateToOnSale();
+    return product;
+  }
+
+  @Transactional
+  public Product changeProductToDiscontinued(long memberId, long productId) {
+    Product product =
+        findByIdWithSeller(productId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
+    if (!product.getSeller().getId().equals(memberId)) {
+      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
+    }
+    product.changeSalesStateToDiscontinued();
+    return product;
+  }
 }
