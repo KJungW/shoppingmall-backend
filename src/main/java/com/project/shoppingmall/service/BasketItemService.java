@@ -77,6 +77,9 @@ public class BasketItemService {
     MultiOptionsCalcResult multiOptionsCalcResult =
         multiOptionsCalcResult(optionObj.getMultipleOptionId(), product.getMultipleOptions());
 
+    if (product.getIsBan() || product.getSaleState().equals(ProductSaleType.DISCONTINUED))
+      return new BasketItemPriceCalcResult(noOptionPrice, false);
+
     if (!singleOptionCalcResult.isSingleOptionAvailable()
         || !multiOptionsCalcResult.isMultiOptionAvailable()) {
       return new BasketItemPriceCalcResult(noOptionPrice, false);

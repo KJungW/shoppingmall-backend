@@ -29,6 +29,7 @@ public class BasketItemRetrieveService {
         basketItemRetrieveRepository
             .retrieveBasketItemDetail(basketItemId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 장바구니 아이템이 존재하지 않습니다."));
+
     validateBasketItemOwner(basketItem, member);
     BasketItemPriceCalcResult basketItemPriceCalcResult =
         basketItemService.calculateBasketItemPrice(basketItem);
@@ -42,7 +43,14 @@ public class BasketItemRetrieveService {
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원정보가 없습니다."));
     List<BasketItem> basketItem = basketItemRetrieveRepository.retrieveBasketByMemberId(memberId);
     List<BasketItemDto> basketItemDtoList =
-        basketItem.stream().map(this::makeBasketItemDto).toList();
+        basketItem.stream()
+            .map(
+                item -> {
+                  BasketItemPriceCalcResult priceCalcResult =
+                      basketItemService.calculateBasketItemPrice(item);
+                  return new BasketItemDto(item, priceCalcResult);
+                })
+            .toList();
     return new BasketDto(basketItemDtoList);
   }
 
@@ -50,11 +58,5 @@ public class BasketItemRetrieveService {
     if (!basketItem.getMember().getId().equals(member.getId())) {
       throw new DataNotFound("현재 회원에게 속해있지않은 장바구니 아이템입니다.");
     }
-  }
-
-  private BasketItemDto makeBasketItemDto(BasketItem basketItem) {
-    BasketItemPriceCalcResult priceCalcResult =
-        basketItemService.calculateBasketItemPrice(basketItem);
-    return new BasketItemDto(basketItem, priceCalcResult);
   }
 }
