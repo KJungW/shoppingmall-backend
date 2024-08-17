@@ -7,6 +7,7 @@ import com.project.shoppingmall.dto.basket.BasketDto;
 import com.project.shoppingmall.dto.basket.BasketItemDto;
 import com.project.shoppingmall.dto.basket.BasketItemMakeData;
 import com.project.shoppingmall.entity.BasketItem;
+import com.project.shoppingmall.service.BasketItemDeleteService;
 import com.project.shoppingmall.service.BasketItemRetrieveService;
 import com.project.shoppingmall.service.BasketItemService;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class BasketItemController {
   private final BasketItemService basketItemService;
   private final BasketItemRetrieveService basketItemRetrieveService;
+  private final BasketItemDeleteService basketItemDeleteService;
 
   @GetMapping("/{basketItemId}")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
@@ -61,6 +63,6 @@ public class BasketItemController {
       @Valid @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    basketItemService.deleteBasketItem(userDetail.getId(), basketItemIdList);
+    basketItemDeleteService.deleteBasketItemByMember(userDetail.getId(), basketItemIdList);
   }
 }

@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
 import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.Review;
+import com.project.shoppingmall.service.ReviewDeleteService;
 import com.project.shoppingmall.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ReviewController {
   private final ReviewService reviewService;
+  private final ReviewDeleteService reviewDeleteService;
 
   @PostMapping("/review")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
@@ -66,6 +68,6 @@ public class ReviewController {
   public void deleteReview(@PathVariable("reviewId") Long reviewId) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    reviewService.deleteReview(userDetail.getId(), reviewId);
+    reviewDeleteService.deleteReviewByWriter(userDetail.getId(), reviewId);
   }
 }

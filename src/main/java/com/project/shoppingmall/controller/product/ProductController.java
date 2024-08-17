@@ -110,6 +110,6 @@ public class ProductController {
   public void deleteProduct(@PathVariable("productId") Long productId) {
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    productDeleteService.deleteProduct(userDetail.getId(), productId);
+    productDeleteService.deleteProductBySeller(userDetail.getId(), productId);
   }
 }

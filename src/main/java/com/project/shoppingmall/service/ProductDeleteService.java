@@ -5,6 +5,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ProductRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class ProductDeleteService {
+  private final ProductService productService;
   private final ProductRepository productRepository;
   private final BasketItemService basketItemService;
   private final BasketItemDeleteService basketItemDeleteService;
@@ -23,13 +25,8 @@ public class ProductDeleteService {
   private final ReportService reportService;
   private final ReportDeleteService reportDeleteService;
 
-  public void deleteProduct(long sellerId, long productId) {
-    Product product =
-        productRepository
-            .findByIdWithSeller(productId)
-            .orElseThrow(() -> new DataNotFound("Id에 해당하는 Prdocut가 존재하지 않습니다."));
-    if (!product.getSeller().getId().equals(sellerId))
-      throw new DataNotFound("다른 회원의 Product를 제거하려고 하고 있습니다.");
+  public void deleteProduct(Product product) {
+    if (product == null) throw new ServerLogicError("비어있는 Product를 제거하려고 시도하고 있습니다.");
 
     List<BasketItem> basketItemList = basketItemService.findAllByProduct(product.getId());
     basketItemDeleteService.deleteBasketItemList(basketItemList);
@@ -41,5 +38,16 @@ public class ProductDeleteService {
     reportDeleteService.deleteProductReportList(productReportList);
 
     productRepository.delete(product);
+  }
+
+  public void deleteProductBySeller(long sellerId, long productId) {
+    Product product =
+        productService
+            .findByIdWithSeller(productId)
+            .orElseThrow(() -> new DataNotFound("Id에 해당하는 Prdocut가 존재하지 않습니다."));
+    if (!product.getSeller().getId().equals(sellerId))
+      throw new DataNotFound("다른 회원의 Product를 제거하려고 하고 있습니다.");
+
+    deleteProduct(product);
   }
 }
