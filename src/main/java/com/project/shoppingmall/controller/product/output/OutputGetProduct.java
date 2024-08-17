@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.ProductContent;
 import com.project.shoppingmall.entity.ProductImage;
 import com.project.shoppingmall.exception.InvalidEnumType;
 import com.project.shoppingmall.type.BlockType;
+import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import java.awt.*;
 import java.util.List;
@@ -29,6 +30,7 @@ public class OutputGetProduct {
   private Double discountRate;
   private Boolean isBan;
   private Double scoreAvg;
+  private ProductSaleType saleState;
 
   public OutputGetProduct(Product product) {
     this.productId = product.getId();
@@ -46,6 +48,7 @@ public class OutputGetProduct {
     this.discountRate = product.getDiscountRate();
     this.isBan = product.getIsBan();
     this.scoreAvg = product.getScoreAvg();
+    this.saleState = product.getSaleState();
   }
 
   private List<OutputBlockData> makeOutputBlockDataList(List<ProductContent> productContents) {

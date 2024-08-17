@@ -41,7 +41,7 @@ class ProductRetrieveServiceTest {
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
-    when(mockProductRetrieveRepository.findByProductTypeIdAndIsBan(anyLong(), anyBoolean(), any()))
+    when(mockProductRetrieveRepository.findByProductType(anyLong(), any()))
         .thenReturn(mockSliceResult);
 
     // when
@@ -50,14 +50,11 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<Long> productTypeIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByProductTypeIdAndIsBan(
-            productTypeIdCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
+        .findByProductType(productTypeIdCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenProductTypeId, productTypeIdCaptor.getValue());
-    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -79,7 +76,7 @@ class ProductRetrieveServiceTest {
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
-    when(mockProductRetrieveRepository.findByProductTypeIdAndIsBan(anyLong(), anyBoolean(), any()))
+    when(mockProductRetrieveRepository.findByProductType(anyLong(), any()))
         .thenReturn(mockSliceResult);
 
     // when
@@ -88,14 +85,11 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<Long> productTypeIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByProductTypeIdAndIsBan(
-            productTypeIdCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
+        .findByProductType(productTypeIdCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenProductTypeId, productTypeIdCaptor.getValue());
-    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -117,8 +111,7 @@ class ProductRetrieveServiceTest {
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
-    when(mockProductRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
-            anyString(), anyBoolean(), any()))
+    when(mockProductRetrieveRepository.findBySearchWord(anyString(), any()))
         .thenReturn(mockSliceResult);
 
     // when
@@ -127,14 +120,11 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<String> searchWordCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByNameContainingIgnoreCaseAndIsBan(
-            searchWordCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
+        .findBySearchWord(searchWordCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenSearchWord, searchWordCaptor.getValue());
-    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -155,8 +145,7 @@ class ProductRetrieveServiceTest {
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
-    when(mockProductRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
-            anyString(), anyBoolean(), any()))
+    when(mockProductRetrieveRepository.findBySearchWord(anyString(), any()))
         .thenReturn(mockSliceResult);
 
     // when
@@ -165,14 +154,11 @@ class ProductRetrieveServiceTest {
 
     // then
     ArgumentCaptor<String> searchWordCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<Boolean> isBanCaptor = ArgumentCaptor.forClass(Boolean.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findByNameContainingIgnoreCaseAndIsBan(
-            searchWordCaptor.capture(), isBanCaptor.capture(), pageRequestCaptor.capture());
+        .findBySearchWord(searchWordCaptor.capture(), pageRequestCaptor.capture());
 
     assertEquals(givenSearchWord, searchWordCaptor.getValue());
-    assertEquals(false, isBanCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNum, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(
@@ -197,18 +183,19 @@ class ProductRetrieveServiceTest {
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList());
-    when(mockProductRetrieveRepository.findAllBySeller(any(), any())).thenReturn(mockSliceResult);
+    when(mockProductRetrieveRepository.findAllBySeller(anyLong(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveBySeller(givenSellerId, givenSliceNumber, givenSliceSize);
 
     // then
-    ArgumentCaptor<Member> seller = ArgumentCaptor.forClass(Member.class);
+    ArgumentCaptor<Long> sellerIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockProductRetrieveRepository, times(1))
-        .findAllBySeller(seller.capture(), pageRequestCaptor.capture());
+        .findAllBySeller(sellerIdCaptor.capture(), pageRequestCaptor.capture());
 
-    assertSame(givenSeller, seller.getValue());
+    assertSame(givenSellerId, sellerIdCaptor.getValue());
     assertEquals(givenSliceSize, pageRequestCaptor.getValue().getPageSize());
     assertEquals(givenSliceNumber, pageRequestCaptor.getValue().getPageNumber());
     assertEquals(

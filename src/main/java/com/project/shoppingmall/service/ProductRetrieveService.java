@@ -24,7 +24,7 @@ public class ProductRetrieveService {
       Long productTypeId, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
     PageRequest pageRequest = makePageRequest(sliceSize, sliceNum, filterType);
     Slice<Product> sliceResult =
-        productRetrieveRepository.findByProductTypeIdAndIsBan(productTypeId, false, pageRequest);
+        productRetrieveRepository.findByProductType(productTypeId, pageRequest);
     sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
     return sliceResult;
   }
@@ -33,8 +33,7 @@ public class ProductRetrieveService {
       String searchWord, int sliceSize, int sliceNum, ProductRetrieveFilterType filterType) {
     PageRequest pageRequest = makePageRequest(sliceSize, sliceNum, filterType);
     Slice<Product> sliceResult =
-        productRetrieveRepository.findByNameContainingIgnoreCaseAndIsBan(
-            searchWord, false, pageRequest);
+        productRetrieveRepository.findBySearchWord(searchWord, pageRequest);
     sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
     return sliceResult;
   }
@@ -78,7 +77,8 @@ public class ProductRetrieveService {
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     PageRequest pageRequest =
         PageRequest.of(sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-    Slice<Product> sliceResult = productRetrieveRepository.findAllBySeller(seller, pageRequest);
+    Slice<Product> sliceResult =
+        productRetrieveRepository.findAllBySeller(seller.getId(), pageRequest);
     sliceResult.getContent().forEach(product -> product.getProductImages().get(0));
     return sliceResult;
   }

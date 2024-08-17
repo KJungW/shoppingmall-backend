@@ -1,6 +1,7 @@
 package com.project.shoppingmall.dto.product;
 
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.type.ProductSaleType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,6 +21,7 @@ public class ProductHeaderDto {
   private Boolean isBan;
   private Double scoreAvg;
   private Integer finalPrice;
+  private ProductSaleType saleType;
 
   public ProductHeaderDto(Product product) {
     this.productId = product.getId();
@@ -35,5 +37,6 @@ public class ProductHeaderDto {
     this.isBan = product.getIsBan();
     this.scoreAvg = product.getScoreAvg();
     this.finalPrice = product.getFinalPrice();
+    this.saleType = product.getSaleState();
   }
 }
