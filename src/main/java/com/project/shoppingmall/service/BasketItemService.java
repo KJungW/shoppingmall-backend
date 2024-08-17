@@ -96,8 +96,12 @@ public class BasketItemService {
     }
   }
 
-  public List<BasketItem> findAllById(List<Long> productIdList) {
-    return basketItemRepository.findAllById(productIdList);
+  public List<BasketItem> findAllById(List<Long> basketIdList) {
+    return basketItemRepository.findAllById(basketIdList);
+  }
+
+  public List<BasketItem> findAllByProduct(long productId) {
+    return basketItemRepository.findAllByProduct(productId);
   }
 
   public void validateInvalidBasketIdInput(

@@ -10,6 +10,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -97,5 +98,13 @@ public class ReportService {
       return latestReport.getCreateDate().isAfter(LocalDateTime.now().minusDays(1));
     }
     return false;
+  }
+
+  public List<ProductReport> findAllByProduct(long productId) {
+    return productReportRepository.findAllByProduct(productId);
+  }
+
+  public List<ReviewReport> findAllByReview(long reviewId) {
+    return reviewReportRepository.findAllByReview(reviewId);
   }
 }

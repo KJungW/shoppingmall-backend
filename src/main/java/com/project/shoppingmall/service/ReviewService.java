@@ -4,14 +4,12 @@ import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
 import com.project.shoppingmall.dto.review.ReviewUpdateData;
-import com.project.shoppingmall.entity.Member;
-import com.project.shoppingmall.entity.Product;
-import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.entity.Review;
+import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -108,6 +106,10 @@ public class ReviewService {
 
   public Optional<Review> findById(long refundId) {
     return reviewRepository.findById(refundId);
+  }
+
+  public List<Review> findByProduct(long productId) {
+    return reviewRepository.findAllByProduct(productId);
   }
 
   public ReviewScoresCalcResult calcReviewScoresInProduct(long productId) {

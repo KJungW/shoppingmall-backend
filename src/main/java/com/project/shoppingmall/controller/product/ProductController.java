@@ -10,6 +10,7 @@ import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.service.ProductDeleteService;
 import com.project.shoppingmall.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ProductController {
   private final ProductService productService;
+  private final ProductDeleteService productDeleteService;
 
   @GetMapping("/{productId}")
   public OutputGetProduct getProduct(@PathVariable("productId") Long productId) {
@@ -101,5 +103,13 @@ public class ProductController {
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Product product = productService.changeProductToDiscontinued(userDetail.getId(), productId);
     return new OutputChangeProductToDiscontinued(product.getId());
+  }
+
+  @DeleteMapping("/{productId}")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void deleteProduct(@PathVariable("productId") Long productId) {
+    AuthUserDetail userDetail =
+        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    productDeleteService.deleteProduct(userDetail.getId(), productId);
   }
 }
