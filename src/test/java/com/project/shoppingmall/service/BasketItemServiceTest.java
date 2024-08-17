@@ -9,9 +9,12 @@ import com.project.shoppingmall.dto.basket.BasketItemPriceCalcResult;
 import com.project.shoppingmall.dto.basket.ProductOptionObjForBasket;
 import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.AddBannedProductInBasket;
+import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
@@ -99,6 +102,60 @@ class BasketItemServiceTest {
   }
 
   @Test
+  @DisplayName("saveBasketItem() : 벤처리된 제품을 장바구니에 넣으려고 시도")
+  public void saveBasketItem_BannedProduct() throws IOException {
+    // given
+    Long givenMemberId = 62L;
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long givenProductId = 30L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct, "isBan", true);
+
+    BasketItemMakeData givenMakeData =
+        BasketItemMakeDataBuilder.fullData()
+            .memberId(givenMemberId)
+            .productId(givenProductId)
+            .singleOptionId(null)
+            .multipleOptionId(null)
+            .build();
+
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    assertThrows(AddBannedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
+  }
+
+  @Test
+  @DisplayName("saveBasketItem() : 판매중단된 제품을 장바구니에 넣으려고 시도")
+  public void saveBasketItem_DiscontinuedProduct() throws IOException {
+    // given
+    Long givenMemberId = 62L;
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long givenProductId = 30L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.DISCONTINUED);
+
+    BasketItemMakeData givenMakeData =
+        BasketItemMakeDataBuilder.fullData()
+            .memberId(givenMemberId)
+            .productId(givenProductId)
+            .singleOptionId(null)
+            .multipleOptionId(null)
+            .build();
+
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    assertThrows(AddDiscontinuedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
+  }
+
+  @Test
   @DisplayName("saveBasketItem() : 제품에 대한 옵션 선택을 하지 않았을 경우")
   public void saveBasketItem_NoOption() throws IOException {
     // given
@@ -161,8 +218,8 @@ class BasketItemServiceTest {
   }
 
   @Test
-  @DisplayName("saveBasketItem() : 제품에 대한 옵션이 유효하지 않은 경우")
-  public void saveBasketItem_InvalidOption() throws IOException {
+  @DisplayName("saveBasketItem() : 제품에 대한 다중 옵션이 유효하지 않은 경우")
+  public void saveBasketItem_InvalidMultiOption() throws IOException {
     Member givenMember = MemberBuilder.fullData().build();
     ArrayList<ProductMultipleOption> givenMultiOption =
         new ArrayList<>(

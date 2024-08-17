@@ -130,8 +130,14 @@ public class ExceptionGlobalControllerAdvice {
   }
 
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-  @ExceptionHandler(AlreadyExistReview.class)
-  public ErrorResult AlreadyExistReviewHandler(AlreadyExistReview e) {
-    return new ErrorResult(ErrorCode.BAD_INPUT, "해당 구매아이템에 대해 작성한 리뷰가 존재합니다.");
+  @ExceptionHandler(AddBannedProductInBasket.class)
+  public ErrorResult AddBannedProductInBasketHandler(AddBannedProductInBasket e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "벤처리된 제품은 장바구니에 담을 수 없습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AddDiscontinuedProductInBasket.class)
+  public ErrorResult AddDiscontinuedProductInBasketHandler(AddDiscontinuedProductInBasket e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "판매중단된 제품은 장바구니에 담을 수 없습니다.");
   }
 }
