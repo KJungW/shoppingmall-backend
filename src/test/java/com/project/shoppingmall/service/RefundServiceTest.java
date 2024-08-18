@@ -7,10 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
-import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.exception.FailRefundException;
-import com.project.shoppingmall.exception.NotAcceptStateRefund;
-import com.project.shoppingmall.exception.NotRequestStateRefund;
+import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.PurchaseBuilder;
@@ -25,6 +22,7 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,6 +36,7 @@ class RefundServiceTest {
   private MemberService mockMemberService;
   private PurchaseItemService mockPurchaseItemService;
   private IamportClient mockIamportClient;
+  private Integer givenRefundPossibleDate = 30;
 
   @BeforeEach
   public void beforeEach() {
@@ -48,6 +47,8 @@ class RefundServiceTest {
     target =
         new RefundService(
             mockRefundRepository, mockMemberService, mockPurchaseItemService, mockIamportClient);
+
+    ReflectionTestUtils.setField(target, "refundSavePossibleDate", givenRefundPossibleDate);
   }
 
   @Test
@@ -74,6 +75,10 @@ class RefundServiceTest {
         PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(
+        givenPurchaseItem,
+        "createDate",
+        LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
     when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
@@ -120,6 +125,10 @@ class RefundServiceTest {
         PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(
+        givenPurchaseItem,
+        "createDate",
+        LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
     when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
@@ -150,12 +159,16 @@ class RefundServiceTest {
     Long wrongMemberId = 50L;
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", wrongMemberId);
-    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.FAIL);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
         PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(
+        givenPurchaseItem,
+        "createDate",
+        LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
     when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
@@ -183,15 +196,18 @@ class RefundServiceTest {
     when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
-    Long wrongMemberId = 50L;
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", wrongMemberId);
-    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.FAIL);
+    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
         PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(
+        givenPurchaseItem,
+        "createDate",
+        LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
     when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
@@ -200,7 +216,49 @@ class RefundServiceTest {
 
     // when
     assertThrows(
-        DataNotFound.class,
+        ProcessOrCompleteRefund.class,
+        () ->
+            target.saveRefund(
+                givenMemberId, givenPurchaseItemId, givenRequestTitle, givenRequestContent));
+  }
+
+  @Test
+  @DisplayName("saveRefund() : 환불요청 기간이 지난 구매아이템에 대해 환불요청을 시도")
+  public void saveRefund_alreadyPassedRefundPossibleDay() throws IOException {
+    // given
+    // - 인자세팅
+    Long givenMemberId = 20L;
+    Long givenPurchaseItemId = 23L;
+    String givenRequestTitle = "testRefundRequestTitle";
+    String givenRequestContent = "testRefundRequestContent";
+
+    // - memberService.findById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
+    Purchase givenPurchase = PurchaseBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
+    int givenFinalPrice = 100000;
+    PurchaseItem givenPurchaseItem =
+        PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
+    ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
+    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(
+        givenPurchaseItem,
+        "createDate",
+        LocalDateTime.now().minusDays(givenRefundPossibleDate + 1));
+    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+        .thenReturn(Optional.of(givenPurchaseItem));
+
+    // - purchaseItemService.refundIsPossible() 세팅
+    when(mockPurchaseItemService.refundIsPossible(any())).thenReturn(true);
+
+    // when
+    assertThrows(
+        PassedRefundRequest.class,
         () ->
             target.saveRefund(
                 givenMemberId, givenPurchaseItemId, givenRequestTitle, givenRequestContent));

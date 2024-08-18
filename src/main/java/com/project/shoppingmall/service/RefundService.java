@@ -13,8 +13,10 @@ import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,9 @@ public class RefundService {
   private final MemberService memberService;
   private final PurchaseItemService purchaseItemService;
   private final IamportClient iamportClient;
+
+  @Value("${project_role.refund.create_possible_day}")
+  private Integer refundSavePossibleDate;
 
   @Transactional
   public Refund saveRefund(
@@ -44,6 +49,11 @@ public class RefundService {
     }
     if (!purchaseItem.getPurchase().getState().equals(PurchaseStateType.COMPLETE)) {
       throw new DataNotFound("결제가 되지 않은 구매에 대해 환불은 불가능합니다.");
+    }
+    if (purchaseItem
+        .getCreateDate()
+        .isBefore(LocalDateTime.now().minusDays(refundSavePossibleDate))) {
+      throw new PassedRefundRequest(refundSavePossibleDate + "일이 지난 구매에 대해서는 환불처리가 불가능합니다.");
     }
     if (!purchaseItemService.refundIsPossible(purchaseItem)) {
       throw new ProcessOrCompleteRefund("이미 진행중이거나 완료된 환불이 존재합니다.");

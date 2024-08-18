@@ -147,4 +147,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult RecentlyPurchasedProductHandler(RecentlyPurchasedProduct e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "정해진 일자 이내에 구매기록이 없는 제품만 삭제가능합니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(PassedRefundRequest.class)
+  public ErrorResult PassedRefundRequestHandler(PassedRefundRequest e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "정해진 일자 이내에 구매기록이 없는 제품만 삭제가능합니다.");
+  }
 }
