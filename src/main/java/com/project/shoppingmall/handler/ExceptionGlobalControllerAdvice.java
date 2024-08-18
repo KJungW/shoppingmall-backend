@@ -47,7 +47,7 @@ public class ExceptionGlobalControllerAdvice {
   @ResponseStatus(code = HttpStatus.BAD_REQUEST)
   @ExceptionHandler(DataNotFound.class)
   public ErrorResult DataNotFoundExceptionHandler(DataNotFound e) {
-    return new ErrorResult(ErrorCode.BAD_INPUT, "데이터가 존재하진 않습니다.");
+    return new ErrorResult(ErrorCode.BAD_INPUT, "데이터가 존재하지 않습니다.");
   }
 
   @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -152,5 +152,11 @@ public class ExceptionGlobalControllerAdvice {
   @ExceptionHandler(PassedRefundRequest.class)
   public ErrorResult PassedRefundRequestHandler(PassedRefundRequest e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "정해진 일자 이내에 구매기록이 없는 제품만 삭제가능합니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AlreadyExistReview.class)
+  public ErrorResult AlreadyExistReviewHandler(AlreadyExistReview e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미 현재 구매 아이템에 대해 작성한 리뷰가 이미 존재합니다.");
   }
 }
