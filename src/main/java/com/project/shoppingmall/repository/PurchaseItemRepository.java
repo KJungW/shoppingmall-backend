@@ -2,6 +2,8 @@ package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.PurchaseItem;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +18,7 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
   @Query(
       "select p from PurchaseItem p " + "left join fetch p.review r " + "where r.id = :reviewId ")
   Optional<PurchaseItem> findByReviewId(long reviewId);
+
+  @Query("select pi from PurchaseItem pi where pi.productId = :productId")
+  Slice<PurchaseItem> findLatestByProduct(long productId, Pageable pageable);
 }

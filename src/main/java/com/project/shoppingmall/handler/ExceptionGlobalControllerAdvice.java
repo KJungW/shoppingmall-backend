@@ -2,6 +2,7 @@ package com.project.shoppingmall.handler;
 
 import com.project.shoppingmall.dto.exception.ErrorResult;
 import com.project.shoppingmall.exception.*;
+import com.project.shoppingmall.service.RecentlyPurchasedProduct;
 import com.project.shoppingmall.type.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -139,5 +140,11 @@ public class ExceptionGlobalControllerAdvice {
   @ExceptionHandler(AddDiscontinuedProductInBasket.class)
   public ErrorResult AddDiscontinuedProductInBasketHandler(AddDiscontinuedProductInBasket e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "판매중단된 제품은 장바구니에 담을 수 없습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(RecentlyPurchasedProduct.class)
+  public ErrorResult RecentlyPurchasedProductHandler(RecentlyPurchasedProduct e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "정해진 일자 이내에 구매기록이 없는 제품만 삭제가능합니다.");
   }
 }

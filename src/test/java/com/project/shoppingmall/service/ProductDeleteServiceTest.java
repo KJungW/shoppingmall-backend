@@ -5,15 +5,14 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductRepository;
-import com.project.shoppingmall.testdata.BasketItemBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.ProductReportBuilder;
-import com.project.shoppingmall.testdata.ReviewBuilder;
+import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ class ProductDeleteServiceTest {
   private ReviewDeleteService mockReviewDeleteService;
   private ReportService mockReportService;
   private ReportDeleteService mockReportDeleteService;
+  private PurchaseItemService mockPurchaseItemService;
 
   @BeforeEach
   public void beforeEach() {
@@ -44,6 +44,7 @@ class ProductDeleteServiceTest {
     mockReviewDeleteService = mock(ReviewDeleteService.class);
     mockReportService = mock(ReportService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
+    mockPurchaseItemService = mock(PurchaseItemService.class);
     target =
         new ProductDeleteService(
             mockProductService,
@@ -53,7 +54,10 @@ class ProductDeleteServiceTest {
             mockReviewService,
             mockReviewDeleteService,
             mockReportService,
-            mockReportDeleteService);
+            mockReportDeleteService,
+            mockPurchaseItemService);
+
+    ReflectionTestUtils.setField(target, "productDeletePossibleDate", 30);
   }
 
   @Test
@@ -69,6 +73,10 @@ class ProductDeleteServiceTest {
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
     when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // - purchaseItemService.findLatestByProduct() 세팅
+    when(mockPurchaseItemService.findLatestByProduct(anyLong(), anyInt()))
+        .thenReturn(new ArrayList<>());
 
     // - basketItemService.findAllByProduct() 세팅
     List<BasketItem> givenBasketItems =
@@ -142,5 +150,33 @@ class ProductDeleteServiceTest {
     // when
     assertThrows(
         DataNotFound.class, () -> target.deleteProductBySeller(givenSellerId, givenProductId));
+  }
+
+  @Test
+  @DisplayName("deleteProductBySeller() : 최근 구매기록이 존재하는 제품의 삭제 시도")
+  public void deleteProductBySeller_RecentlyPurchasedProduct() throws IOException {
+    // given
+    // - 인자세팅
+    long givenSellerId = 10L;
+    long givenProductId = 20L;
+
+    // - productRepository.findByIdWithSeller() 세팅
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
+    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // - purchaseItemService.findLatestByProduct() 세팅
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
+    ReflectionTestUtils.setField(
+        givenPurchaseItem, "createDate", LocalDateTime.now().minusDays(10));
+    List<PurchaseItem> givenPurchaseItemList = new ArrayList<>(List.of(givenPurchaseItem));
+    when(mockPurchaseItemService.findLatestByProduct(anyLong(), anyInt()))
+        .thenReturn(givenPurchaseItemList);
+
+    // when
+    assertThrows(
+        RecentlyPurchasedProduct.class,
+        () -> target.deleteProductBySeller(givenSellerId, givenProductId));
   }
 }

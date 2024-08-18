@@ -7,6 +7,8 @@ import com.project.shoppingmall.type.RefundStateType;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,5 +45,11 @@ public class PurchaseItemService {
 
   public Optional<PurchaseItem> findByReviewId(long reviewId) {
     return purchaseItemRepository.findByReviewId(reviewId);
+  }
+
+  public List<PurchaseItem> findLatestByProduct(long productId, int queryPurchaseItemCount) {
+    PageRequest pageRequest =
+        PageRequest.of(0, queryPurchaseItemCount, Sort.by(Sort.Direction.DESC, "createDate"));
+    return purchaseItemRepository.findLatestByProduct(productId, pageRequest).getContent();
   }
 }
