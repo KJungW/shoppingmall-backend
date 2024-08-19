@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
+import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.entity.Manager;
+import com.project.shoppingmall.entity.ManagerToken;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.repository.ManagerRepository;
+import com.project.shoppingmall.exception.JwtTokenException;
+import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.testdata.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.util.JwtUtil;
@@ -18,15 +21,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class AuthManagerTokenServiceTest {
   private AuthManagerTokenService target;
-  private ManagerRepository mockManagerRepository;
+  private ManagerService mockManagerService;
   private JwtUtil mockJwtUtil;
   private static MockedStatic<PasswordEncoderUtil> mockPasswordEncoderUtil;
 
   @BeforeEach
   public void beforeEach() {
-    mockManagerRepository = mock(ManagerRepository.class);
+    mockManagerService = mock(ManagerService.class);
     mockJwtUtil = mock(JwtUtil.class);
-    target = new AuthManagerTokenService(mockManagerRepository, mockJwtUtil);
+    target = new AuthManagerTokenService(mockManagerService, mockJwtUtil);
 
     mockPasswordEncoderUtil = mockStatic(PasswordEncoderUtil.class);
   }
@@ -50,8 +53,7 @@ class AuthManagerTokenServiceTest {
     Manager givenManager = ManagerBuilder.fullData().build();
     ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
     ReflectionTestUtils.setField(givenManager, "role", givenManagerRoleType);
-    when(mockManagerRepository.findBySerialNumber(anyString()))
-        .thenReturn(Optional.of(givenManager));
+    when(mockManagerService.findBySerialNumber(anyString())).thenReturn(Optional.of(givenManager));
 
     // - PasswordEncoderUtil.checkPassword() 세팅
     mockPasswordEncoderUtil
@@ -89,8 +91,7 @@ class AuthManagerTokenServiceTest {
     Manager givenManager = ManagerBuilder.fullData().build();
     ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
     ReflectionTestUtils.setField(givenManager, "role", givenManagerRoleType);
-    when(mockManagerRepository.findBySerialNumber(anyString()))
-        .thenReturn(Optional.of(givenManager));
+    when(mockManagerService.findBySerialNumber(anyString())).thenReturn(Optional.of(givenManager));
 
     // - PasswordEncoderUtil.checkPassword() 세팅
     mockPasswordEncoderUtil
@@ -99,5 +100,56 @@ class AuthManagerTokenServiceTest {
 
     // when then
     assertThrows(DataNotFound.class, () -> target.longinManager(givenSerialNumber, givenPassword));
+  }
+
+  @Test()
+  @DisplayName("reissueRefreshAndAccess() : 정상흐름")
+  public void reissueRefreshAndAccess_ok() {
+    // given
+    String givenInputRefreshToken = "testInputRefreshToken";
+
+    long givenMangerId = 10L;
+    ManagerRoleType givenRoleType = ManagerRoleType.ROLE_COMMON_MANAGER;
+    RefreshTokenData givenInputRefreshTokenData =
+        new RefreshTokenData(givenMangerId, givenRoleType.toString());
+    when(mockJwtUtil.decodeRefreshToken(anyString())).thenReturn(givenInputRefreshTokenData);
+
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ManagerToken givenManagerToken = new ManagerToken(givenInputRefreshToken);
+    ReflectionTestUtils.setField(givenManager, "id", givenMangerId);
+    ReflectionTestUtils.setField(givenManager, "token", givenManagerToken);
+    when(mockManagerService.findById(anyLong())).thenReturn(Optional.of(givenManager));
+
+    String givenNewRefreshToken = "testNewRefreshToken";
+    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenNewRefreshToken);
+
+    String givenNewAccessToken = "testNewAccessToken";
+    when(mockJwtUtil.createAccessToken(any())).thenReturn(givenNewAccessToken);
+
+    // when
+    RefreshAndAccessToken reissueResult = target.reissueRefreshAndAccess(givenInputRefreshToken);
+
+    // then
+    assertEquals(givenNewRefreshToken, reissueResult.getRefreshToken());
+    assertEquals(givenNewAccessToken, reissueResult.getAccessToken());
+    assertEquals(givenNewRefreshToken, givenManager.getToken().getRefresh());
+  }
+
+  @Test()
+  @DisplayName("reissueRefreshAndAccess() : 조회된 관리자 없음")
+  public void reissueRefreshAndAccess_noManager() {
+    // given
+    String givenInputRefreshToken = "testInputRefreshToken";
+
+    long givenMangerId = 10L;
+    ManagerRoleType givenRoleType = ManagerRoleType.ROLE_COMMON_MANAGER;
+    RefreshTokenData givenInputRefreshTokenData =
+        new RefreshTokenData(givenMangerId, givenRoleType.toString());
+    when(mockJwtUtil.decodeRefreshToken(anyString())).thenReturn(givenInputRefreshTokenData);
+
+    when(mockManagerService.findById(anyLong())).thenReturn(Optional.empty());
+
+    assertThrows(
+        JwtTokenException.class, () -> target.reissueRefreshAndAccess(givenInputRefreshToken));
   }
 }
