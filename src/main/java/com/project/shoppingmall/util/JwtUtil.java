@@ -4,7 +4,6 @@ import com.project.shoppingmall.dto.token.AccessTokenData;
 import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.exception.JwtTokenException;
 import com.project.shoppingmall.type.JwtTokenType;
-import com.project.shoppingmall.type.MemberRoleType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
@@ -70,8 +69,7 @@ public class JwtUtil {
         throw new JwtTokenException("refresh Token이 아닌 다른 타입의 토큰입니다.");
 
       Long id = payload.get("id", Long.class);
-      MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
-      return new RefreshTokenData(id, role);
+      return new RefreshTokenData(id, payload.get("role", String.class));
 
     } catch (io.jsonwebtoken.JwtException | IllegalArgumentException | JwtTokenException ex) {
       throw new JwtTokenException("유효하지 않은 토큰입니다.");
@@ -88,8 +86,7 @@ public class JwtUtil {
         throw new JwtTokenException("access Token이 아닌 다른 타입의 토큰입니다.");
 
       Long id = payload.get("id", Long.class);
-      MemberRoleType role = MemberRoleType.valueOf(payload.get("role", String.class));
-      return new AccessTokenData(id, role);
+      return new AccessTokenData(id, payload.get("role", String.class));
 
     } catch (io.jsonwebtoken.JwtException | IllegalArgumentException | JwtTokenException ex) {
       throw new JwtTokenException("유효하지 않은 토큰입니다.");

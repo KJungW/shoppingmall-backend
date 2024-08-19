@@ -2,7 +2,7 @@ package com.project.shoppingmall.controller.email;
 
 import com.project.shoppingmall.controller.email.input.InputRegisterEmail;
 import com.project.shoppingmall.controller.email.input.InputRequestEmailRegister;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.service.email.EmailRegistrationService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -27,9 +27,9 @@ public class EmailController {
   @PostMapping("/registration/request")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void requestEmailRegister(@Valid @RequestBody InputRequestEmailRegister input) {
-    AuthUserDetail authUserDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    emailRegistrationService.sendCertificationEmail(authUserDetail.getId(), input.getEmail());
+    AuthMemberDetail authMemberDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    emailRegistrationService.sendCertificationEmail(authMemberDetail.getId(), input.getEmail());
   }
 
   @GetMapping("/registration")

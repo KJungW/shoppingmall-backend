@@ -89,7 +89,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
   private MemberToken makeRefreshToken(Member member) {
     String refreshToken =
-        jwtUtil.createRefreshToken(new RefreshTokenData(member.getId(), member.getRole()));
+        jwtUtil.createRefreshToken(
+            new RefreshTokenData(member.getId(), member.getRole().toString()));
     MemberToken memberToken = new MemberToken(refreshToken);
     member.updateRefreshToken(memberToken);
     return memberToken;

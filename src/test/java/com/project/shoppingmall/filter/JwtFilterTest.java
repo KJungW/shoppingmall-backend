@@ -3,7 +3,7 @@ package com.project.shoppingmall.filter;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.token.AccessTokenData;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
 import com.project.shoppingmall.type.MemberRoleType;
@@ -51,13 +51,14 @@ class JwtFilterTest {
     // - jwtUtil.decodeAccessToken() 세팅
     Long givenMemberId = 6L;
     MemberRoleType givenMemberRole = MemberRoleType.ROLE_MEMBER;
-    AccessTokenData givenAccessTokenData = new AccessTokenData(givenMemberId, givenMemberRole);
+    AccessTokenData givenAccessTokenData =
+        new AccessTokenData(givenMemberId, givenMemberRole.toString());
     when(mockJwtUtil.decodeAccessToken(anyString())).thenReturn(givenAccessTokenData);
 
     // - authUserDetailService.loadUserByUsername() 세팅
-    AuthUserDetail givenAuthUserDetail = new AuthUserDetail(givenMemberId, givenMemberRole);
+    AuthMemberDetail givenAuthMemberDetail = new AuthMemberDetail(givenMemberId, givenMemberRole);
     when(mockAuthMemberDetailService.loadUserByUsername(anyString()))
-        .thenReturn(givenAuthUserDetail);
+        .thenReturn(givenAuthMemberDetail);
 
     // - SecurityContextHolder 세팅
     SecurityContext givenSecurityContext = mock(SecurityContext.class);
@@ -78,7 +79,7 @@ class JwtFilterTest {
     ArgumentCaptor<UsernamePasswordAuthenticationToken> authTokenCaptor =
         ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
     verify(givenSecurityContext, times(1)).setAuthentication(authTokenCaptor.capture());
-    assertEquals(givenAuthUserDetail, authTokenCaptor.getValue().getPrincipal());
+    assertEquals(givenAuthMemberDetail, authTokenCaptor.getValue().getPrincipal());
     assertEquals(
         givenMemberRole.toString(),
         authTokenCaptor.getValue().getAuthorities().iterator().next().getAuthority());

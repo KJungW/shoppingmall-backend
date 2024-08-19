@@ -3,7 +3,7 @@ package com.project.shoppingmall.controller.refund_retrieve;
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFinaAllByBuyer;
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllAboutPurchaseItem;
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllBySeller;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
@@ -29,8 +29,8 @@ public class RefundRetrieveController {
   public OutputFinaAllByBuyer findAllByBuyer(
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<PurchaseItem> sliceResult =
         purchaseItemRetrieveService.retrieveRefundedAllForBuyer(
             userDetail.getId(), sliceNumber, sliceSize);
@@ -42,8 +42,8 @@ public class RefundRetrieveController {
   public OutputFindAllBySeller findAllBySeller(
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<PurchaseItem> sliceResult =
         purchaseItemRetrieveService.retrieveRefundedAllForSeller(
             userDetail.getId(), sliceNumber, sliceSize);
@@ -56,8 +56,8 @@ public class RefundRetrieveController {
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize,
       @RequestParam("purchaseItemId") long purchaseItemId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<Refund> sliceResult =
         refundRetrieveService.retrieveAllByPurchaseItem(
             userDetail.getId(), purchaseItemId, sliceNumber, sliceSize);

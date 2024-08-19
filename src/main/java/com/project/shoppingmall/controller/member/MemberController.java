@@ -3,7 +3,7 @@ package com.project.shoppingmall.controller.member;
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
 import com.project.shoppingmall.controller.member.output.OutputGetMember;
 import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.member.MemberService;
@@ -22,8 +22,8 @@ public class MemberController {
   @GetMapping("")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputGetMember getMember() {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Member member =
         memberService
             .findById(userDetail.getId())
@@ -35,8 +35,8 @@ public class MemberController {
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputUpdateMemberInfo updateMemberInfo(
       @Valid @ModelAttribute InputUpdateMemberInfo memberInfo) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Member member =
         memberService.updateMemberNickNameAndProfileImg(
             userDetail.getId(), memberInfo.getNickName(), memberInfo.getProfileImg());

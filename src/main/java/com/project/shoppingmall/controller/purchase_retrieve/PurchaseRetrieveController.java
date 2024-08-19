@@ -2,7 +2,7 @@ package com.project.shoppingmall.controller.purchase_retrieve;
 
 import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrievePurchaseBySeller;
 import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrievePurchasesByBuyer;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
@@ -28,8 +28,8 @@ public class PurchaseRetrieveController {
   public OutputRetrievePurchasesByBuyer retrievePurchasesByBuyer(
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<Purchase> sliceResult =
         purchaseRetrieveService.retrieveAllByMember(userDetail.getId(), sliceNumber, sliceSize);
     return new OutputRetrievePurchasesByBuyer(sliceResult);
@@ -41,8 +41,8 @@ public class PurchaseRetrieveController {
       @PositiveOrZero @RequestParam("sliceNumber") int sliceNumber,
       @Positive @RequestParam("sliceSize") int sliceSize,
       @RequestParam("productId") long productId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Slice<PurchaseItem> sliceResult =
         purchaseItemRetrieveService.retrieveAllForSeller(
             userDetail.getId(), productId, sliceNumber, sliceSize);

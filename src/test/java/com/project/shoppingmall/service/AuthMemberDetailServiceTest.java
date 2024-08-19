@@ -3,7 +3,7 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
@@ -41,7 +41,7 @@ class AuthMemberDetailServiceTest {
     when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when
-    AuthUserDetail resultUserDetail = (AuthUserDetail) target.loadUserByUsername(rightMemberId);
+    AuthMemberDetail resultUserDetail = (AuthMemberDetail) target.loadUserByUsername(rightMemberId);
 
     // then
     assertEquals(givenMemberId, resultUserDetail.getId());

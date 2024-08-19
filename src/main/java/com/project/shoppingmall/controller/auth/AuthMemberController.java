@@ -1,7 +1,7 @@
 package com.project.shoppingmall.controller.auth;
 
-import com.project.shoppingmall.controller.auth.dto.ReissueOutput;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.controller.auth.output.ReissueOutput;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
 import com.project.shoppingmall.exception.TokenNotFound;
 import com.project.shoppingmall.service.auth.AuthMemberTokenService;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthMemberController {
   private final JwtUtil jwtUtil;
   private final CookieUtil cookieUtil;
   private final AuthMemberTokenService authMemberTokenService;
@@ -40,8 +40,8 @@ public class AuthController {
   @GetMapping("/logout")
   public void logout(HttpServletResponse response) {
     deleteRefreshTokenInResponse(response);
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     authMemberTokenService.deleteRefreshToken(userDetail.getId());
   }
 

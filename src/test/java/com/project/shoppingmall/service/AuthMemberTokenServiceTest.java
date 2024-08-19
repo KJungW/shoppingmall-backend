@@ -42,7 +42,7 @@ class AuthMemberTokenServiceTest {
     // - jwtUtil.decodeRefreshToken() 세팅
     Long givenMemberId = 10L;
     RefreshTokenData givenInputRefreshData =
-        new RefreshTokenData(givenMemberId, MemberRoleType.ROLE_MEMBER);
+        new RefreshTokenData(givenMemberId, MemberRoleType.ROLE_MEMBER.toString());
     when(mockJwtUtil.decodeRefreshToken(anyString())).thenReturn(givenInputRefreshData);
 
     // - memberService.findById() 세팅
@@ -83,7 +83,7 @@ class AuthMemberTokenServiceTest {
     // - jwtUtil.decodeRefreshToken() 세팅
     Long givenMemberId = 10L;
     RefreshTokenData givenInputRefreshData =
-        new RefreshTokenData(givenMemberId, MemberRoleType.ROLE_MEMBER);
+        new RefreshTokenData(givenMemberId, MemberRoleType.ROLE_MEMBER.toString());
     when(mockJwtUtil.decodeRefreshToken(anyString())).thenReturn(givenInputRefreshData);
 
     // - memberService.findById() 세팅

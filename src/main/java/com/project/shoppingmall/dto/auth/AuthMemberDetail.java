@@ -11,11 +11,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
-public class AuthUserDetail implements UserDetails {
+public class AuthMemberDetail implements UserDetails {
   private final Long id;
   private final MemberRoleType role;
 
-  public AuthUserDetail(Long id, MemberRoleType role) {
+  public AuthMemberDetail(Long id, MemberRoleType role) {
     this.id = id;
     this.role = role;
   }

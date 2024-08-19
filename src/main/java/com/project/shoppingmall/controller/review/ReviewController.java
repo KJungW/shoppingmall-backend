@@ -4,7 +4,7 @@ import com.project.shoppingmall.controller.review.input.InputSaveReview;
 import com.project.shoppingmall.controller.review.input.InputUpdateReview;
 import com.project.shoppingmall.controller.review.output.OutputSaveReview;
 import com.project.shoppingmall.controller.review.output.OutputUpdateReview;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
 import com.project.shoppingmall.dto.review.ReviewUpdateData;
 import com.project.shoppingmall.entity.Review;
@@ -28,8 +28,8 @@ public class ReviewController {
   public OutputSaveReview saveReview(
       @Valid @RequestPart(value = "reviewData") InputSaveReview input,
       @RequestPart(value = "reviewImage", required = false) MultipartFile reviewImage) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     ReviewMakeData makeData =
         ReviewMakeData.builder()
             .writerId(userDetail.getId())
@@ -48,8 +48,8 @@ public class ReviewController {
   public OutputUpdateReview updateReview(
       @Valid @RequestPart(value = "reviewData") InputUpdateReview input,
       @RequestPart(value = "reviewImage", required = false) MultipartFile reviewImage) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     ReviewUpdateData updateData =
         ReviewUpdateData.builder()
             .writerId(userDetail.getId())
@@ -66,8 +66,8 @@ public class ReviewController {
   @DeleteMapping("/review/{reviewId}")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void deleteReview(@PathVariable("reviewId") Long reviewId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     reviewDeleteService.deleteReviewByWriter(userDetail.getId(), reviewId);
   }
 }

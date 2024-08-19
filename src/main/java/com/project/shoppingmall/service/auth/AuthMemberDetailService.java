@@ -1,6 +1,6 @@
 package com.project.shoppingmall.service.auth;
 
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.member.MemberService;
@@ -24,6 +24,6 @@ public class AuthMemberDetailService implements UserDetailsService {
         memberService
             .findById(id)
             .orElseThrow(() -> new DataNotFound("현재 ID에 해당하는 사용자가 존재하지 않습니다."));
-    return new AuthUserDetail(member.getId(), member.getRole());
+    return new AuthMemberDetail(member.getId(), member.getRole());
   }
 }

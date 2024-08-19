@@ -2,7 +2,7 @@ package com.project.shoppingmall.controller.report;
 
 import com.project.shoppingmall.controller.report.input.InputSaveReportAboutProduct;
 import com.project.shoppingmall.controller.report.input.InputSaveReportAboutReview;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.service.review.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class ReportController {
   @PostMapping("/report")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void saveReportAboutProduct(@Valid @RequestBody InputSaveReportAboutProduct input) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     reportService.saveProductReport(
         userDetail.getId(),
         input.getProductId(),
@@ -32,8 +32,8 @@ public class ReportController {
   @PostMapping("/review/report")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void saveReportAboutReview(@Valid @RequestBody InputSaveReportAboutReview input) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     reportService.saveReviewReport(
         userDetail.getId(),
         input.getReviewId(),

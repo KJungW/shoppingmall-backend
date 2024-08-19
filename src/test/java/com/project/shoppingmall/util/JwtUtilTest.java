@@ -38,7 +38,8 @@ class JwtUtilTest {
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
 
     // when
-    String resultToken = jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole));
+    String resultToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole.toString()));
 
     // then
     Claims payload =
@@ -59,7 +60,8 @@ class JwtUtilTest {
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
 
     // when
-    String resultToken = jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole));
+    String resultToken =
+        jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole.toString()));
 
     // then
     Claims payload =
@@ -78,14 +80,15 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String givenToken = jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole));
+    String givenToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole.toString()));
 
     // when
     RefreshTokenData resultTokenData = jwtUtil.decodeRefreshToken(givenToken);
 
     // then
     assertEquals(givenId, resultTokenData.getId());
-    assertEquals(givenRole, resultTokenData.getRoleType());
+    assertEquals(givenRole, MemberRoleType.valueOf(resultTokenData.getRoleType()));
   }
 
   @Test
@@ -94,7 +97,8 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String givenToken = jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole));
+    String givenToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole.toString()));
     String damegedToken = givenToken.substring(1);
 
     // when then
@@ -112,7 +116,8 @@ class JwtUtilTest {
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
     ReflectionTestUtils.setField(jwtUtil, "refreshExpirationTime", -100000000L);
-    String expiredToken = jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole));
+    String expiredToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole.toString()));
 
     // when then
     assertThrows(
@@ -128,7 +133,8 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String accessToken = jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole));
+    String accessToken =
+        jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole.toString()));
 
     // when then
     assertThrows(
@@ -144,14 +150,15 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String givenToken = jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole));
+    String givenToken =
+        jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole.toString()));
 
     // when
     AccessTokenData resultTokenData = jwtUtil.decodeAccessToken(givenToken);
 
     // then
     assertEquals(givenId, resultTokenData.getId());
-    assertEquals(givenRole, resultTokenData.getRoleType());
+    assertEquals(givenRole, MemberRoleType.valueOf(resultTokenData.getRoleType()));
   }
 
   @Test
@@ -160,7 +167,8 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String givenToken = jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole));
+    String givenToken =
+        jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole.toString()));
     String damegedToken = givenToken.substring(1);
 
     // when then
@@ -178,7 +186,8 @@ class JwtUtilTest {
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
     ReflectionTestUtils.setField(jwtUtil, "accessExpirationTime", -100000L);
-    String expiredToken = jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole));
+    String expiredToken =
+        jwtUtil.createAccessToken(new AccessTokenData(givenId, givenRole.toString()));
 
     // when then
     assertThrows(
@@ -194,7 +203,8 @@ class JwtUtilTest {
     // given
     Long givenId = 3L;
     MemberRoleType givenRole = MemberRoleType.ROLE_MEMBER;
-    String refreshToken = jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole));
+    String refreshToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(givenId, givenRole.toString()));
 
     // when then
     assertThrows(

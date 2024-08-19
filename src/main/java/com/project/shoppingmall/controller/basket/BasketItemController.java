@@ -2,7 +2,7 @@ package com.project.shoppingmall.controller.basket;
 
 import com.project.shoppingmall.controller.basket.input.InputSaveBasketItem;
 import com.project.shoppingmall.controller.basket.output.OutputSaveBasketItem;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.basket.BasketDto;
 import com.project.shoppingmall.dto.basket.BasketItemDto;
 import com.project.shoppingmall.dto.basket.BasketItemMakeData;
@@ -28,24 +28,24 @@ public class BasketItemController {
   @GetMapping("/{basketItemId}")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public BasketItemDto getBasketItem(@PathVariable("basketItemId") Long basketId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return basketItemRetrieveService.getBasketItemDetail(userDetail.getId(), basketId);
   }
 
   @GetMapping("")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public BasketDto getBasket() {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return basketItemRetrieveService.getBasket(userDetail.getId());
   }
 
   @PostMapping
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputSaveBasketItem saveBasketItem(@Valid @RequestBody InputSaveBasketItem input) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     BasketItemMakeData basketItemMakeData =
         BasketItemMakeData.builder()
             .memberId(userDetail.getId())
@@ -61,8 +61,8 @@ public class BasketItemController {
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void deleteBasketItem(
       @Valid @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     basketItemDeleteService.deleteBasketItemByMember(userDetail.getId(), basketItemIdList);
   }
 }

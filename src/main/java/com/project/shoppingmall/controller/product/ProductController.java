@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller.product.output.OutputChangeProductToD
 import com.project.shoppingmall.controller.product.output.OutputChangeProductToOnSale;
 import com.project.shoppingmall.controller.product.output.OutputGetProduct;
 import com.project.shoppingmall.controller.product.output.OutputSaveProduct;
-import com.project.shoppingmall.dto.auth.AuthUserDetail;
+import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.exception.DataNotFound;
@@ -55,8 +55,8 @@ public class ProductController {
             .productImages(productImages)
             .blockImages(blockImages)
             .build();
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Product savedProduct = productService.save(userDetail.getId(), productMakeData);
     return new OutputSaveProduct(savedProduct.getId());
   }
@@ -80,8 +80,8 @@ public class ProductController {
             .productImages(productImages)
             .blockImages(blockImages)
             .build();
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     productService.update(userDetail.getId(), productData.getProductId(), productMakeData);
   }
 
@@ -89,8 +89,8 @@ public class ProductController {
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputChangeProductToOnSale ChangeProductToOnSale(
       @PathVariable("productId") Long productId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Product product = productService.changeProductToOnSale(userDetail.getId(), productId);
     return new OutputChangeProductToOnSale(product.getId());
   }
@@ -99,8 +99,8 @@ public class ProductController {
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputChangeProductToDiscontinued ChangeProductToDiscontinued(
       @PathVariable("productId") Long productId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Product product = productService.changeProductToDiscontinued(userDetail.getId(), productId);
     return new OutputChangeProductToDiscontinued(product.getId());
   }
@@ -108,8 +108,8 @@ public class ProductController {
   @DeleteMapping("/{productId}")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void deleteProduct(@PathVariable("productId") Long productId) {
-    AuthUserDetail userDetail =
-        (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     productDeleteService.deleteProductBySeller(userDetail.getId(), productId);
   }
 }
