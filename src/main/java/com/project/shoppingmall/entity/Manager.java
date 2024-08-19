@@ -17,7 +17,9 @@ public class Manager extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true)
   private String serialNumber;
+
   private String password;
 
   @Enumerated(EnumType.STRING)
@@ -37,5 +39,11 @@ public class Manager extends BaseEntity {
     this.serialNumber = serialNumber;
     this.password = PasswordEncoderUtil.encodePassword(password);
     this.role = role;
+  }
+
+  public void updateRefreshToken(ManagerToken token) {
+    if (token == null || token.getRefresh() == null || token.getRefresh().isBlank())
+      throw new ServerLogicError("Manger의 token필드에 비어있는 ManagerToken를 입력했습니다.");
+    this.token = token;
   }
 }
