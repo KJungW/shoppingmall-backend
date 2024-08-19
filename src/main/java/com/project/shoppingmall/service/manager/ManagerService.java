@@ -16,4 +16,8 @@ public class ManagerService {
   public Optional<Manager> findById(long managerId) {
     return managerRepository.findById(managerId);
   }
+
+  public Optional<Manager> findBySerialNumber(String serialNumber) {
+    return managerRepository.findBySerialNumber(serialNumber);
+  }
 }
