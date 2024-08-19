@@ -102,7 +102,7 @@ class AuthManagerTokenServiceTest {
     assertThrows(DataNotFound.class, () -> target.longinManager(givenSerialNumber, givenPassword));
   }
 
-  @Test()
+  @Test
   @DisplayName("reissueRefreshAndAccess() : 정상흐름")
   public void reissueRefreshAndAccess_ok() {
     // given
@@ -135,7 +135,7 @@ class AuthManagerTokenServiceTest {
     assertEquals(givenNewRefreshToken, givenManager.getToken().getRefresh());
   }
 
-  @Test()
+  @Test
   @DisplayName("reissueRefreshAndAccess() : 조회된 관리자 없음")
   public void reissueRefreshAndAccess_noManager() {
     // given
@@ -151,5 +151,36 @@ class AuthManagerTokenServiceTest {
 
     assertThrows(
         JwtTokenException.class, () -> target.reissueRefreshAndAccess(givenInputRefreshToken));
+  }
+
+  @Test
+  @DisplayName("deleteRefreshToken : 정상흐름")
+  public void deleteRefreshToken_ok() {
+    // given
+    long givenManagerId = 10L;
+
+    ManagerToken givenManagerToken = new ManagerToken("test fresh token");
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
+    ReflectionTestUtils.setField(givenManager, "token", givenManagerToken);
+    when(mockManagerService.findById(anyLong())).thenReturn(Optional.of(givenManager));
+
+    // when
+    target.deleteRefreshToken(givenManagerId);
+
+    // then
+    assertNull(givenManager.getToken());
+  }
+
+  @Test
+  @DisplayName("deleteRefreshToken : 조회된 관리자가 없음")
+  public void deleteRefreshToken_noManager() {
+    // given
+    long givenManagerId = 10L;
+
+    when(mockManagerService.findById(anyLong())).thenReturn(Optional.empty());
+
+    // when then
+    assertThrows(DataNotFound.class, () -> target.deleteRefreshToken(givenManagerId));
   }
 }
