@@ -2,10 +2,14 @@ package com.project.shoppingmall.controller.auth;
 
 import com.project.shoppingmall.controller.auth.input.InputLongManager;
 import com.project.shoppingmall.controller.auth.output.OutputLoginManager;
+import com.project.shoppingmall.controller.auth.output.OutputReissueManagerToken;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
+import com.project.shoppingmall.exception.TokenNotFound;
 import com.project.shoppingmall.service.auth.AuthManagerTokenService;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +31,23 @@ public class AuthManagerController {
         authManagerTokenService.longinManager(input.getSerialNumber(), input.getPassword());
     addRefreshTokenInResponse(response, longinResult.getRefreshToken());
     return new OutputLoginManager(longinResult.getAccessToken());
+  }
+
+  @GetMapping("/manager/reissue")
+  public OutputReissueManagerToken reissueManagerToken(
+      HttpServletRequest request, HttpServletResponse response) {
+    String refreshToken = findRefreshCookie(request);
+    RefreshAndAccessToken reissueResult =
+        authManagerTokenService.reissueRefreshAndAccess(refreshToken);
+    addRefreshTokenInResponse(response, reissueResult.getRefreshToken());
+    return new OutputReissueManagerToken(reissueResult.getAccessToken());
+  }
+
+  private String findRefreshCookie(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    String refreshToken = cookieUtil.findCookie("refresh", cookies);
+    if (refreshToken.isEmpty()) throw new TokenNotFound("refresh 토큰이 존재하지 않습니다.");
+    return refreshToken;
   }
 
   private void addRefreshTokenInResponse(HttpServletResponse response, String refreshToken) {

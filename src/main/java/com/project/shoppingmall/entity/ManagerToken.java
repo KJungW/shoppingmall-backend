@@ -20,8 +20,12 @@ public class ManagerToken extends BaseEntity {
   private String refresh;
 
   public ManagerToken(String refresh) {
+    updateRefresh(refresh);
+  }
+
+  public void updateRefresh(String refresh) {
     if (refresh == null || refresh.isBlank())
-      throw new ServerLogicError("ManagerToken을 생성할때 비어있는 refresh값을 입력했습니다.");
+      throw new ServerLogicError("ManagerToken.refresh에 비어있는 값이 입력되었습니다.");
     this.refresh = refresh;
   }
 }
