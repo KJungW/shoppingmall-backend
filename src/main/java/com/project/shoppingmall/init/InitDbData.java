@@ -9,6 +9,7 @@ import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.*;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.LoginType;
+import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
 import jakarta.annotation.PostConstruct;
@@ -31,6 +32,13 @@ public class InitDbData {
   @Value("${spring.jpa.hibernate.ddl-auto}")
   private String ddlType;
 
+  @Value("${project_account.root.serial_number}")
+  private String rootSerialNumber;
+
+  @Value("${project_account.root.password}")
+  private String rootPassword;
+
+  private final ManagerRepository managerRepository;
   private final ProductTypeRepository productTypeRepository;
   private final MemberRepository memberRepository;
   private final ProductRepository productRepository;
@@ -40,10 +48,23 @@ public class InitDbData {
 
   @PostConstruct
   public void init() {
+    initRootAccount();
     if (envType.equals("dev") || envType.equals("stage")) {
       if (ddlType.equals("create") || ddlType.equals("create-drop")) {
         initData();
       }
+    }
+  }
+
+  private void initRootAccount() {
+    if (managerRepository.findRootManger().isEmpty()) {
+      Manager rootManager =
+          Manager.builder()
+              .serialNumber(rootSerialNumber)
+              .password(rootPassword)
+              .role(ManagerRoleType.ROLE_ROOT_MANAGER)
+              .build();
+      managerRepository.save(rootManager);
     }
   }
 

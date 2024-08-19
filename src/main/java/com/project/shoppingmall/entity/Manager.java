@@ -2,6 +2,7 @@ package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.ManagerRoleType;
+import com.project.shoppingmall.util.PasswordEncoderUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,7 +35,7 @@ public class Manager extends BaseEntity {
       throw new ServerLogicError("Manager를 생성할때 비어있는 password값을 입력했습니다.");
     if (role == null) throw new ServerLogicError("Manager를 생성할때 비어있는 role값을 입력했습니다.");
     this.serialNumber = serialNumber;
-    this.password = password;
+    this.password = PasswordEncoderUtil.encodePassword(password);
     this.role = role;
   }
 }
