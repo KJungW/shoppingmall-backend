@@ -3,9 +3,12 @@ package com.project.shoppingmall.filter;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.token.AccessTokenData;
+import com.project.shoppingmall.service.auth.AuthManagerDetailService;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
+import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -25,16 +28,18 @@ class JwtFilterTest {
   private JwtFilter target;
   private JwtUtil mockJwtUtil;
   private AuthMemberDetailService mockAuthMemberDetailService;
+  private AuthManagerDetailService mockAuthManagerDetailService;
 
   @BeforeEach
   public void beforeEach() {
     mockJwtUtil = mock(JwtUtil.class);
     mockAuthMemberDetailService = mock(AuthMemberDetailService.class);
-    target = new JwtFilter(mockJwtUtil, mockAuthMemberDetailService);
+    mockAuthManagerDetailService = mock(AuthManagerDetailService.class);
+    target = new JwtFilter(mockJwtUtil, mockAuthMemberDetailService, mockAuthManagerDetailService);
   }
 
   @Test
-  @DisplayName("doFilterInternal() : 정상흐름")
+  @DisplayName("doFilterInternal() : 정상흐름 - 일반 회원의 토큰 입력")
   public void doFilterInternal_ok() throws ServletException, IOException {
     // given
     // - request 인자 세팅
@@ -82,6 +87,59 @@ class JwtFilterTest {
     assertEquals(givenAuthMemberDetail, authTokenCaptor.getValue().getPrincipal());
     assertEquals(
         givenMemberRole.toString(),
+        authTokenCaptor.getValue().getAuthorities().iterator().next().getAuthority());
+  }
+
+  @Test
+  @DisplayName("doFilterInternal() : 관리자의 토큰 입력")
+  public void doFilterInternal_manager() throws ServletException, IOException {
+    // given
+    // - request 인자 세팅
+    MockHttpServletRequest rightRequest = new MockHttpServletRequest();
+    String givenAccessToken = "testAccessToken123412341234";
+    rightRequest.addHeader("Authorization", "Bearer " + givenAccessToken);
+
+    // - response 인자 세팅
+    MockHttpServletResponse rightResponse = new MockHttpServletResponse();
+
+    // - filterchain 인자 세팅
+    FilterChain rightFilterChain = mock(FilterChain.class);
+
+    // - jwtUtil.decodeAccessToken() 세팅
+    Long givenManagerId = 6L;
+    ManagerRoleType givenManagerRole = ManagerRoleType.ROLE_COMMON_MANAGER;
+    AccessTokenData givenAccessTokenData =
+        new AccessTokenData(givenManagerId, givenManagerRole.toString());
+    when(mockJwtUtil.decodeAccessToken(anyString())).thenReturn(givenAccessTokenData);
+
+    // - authManagerDetailService.loadUserByUsername() 세팅
+    AuthManagerDetail givenAuthManagerDetail =
+        new AuthManagerDetail(givenManagerId, givenManagerRole);
+    when(mockAuthManagerDetailService.loadUserByUsername(anyString()))
+        .thenReturn(givenAuthManagerDetail);
+
+    // - SecurityContextHolder 세팅
+    SecurityContext givenSecurityContext = mock(SecurityContext.class);
+    SecurityContextHolder.setContext(givenSecurityContext);
+
+    // when
+    target.doFilterInternal(rightRequest, rightResponse, rightFilterChain);
+
+    // then
+    ArgumentCaptor<String> accessTokenCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockJwtUtil, times(1)).decodeAccessToken(accessTokenCaptor.capture());
+    assertEquals(givenAccessToken, accessTokenCaptor.getValue());
+
+    ArgumentCaptor<String> managerIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockAuthManagerDetailService, times(1)).loadUserByUsername(managerIdCaptor.capture());
+    assertEquals(givenManagerId.toString(), managerIdCaptor.getValue());
+
+    ArgumentCaptor<UsernamePasswordAuthenticationToken> authTokenCaptor =
+        ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+    verify(givenSecurityContext, times(1)).setAuthentication(authTokenCaptor.capture());
+    assertEquals(givenAuthManagerDetail, authTokenCaptor.getValue().getPrincipal());
+    assertEquals(
+        givenManagerRole.toString(),
         authTokenCaptor.getValue().getAuthorities().iterator().next().getAuthority());
   }
 
