@@ -1,7 +1,9 @@
 package com.project.shoppingmall.filter;
 
 import com.project.shoppingmall.dto.token.AccessTokenData;
+import com.project.shoppingmall.service.auth.AuthManagerDetailService;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
+import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
   private final AuthMemberDetailService authMemberDetailService;
+  private final AuthManagerDetailService authManagerDetailService;
 
   @Override
   protected void doFilterInternal(
@@ -31,8 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
       if (checkAuthHeader(authHeader)) {
         String accessToken = authHeader.substring(7);
         AccessTokenData accessTokenData = jwtUtil.decodeAccessToken(accessToken);
-        UserDetails userDetails =
-            authMemberDetailService.loadUserByUsername(accessTokenData.getId().toString());
+        UserDetails userDetails = makeUserDetail(accessTokenData);
         UsernamePasswordAuthenticationToken usernamePasswordToken =
             new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
@@ -47,5 +49,22 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private Boolean checkAuthHeader(String authHeader) {
     return authHeader != null && authHeader.startsWith("Bearer ");
+  }
+
+  private UserDetails makeUserDetail(AccessTokenData accessTokenData) {
+    if (checkAccessTokenOwnerIsMember(accessTokenData.getRoleType())) {
+      return authMemberDetailService.loadUserByUsername(accessTokenData.getId().toString());
+    } else {
+      return authManagerDetailService.loadUserByUsername(accessTokenData.getId().toString());
+    }
+  }
+
+  private Boolean checkAccessTokenOwnerIsMember(String role) {
+    try {
+      MemberRoleType.valueOf(role);
+      return true;
+    } catch (IllegalArgumentException ex) {
+      return false;
+    }
   }
 }
