@@ -46,4 +46,8 @@ public class Manager extends BaseEntity {
       throw new ServerLogicError("Manger의 token필드에 비어있는 ManagerToken를 입력했습니다.");
     this.token = token;
   }
+
+  public void deleteRefreshToken() {
+    this.token = null;
+  }
 }

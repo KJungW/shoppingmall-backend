@@ -65,6 +65,15 @@ public class AuthManagerTokenService {
     }
   }
 
+  @Transactional
+  public void deleteRefreshToken(Long managerId) {
+    Manager manager =
+        managerService
+            .findById(managerId)
+            .orElseThrow(() -> new DataNotFound("토큰에 해당하는 유저를 찾을 수 없습니다."));
+    manager.deleteRefreshToken();
+  }
+
   private RefreshAndAccessToken makeNewRefreshAndAccess(RefreshTokenData tokenData) {
     AccessTokenData accessTokenData =
         new AccessTokenData(tokenData.getId(), tokenData.getRoleType());
