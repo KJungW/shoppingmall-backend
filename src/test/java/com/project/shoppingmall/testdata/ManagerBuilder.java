@@ -8,6 +8,6 @@ public class ManagerBuilder {
     return Manager.builder()
         .serialNumber("sljcxiov#@$@1Df")
         .password("fwoeijcxlkvjlkmlksdfi234124")
-        .role(ManagerRoleType.ROLE_COMMON_MANGER);
+        .role(ManagerRoleType.ROLE_COMMON_MANAGER);
   }
 }

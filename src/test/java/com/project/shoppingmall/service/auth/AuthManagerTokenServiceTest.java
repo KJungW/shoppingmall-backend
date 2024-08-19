@@ -46,7 +46,7 @@ class AuthManagerTokenServiceTest {
 
     // - managerRepository.findBySerialNumber() 세팅
     long givenManagerId = 10L;
-    ManagerRoleType givenManagerRoleType = ManagerRoleType.ROLE_COMMON_MANGER;
+    ManagerRoleType givenManagerRoleType = ManagerRoleType.ROLE_COMMON_MANAGER;
     Manager givenManager = ManagerBuilder.fullData().build();
     ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
     ReflectionTestUtils.setField(givenManager, "role", givenManagerRoleType);
@@ -85,7 +85,7 @@ class AuthManagerTokenServiceTest {
 
     // - managerRepository.findBySerialNumber() 세팅
     long givenManagerId = 10L;
-    ManagerRoleType givenManagerRoleType = ManagerRoleType.ROLE_COMMON_MANGER;
+    ManagerRoleType givenManagerRoleType = ManagerRoleType.ROLE_COMMON_MANAGER;
     Manager givenManager = ManagerBuilder.fullData().build();
     ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
     ReflectionTestUtils.setField(givenManager, "role", givenManagerRoleType);
