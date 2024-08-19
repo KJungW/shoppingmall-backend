@@ -5,7 +5,7 @@ import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.MemberToken;
-import com.project.shoppingmall.service.MemberService;
+import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;

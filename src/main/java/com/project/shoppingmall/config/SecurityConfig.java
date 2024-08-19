@@ -4,7 +4,7 @@ import com.project.shoppingmall.filter.JwtFilter;
 import com.project.shoppingmall.handler.auth.AuthorizationFailureHandler;
 import com.project.shoppingmall.handler.oauth2.OAuth2FailureHandler;
 import com.project.shoppingmall.handler.oauth2.OAuth2SuccessHandler;
-import com.project.shoppingmall.service.CustomOAuth2UserService;
+import com.project.shoppingmall.service.auth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

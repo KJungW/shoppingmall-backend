@@ -8,7 +8,7 @@ import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.delivery.DeliveryDto;
 import com.project.shoppingmall.dto.purchase.PurchaseItemMakeData;
 import com.project.shoppingmall.entity.Purchase;
-import com.project.shoppingmall.service.PurchaseService;
+import com.project.shoppingmall.service.purchase.PurchaseService;
 import com.project.shoppingmall.type.PaymentResultType;
 import jakarta.validation.Valid;
 import java.util.List;

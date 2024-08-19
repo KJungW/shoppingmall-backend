@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.service.MemberService;
+import com.project.shoppingmall.service.member.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

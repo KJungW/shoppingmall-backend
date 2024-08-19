@@ -4,7 +4,7 @@ import com.project.shoppingmall.controller.product_type.output.OutputGetAllProdu
 import com.project.shoppingmall.controller.product_type.output.OutputGetProductType;
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.service.ProductTypeService;
+import com.project.shoppingmall.service.product_type.ProductTypeService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

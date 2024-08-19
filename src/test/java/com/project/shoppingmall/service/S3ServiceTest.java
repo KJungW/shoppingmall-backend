@@ -3,6 +3,7 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.dto.file.FileUploadResult;
+import com.project.shoppingmall.service.s3.S3Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;

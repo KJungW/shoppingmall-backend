@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.token.AccessTokenData;
-import com.project.shoppingmall.service.AuthUserDetailService;
+import com.project.shoppingmall.service.auth.AuthMemberDetailService;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -24,13 +24,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class JwtFilterTest {
   private JwtFilter target;
   private JwtUtil mockJwtUtil;
-  private AuthUserDetailService mockAuthUserDetailService;
+  private AuthMemberDetailService mockAuthMemberDetailService;
 
   @BeforeEach
   public void beforeEach() {
     mockJwtUtil = mock(JwtUtil.class);
-    mockAuthUserDetailService = mock(AuthUserDetailService.class);
-    target = new JwtFilter(mockJwtUtil, mockAuthUserDetailService);
+    mockAuthMemberDetailService = mock(AuthMemberDetailService.class);
+    target = new JwtFilter(mockJwtUtil, mockAuthMemberDetailService);
   }
 
   @Test
@@ -56,7 +56,8 @@ class JwtFilterTest {
 
     // - authUserDetailService.loadUserByUsername() 세팅
     AuthUserDetail givenAuthUserDetail = new AuthUserDetail(givenMemberId, givenMemberRole);
-    when(mockAuthUserDetailService.loadUserByUsername(anyString())).thenReturn(givenAuthUserDetail);
+    when(mockAuthMemberDetailService.loadUserByUsername(anyString()))
+        .thenReturn(givenAuthUserDetail);
 
     // - SecurityContextHolder 세팅
     SecurityContext givenSecurityContext = mock(SecurityContext.class);
@@ -71,7 +72,7 @@ class JwtFilterTest {
     assertEquals(givenAccessToken, accessTokenCaptor.getValue());
 
     ArgumentCaptor<String> memberIdCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockAuthUserDetailService, times(1)).loadUserByUsername(memberIdCaptor.capture());
+    verify(mockAuthMemberDetailService, times(1)).loadUserByUsername(memberIdCaptor.capture());
     assertEquals(givenMemberId.toString(), memberIdCaptor.getValue());
 
     ArgumentCaptor<UsernamePasswordAuthenticationToken> authTokenCaptor =
@@ -107,7 +108,7 @@ class JwtFilterTest {
 
     // then
     verify(mockJwtUtil, times(0)).decodeAccessToken(any());
-    verify(mockAuthUserDetailService, times(0)).loadUserByUsername(any());
+    verify(mockAuthMemberDetailService, times(0)).loadUserByUsername(any());
     verify(givenSecurityContext, times(0)).setAuthentication(any());
   }
 
@@ -133,7 +134,7 @@ class JwtFilterTest {
 
     // then
     verify(mockJwtUtil, times(0)).decodeAccessToken(any());
-    verify(mockAuthUserDetailService, times(0)).loadUserByUsername(any());
+    verify(mockAuthMemberDetailService, times(0)).loadUserByUsername(any());
     verify(givenSecurityContext, times(0)).setAuthentication(any());
   }
 }

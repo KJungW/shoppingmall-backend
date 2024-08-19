@@ -2,7 +2,7 @@ package com.project.shoppingmall.controller.review_retrieve;
 
 import com.project.shoppingmall.controller.review_retrieve.output.OutputGetReviewsByProduct;
 import com.project.shoppingmall.entity.Review;
-import com.project.shoppingmall.service.ReviewRetrieveService;
+import com.project.shoppingmall.service.review.ReviewRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

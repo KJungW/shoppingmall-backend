@@ -3,7 +3,7 @@ package com.project.shoppingmall.controller.email;
 import com.project.shoppingmall.controller.email.input.InputRegisterEmail;
 import com.project.shoppingmall.controller.email.input.InputRequestEmailRegister;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
-import com.project.shoppingmall.service.EmailRegistrationService;
+import com.project.shoppingmall.service.email.EmailRegistrationService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;

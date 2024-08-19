@@ -2,7 +2,7 @@ package com.project.shoppingmall.handler;
 
 import com.project.shoppingmall.dto.exception.ErrorResult;
 import com.project.shoppingmall.exception.*;
-import com.project.shoppingmall.service.RecentlyPurchasedProduct;
+import com.project.shoppingmall.exception.RecentlyPurchasedProduct;
 import com.project.shoppingmall.type.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;

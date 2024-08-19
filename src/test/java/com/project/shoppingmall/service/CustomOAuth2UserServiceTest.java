@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.dto.oauth2.OAuth2UserPrinciple;
 import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
+import com.project.shoppingmall.service.auth.CustomOAuth2UserService;
 import com.project.shoppingmall.type.LoginType;
 import java.util.HashMap;
 import java.util.Map;

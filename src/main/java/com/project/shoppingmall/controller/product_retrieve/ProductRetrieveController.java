@@ -5,7 +5,7 @@ import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProd
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsByTypeWithFilter;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetRandomProducts;
 import com.project.shoppingmall.entity.Product;
-import com.project.shoppingmall.service.ProductRetrieveService;
+import com.project.shoppingmall.service.product.ProductRetrieveService;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;

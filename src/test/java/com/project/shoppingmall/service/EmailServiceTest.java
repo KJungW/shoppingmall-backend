@@ -2,6 +2,7 @@ package com.project.shoppingmall.service;
 
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.service.email.EmailService;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

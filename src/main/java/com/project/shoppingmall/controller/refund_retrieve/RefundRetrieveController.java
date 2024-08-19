@@ -6,8 +6,8 @@ import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllB
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
-import com.project.shoppingmall.service.PurchaseItemRetrieveService;
-import com.project.shoppingmall.service.RefundRetrieveService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
+import com.project.shoppingmall.service.refund.RefundRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

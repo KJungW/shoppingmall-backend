@@ -4,7 +4,7 @@ import com.project.shoppingmall.controller.auth.dto.ReissueOutput;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
 import com.project.shoppingmall.exception.TokenNotFound;
-import com.project.shoppingmall.service.AuthTokenService;
+import com.project.shoppingmall.service.auth.AuthMemberTokenService;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -25,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
   private final JwtUtil jwtUtil;
   private final CookieUtil cookieUtil;
-  private final AuthTokenService authTokenService;
+  private final AuthMemberTokenService authMemberTokenService;
 
   @GetMapping("/reissue")
   public ReissueOutput reissue(HttpServletRequest request, HttpServletResponse response) {
     String refreshToken = findRefreshCookie(request);
-    RefreshAndAccessToken reissueResult = authTokenService.reissueRefreshAndAccess(refreshToken);
+    RefreshAndAccessToken reissueResult =
+        authMemberTokenService.reissueRefreshAndAccess(refreshToken);
     addRefreshTokenInResponse(response, reissueResult.getRefreshToken());
     return new ReissueOutput(reissueResult.getAccessToken());
   }
@@ -41,7 +42,7 @@ public class AuthController {
     deleteRefreshTokenInResponse(response);
     AuthUserDetail userDetail =
         (AuthUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    authTokenService.deleteRefreshToken(userDetail.getId());
+    authMemberTokenService.deleteRefreshToken(userDetail.getId());
   }
 
   private String findRefreshCookie(HttpServletRequest request) {

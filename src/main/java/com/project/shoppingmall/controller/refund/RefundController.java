@@ -10,7 +10,7 @@ import com.project.shoppingmall.controller.refund.output.OutputRejectRefund;
 import com.project.shoppingmall.controller.refund.output.OutputRequestRefund;
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Refund;
-import com.project.shoppingmall.service.RefundService;
+import com.project.shoppingmall.service.refund.RefundService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

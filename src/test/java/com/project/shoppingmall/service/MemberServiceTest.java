@@ -3,6 +3,8 @@ package com.project.shoppingmall.service;
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.MemberRepository;
+import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
 import java.io.FileInputStream;

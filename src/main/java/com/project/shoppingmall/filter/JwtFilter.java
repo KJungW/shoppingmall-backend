@@ -1,7 +1,7 @@
 package com.project.shoppingmall.filter;
 
 import com.project.shoppingmall.dto.token.AccessTokenData;
-import com.project.shoppingmall.service.AuthUserDetailService;
+import com.project.shoppingmall.service.auth.AuthMemberDetailService;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,7 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
-  private final AuthUserDetailService authUserDetailService;
+  private final AuthMemberDetailService authMemberDetailService;
 
   @Override
   protected void doFilterInternal(
@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String accessToken = authHeader.substring(7);
         AccessTokenData accessTokenData = jwtUtil.decodeAccessToken(accessToken);
         UserDetails userDetails =
-            authUserDetailService.loadUserByUsername(accessTokenData.getId().toString());
+            authMemberDetailService.loadUserByUsername(accessTokenData.getId().toString());
         UsernamePasswordAuthenticationToken usernamePasswordToken =
             new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());

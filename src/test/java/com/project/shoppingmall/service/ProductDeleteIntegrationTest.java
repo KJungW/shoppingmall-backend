@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.entity.value.DeliveryInfo;
+import com.project.shoppingmall.service.product.ProductDeleteService;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
 import jakarta.persistence.EntityManager;

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.dto.oauth2.OAuth2UserPrinciple;
 import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.entity.Member;
-import com.project.shoppingmall.service.MemberService;
+import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;

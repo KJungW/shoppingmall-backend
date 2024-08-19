@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.repository.ReviewRetrieveRepository;
+import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.review.ReviewRetrieveService;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import java.io.IOException;
 import java.util.Optional;

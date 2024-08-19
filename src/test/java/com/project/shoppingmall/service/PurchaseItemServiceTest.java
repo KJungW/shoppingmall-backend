@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.repository.PurchaseItemRepository;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.testdata.PurchaseItemBuilder;
 import com.project.shoppingmall.testdata.RefundBuilder;
 import com.project.shoppingmall.type.RefundStateType;

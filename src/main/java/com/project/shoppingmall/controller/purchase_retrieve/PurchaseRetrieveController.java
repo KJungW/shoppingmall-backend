@@ -5,8 +5,8 @@ import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrie
 import com.project.shoppingmall.dto.auth.AuthUserDetail;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.service.PurchaseItemRetrieveService;
-import com.project.shoppingmall.service.PurchaseRetrieveService;
+import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

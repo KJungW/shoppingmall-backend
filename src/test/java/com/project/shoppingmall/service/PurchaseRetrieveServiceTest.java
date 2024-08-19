@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRetrieveRepository;
+import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.ArrayList;
 import java.util.Optional;

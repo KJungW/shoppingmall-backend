@@ -10,6 +10,8 @@ import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
+import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
+import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.io.IOException;
