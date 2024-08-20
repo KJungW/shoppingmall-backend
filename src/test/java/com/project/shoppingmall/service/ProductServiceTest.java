@@ -11,13 +11,12 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductRepository;
+import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.ProductMakeDataBuilder;
+import com.project.shoppingmall.testdata.*;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -26,15 +25,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class ProductServiceTest {
   private ProductService productService;
+  private ManagerService managerService;
   private MemberService memberService;
   private ProductTypeService productTypeService;
   private ProductRepository productRepository;
@@ -43,13 +41,15 @@ class ProductServiceTest {
 
   @BeforeEach
   public void beforeEach() {
+    managerService = mock(ManagerService.class);
     memberService = mock(MemberService.class);
     productTypeService = mock(ProductTypeService.class);
     productRepository = mock(ProductRepository.class);
     s3Service = mock(S3Service.class);
     jsonUtil = mockStatic(JsonUtil.class);
     productService =
-        new ProductService(memberService, productTypeService, productRepository, s3Service);
+        new ProductService(
+            managerService, memberService, productTypeService, productRepository, s3Service);
   }
 
   @AfterEach
@@ -387,5 +387,49 @@ class ProductServiceTest {
     assertEquals(givenProductId, product.getId());
     assertEquals(givenMemberId, product.getSeller().getId());
     assertEquals(ProductSaleType.DISCONTINUED, givenProduct.getSaleState());
+  }
+
+  @Test
+  @DisplayName("banProduct() : 정상흐름")
+  public void banProduct_ok() throws IOException {
+    // given
+    long givenManagerId = 10L;
+    long givenProductId = 20L;
+    boolean givenIsBan = true;
+
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
+    when(managerService.findById(Mockito.anyLong())).thenReturn(Optional.of(givenManager));
+
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    ReflectionTestUtils.setField(givenProduct, "isBan", !givenIsBan);
+    when(productService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    productService.banProduct(givenManagerId, givenProductId, givenIsBan);
+
+    // then
+    assertEquals(givenIsBan, givenProduct.getIsBan());
+  }
+
+  @Test
+  @DisplayName("banProduct() : 조회된 제품 없음")
+  public void banProduct_noProduct() throws IOException {
+    // given
+    long givenManagerId = 10L;
+    long givenProductId = 20L;
+    boolean givenIsBan = true;
+
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
+    when(managerService.findById(Mockito.anyLong())).thenReturn(Optional.of(givenManager));
+
+    when(productService.findById(anyLong())).thenReturn(Optional.empty());
+
+    // when then
+    assertThrows(
+        DataNotFound.class,
+        () -> productService.banProduct(givenManagerId, givenProductId, givenIsBan));
   }
 }
