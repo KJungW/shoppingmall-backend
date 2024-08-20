@@ -9,6 +9,7 @@ import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
+import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -25,6 +26,7 @@ public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final PurchaseItemService purchaseItemService;
   private final ProductService productService;
+  private final ManagerService managerService;
   private final S3Service s3Service;
 
   @Transactional
@@ -117,5 +119,17 @@ public class ReviewService {
 
   public ReviewScoresCalcResult calcReviewScoresInProduct(long productId) {
     return reviewRepository.calcReviewScoresInProduct(productId);
+  }
+
+  @Transactional
+  public Review banReview(long managerId, long reviewId, boolean isBan) {
+    Manager manager =
+        managerService
+            .findById(managerId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 관리자 데이터가 존재하지 않습니다."));
+    Review review =
+        findById(reviewId).orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰 데이터가 존재하지 않습니다."));
+    review.updateIsBan(isBan);
+    return review;
   }
 }

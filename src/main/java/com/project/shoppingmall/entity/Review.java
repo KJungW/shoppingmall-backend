@@ -47,7 +47,7 @@ public class Review extends BaseEntity {
     this.product = product;
     updateScore(score);
     updateTitle(title);
-    this.isBan = false;
+    updateIsBan(false);
     updateReviewImage(reviewImageUri, reviewImageDownloadUrl);
     updateDescription(description);
   }
@@ -77,5 +77,10 @@ public class Review extends BaseEntity {
   public void updateDescription(String description) {
     if (description == null || description.isBlank()) this.description = "";
     else this.description = description;
+  }
+
+  public void updateIsBan(Boolean isBan) {
+    if (isBan == null) throw new ServerLogicError("Review의 isBan에 비어있는 입력되었습니다.");
+    this.isBan = isBan;
   }
 }
