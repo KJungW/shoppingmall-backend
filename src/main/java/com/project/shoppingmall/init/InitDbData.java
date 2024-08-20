@@ -4,6 +4,8 @@ import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.dto.block.TextBlock;
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.entity.report.ProductReport;
+import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.entity.value.DeliveryInfo;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.*;
@@ -45,6 +47,8 @@ public class InitDbData {
   private final PurchaseRepository purchaseRepository;
   private final RefundRepository refundRepository;
   private final ReviewRepository reviewRepository;
+  private final ProductReportRepository productReportRepository;
+  private final ReviewReportRepository reviewReportRepository;
 
   @PostConstruct
   public void init() {
@@ -209,8 +213,17 @@ public class InitDbData {
             new ArrayList<>(Arrays.asList(multiOption1, multiOption2, multiOption3));
         product.updateMultiOptions(multiOptions);
         productRepository.save(product);
-
         if (type.getTypeName().equals(type1.getTypeName())) productListInType1.add(product);
+
+        // 제품마다 신고데이터 작성
+        ProductReport report =
+            ProductReport.builder()
+                .product(product)
+                .reporter(seller)
+                .title("제품을 신고합니다.")
+                .description("부적절한 제품입니다.")
+                .build();
+        productReportRepository.save(report);
       }
     }
 
@@ -288,6 +301,15 @@ public class InitDbData {
               .build();
       targetItem.registerReview(review);
       reviewRepository.save(review);
+
+      ReviewReport report =
+          ReviewReport.builder()
+              .review(review)
+              .reporter(seller)
+              .title("리뷰를 신고합니다.")
+              .description("부적절한 리뷰입니다.")
+              .build();
+      reviewReportRepository.save(report);
     }
   }
 }
