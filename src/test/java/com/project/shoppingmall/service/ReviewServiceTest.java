@@ -13,6 +13,7 @@ import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
+import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -21,10 +22,12 @@ import com.project.shoppingmall.testdata.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -35,6 +38,7 @@ class ReviewServiceTest {
   private ReviewRepository mockReviewRepository;
   private PurchaseItemService mockPurchaseItemService;
   private ProductService mockProductService;
+  private ManagerService mockManagerService;
   private S3Service mockS3Service;
 
   @BeforeEach
@@ -42,10 +46,15 @@ class ReviewServiceTest {
     mockReviewRepository = mock(ReviewRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockProductService = mock(ProductService.class);
+    mockManagerService = mock(ManagerService.class);
     mockS3Service = mock(S3Service.class);
     target =
         new ReviewService(
-            mockReviewRepository, mockPurchaseItemService, mockProductService, mockS3Service);
+            mockReviewRepository,
+            mockPurchaseItemService,
+            mockProductService,
+            mockManagerService,
+            mockS3Service);
   }
 
   @Test
@@ -502,5 +511,50 @@ class ReviewServiceTest {
 
     // when
     assertThrows(DataNotFound.class, () -> target.updateReview(givenUpdateData));
+  }
+
+  @Test
+  @DisplayName("banReview() : 정상흐름")
+  public void banReview_ok() throws IOException {
+    // given
+    long givenManagerId = 10L;
+    long givenReviewId = 20L;
+    boolean givenIsBan = true;
+
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
+    Mockito.when(mockManagerService.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(givenManager));
+
+    Review givenReview = ReviewBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
+    ReflectionTestUtils.setField(givenReview, "isBan", !givenIsBan);
+    Mockito.when(target.findById(anyLong())).thenReturn(Optional.of(givenReview));
+
+    // when
+    target.banReview(givenManagerId, givenReviewId, givenIsBan);
+
+    // then
+    Assertions.assertEquals(givenIsBan, givenReview.getIsBan());
+  }
+
+  @Test
+  @DisplayName("banReview() : 조회된 리뷰가 없음")
+  public void banReview_noReview() {
+    // given
+    long givenManagerId = 10L;
+    long givenReviewId = 20L;
+    boolean givenIsBan = true;
+
+    Manager givenManager = ManagerBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
+    Mockito.when(mockManagerService.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(givenManager));
+
+    Mockito.when(target.findById(anyLong())).thenReturn(Optional.empty());
+
+    // when then
+    assertThrows(
+        DataNotFound.class, () -> target.banReview(givenManagerId, givenReviewId, givenIsBan));
   }
 }
