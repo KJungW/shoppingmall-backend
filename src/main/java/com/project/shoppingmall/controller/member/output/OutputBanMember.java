@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OutputBanMember {
-  private Long bannedMemberId;
+  private Long memberId;
 }
