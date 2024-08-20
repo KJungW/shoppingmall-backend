@@ -129,6 +129,11 @@ public class Product extends BaseEntity {
     }
   }
 
+  public void updateIsBan(Boolean isBan) {
+    if (isBan == null) throw new ServerLogicError("Product의 isBan필드에 비어있는 값이 입력되었습니다.");
+    this.isBan = isBan;
+  }
+
   public void CalcFinalPrice() {
     this.finalPrice =
         PriceCalculateUtil.calculatePrice(this.price, this.discountAmount, this.discountRate);
