@@ -1,5 +1,6 @@
 package com.project.shoppingmall.entity;
 
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
 import jakarta.persistence.*;
@@ -56,7 +57,7 @@ public class Member extends BaseEntity {
     this.profileImageUrl = profileImageUrl;
     this.profileImageDownLoadUrl = profileImageDownLoadUrl;
     this.role = role;
-    this.isBan = isBan;
+    updateMemberBan(isBan);
     this.token = token;
   }
 
@@ -67,6 +68,11 @@ public class Member extends BaseEntity {
   public void updateProfile(String imageUri, String downloadUrl) {
     this.profileImageUrl = imageUri;
     this.profileImageDownLoadUrl = downloadUrl;
+  }
+
+  public void updateMemberBan(Boolean isBan) {
+    if (isBan == null) throw new ServerLogicError("Member.isBan 필드에 비어있는 값이 입력되었습니다.");
+    this.isBan = isBan;
   }
 
   public void registerEmail(String email) {

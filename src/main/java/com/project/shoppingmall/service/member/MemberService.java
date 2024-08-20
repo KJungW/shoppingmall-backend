@@ -1,9 +1,11 @@
 package com.project.shoppingmall.service.member;
 
 import com.project.shoppingmall.dto.file.FileUploadResult;
+import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.MemberRepository;
+import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.type.LoginType;
 import java.util.Optional;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
+  private final ManagerService managerService;
   private final MemberRepository memberRepository;
   private final S3Service s3Service;
 
@@ -45,6 +48,18 @@ public class MemberService {
         s3Service.uploadFile(profileImg, "profileImg/" + member.getId() + "-" + nickName + "/");
     member.updateProfile(uploadResult.getFileServerUri(), uploadResult.getDownLoadUrl());
     member.updateNickName(nickName);
+    return member;
+  }
+
+  @Transactional
+  public Member banMember(long managerId, long memberId, boolean isBan) {
+    Manager manager =
+        managerService
+            .findById(managerId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 관리자 데이터가 존재하지 않습니다."));
+    Member member =
+        findById(memberId).orElseThrow(() -> new DataNotFound("id에 해당하는 회원 데이터가 존재하지 않습니다."));
+    member.updateMemberBan(isBan);
     return member;
   }
 }
