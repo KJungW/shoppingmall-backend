@@ -78,7 +78,7 @@ public class Product extends BaseEntity {
     updateMultiOptions(multipleOptions);
     updateProductImages(productImages);
     updateContents(contents);
-    CalcFinalPrice();
+    calcFinalPrice();
   }
 
   public void changeProductType(ProductType type) {
@@ -134,7 +134,7 @@ public class Product extends BaseEntity {
     this.isBan = isBan;
   }
 
-  public void CalcFinalPrice() {
+  public void calcFinalPrice() {
     this.finalPrice =
         PriceCalculateUtil.calculatePrice(this.price, this.discountAmount, this.discountRate);
   }

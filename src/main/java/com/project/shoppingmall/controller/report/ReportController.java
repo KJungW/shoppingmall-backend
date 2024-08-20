@@ -3,7 +3,7 @@ package com.project.shoppingmall.controller.report;
 import com.project.shoppingmall.controller.report.input.InputSaveReportAboutProduct;
 import com.project.shoppingmall.controller.report.input.InputSaveReportAboutReview;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
-import com.project.shoppingmall.service.review.ReportService;
+import com.project.shoppingmall.service.report.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

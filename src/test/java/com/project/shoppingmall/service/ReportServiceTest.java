@@ -13,7 +13,7 @@ import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
-import com.project.shoppingmall.service.review.ReportService;
+import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.testdata.*;
 import java.io.IOException;

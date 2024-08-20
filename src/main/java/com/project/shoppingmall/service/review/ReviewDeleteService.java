@@ -9,6 +9,8 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.report.ReportDeleteService;
+import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.s3.S3Service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

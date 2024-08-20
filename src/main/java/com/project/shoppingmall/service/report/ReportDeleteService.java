@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.review;
+package com.project.shoppingmall.service.report;
 
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;

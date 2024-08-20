@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.review;
+package com.project.shoppingmall.service.report;
 
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
@@ -11,6 +11,7 @@ import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.review.ReviewService;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
