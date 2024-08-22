@@ -101,4 +101,8 @@ public class ProductBuilder {
         .productImages(givenProductImageList)
         .contents(givenContents);
   }
+
+  public static Product makeNoBannedProduct(Member seller, ProductType type) throws IOException {
+    return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
+  }
 }

@@ -1,5 +1,7 @@
 package com.project.shoppingmall.testdata;
 
+import com.project.shoppingmall.entity.Member;
+import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import java.io.IOException;
 
@@ -13,5 +15,9 @@ public class ReviewBuilder {
         .reviewImageUri("testImageUri")
         .reviewImageDownloadUrl("testImageUrl")
         .description("testDescription");
+  }
+
+  public static Review makeReview(Member reviewer, Product product) throws IOException {
+    return ReviewBuilder.fullData().writer(reviewer).product(product).build();
   }
 }

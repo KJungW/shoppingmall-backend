@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.value.DeliveryInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class PurchaseBuilder {
@@ -30,5 +31,23 @@ public class PurchaseBuilder {
         .purchaseTitle("testPurchaseTitle")
         .deliveryInfo(givenDeliveryInfo)
         .totalPrice(30000);
+  }
+
+  public static Purchase makeCompleteStatePurchase(Member buyer, List<PurchaseItem> purchaseItems)
+      throws IOException {
+    int totalPrice = purchaseItems.stream().mapToInt(PurchaseItem::getFinalPrice).sum();
+    DeliveryInfo deliveryInfo =
+        new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
+    Purchase purchase =
+        Purchase.builder()
+            .buyer(buyer)
+            .purchaseItems(purchaseItems)
+            .purchaseUid("test-purchaseUid" + UUID.randomUUID())
+            .purchaseTitle("test purchase")
+            .deliveryInfo(deliveryInfo)
+            .totalPrice(totalPrice)
+            .build();
+    purchase.convertStateToComplete("test-completeUid" + UUID.randomUUID());
+    return purchase;
   }
 }

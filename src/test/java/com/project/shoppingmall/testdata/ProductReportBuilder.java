@@ -4,6 +4,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.report.ProductReport;
 import java.io.IOException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class ProductReportBuilder {
   public static ProductReport.ProductReportBuilder fullData() throws IOException {
@@ -14,5 +15,21 @@ public class ProductReportBuilder {
         .title("Test Title")
         .description("Test Description")
         .product(givenProduct);
+  }
+
+  public static ProductReport makeNoProcessedProductReport(Member reporter, Product product)
+      throws IOException {
+    ProductReport report =
+        ProductReportBuilder.fullData().product(product).reporter(reporter).build();
+    ReflectionTestUtils.setField(report, "isProcessedComplete", false);
+    return report;
+  }
+
+  public static ProductReport makeProcessedProductReportTestData(Member reporter, Product product)
+      throws IOException {
+    ProductReport report =
+        ProductReportBuilder.fullData().product(product).reporter(reporter).build();
+    ReflectionTestUtils.setField(report, "isProcessedComplete", true);
+    return report;
   }
 }

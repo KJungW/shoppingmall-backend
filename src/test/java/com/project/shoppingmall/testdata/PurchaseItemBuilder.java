@@ -1,6 +1,7 @@
 package com.project.shoppingmall.testdata;
 
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
+import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
 import java.io.IOException;
 
@@ -18,5 +19,14 @@ public class PurchaseItemBuilder {
             .discountRate(10d)
             .build();
     return PurchaseItem.builder().productData(productData).finalPrice(10000);
+  }
+
+  public static PurchaseItem makePurchaseItem(Product product) throws IOException {
+    ProductDataForPurchase productOptionObj =
+        ProductDataForPurchaseBuilder.fullData(product).build();
+    return PurchaseItemBuilder.fullData()
+        .productData(productOptionObj)
+        .finalPrice(product.getFinalPrice())
+        .build();
   }
 }
