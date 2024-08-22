@@ -3,6 +3,7 @@ package com.project.shoppingmall.testdata;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.report.ProductReport;
+import com.project.shoppingmall.type.ReportResultType;
 import java.io.IOException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -30,6 +31,7 @@ public class ProductReportBuilder {
     ProductReport report =
         ProductReportBuilder.fullData().product(product).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", true);
+    ReflectionTestUtils.setField(report, "reportResult", ReportResultType.NO_ACTION);
     return report;
   }
 }
