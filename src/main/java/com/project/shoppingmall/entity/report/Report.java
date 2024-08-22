@@ -3,6 +3,7 @@ package com.project.shoppingmall.entity.report;
 import com.project.shoppingmall.entity.BaseEntity;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.type.ReportResultType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,11 +25,13 @@ public abstract class Report extends BaseEntity {
   private String title;
   private String description;
   private boolean isProcessedComplete;
+  private ReportResultType reportResult;
 
   public Report(Member reporter, String title, String description) {
     updateReporter(reporter);
     updateReportContent(title, description);
     updateIsProcessedComplete(false);
+    this.reportResult = ReportResultType.WAITING_PROCESSED;
   }
 
   private void updateReporter(Member reporter) {
@@ -43,7 +46,7 @@ public abstract class Report extends BaseEntity {
     this.description = description;
   }
 
-  public void updateIsProcessedComplete(Boolean isProcessedComplete) {
+  private void updateIsProcessedComplete(Boolean isProcessedComplete) {
     if (isProcessedComplete == null)
       throw new ServerLogicError("Report의 title과 isProcessedComplete에 빈값이 들어왔습니다.");
     this.isProcessedComplete = isProcessedComplete;
