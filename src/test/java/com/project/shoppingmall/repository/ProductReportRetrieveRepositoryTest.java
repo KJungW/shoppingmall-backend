@@ -206,4 +206,140 @@ class ProductReportRetrieveRepositoryTest {
           assertFalse(productReport.isProcessedComplete());
         });
   }
+
+  @Test
+  @DisplayName("findProductReportsByProductSeller() : 정상흐름 - 첫번째 페이지")
+  public void findProductReportsByProductSeller_ok_firstPage() throws IOException {
+    // given
+    // - 새로운 판매자와 신고자 생성
+    Member seller = MemberBuilder.fullData().build();
+    em.persist(seller);
+    long givenProductSellerId = seller.getId();
+    Member reporter = MemberBuilder.fullData().build();
+    em.persist(reporter);
+
+    // - 새로운 제품 타입 생성
+    String givenProductTypeName = "test%test2";
+    ProductType type = new ProductType(givenProductTypeName);
+    em.persist(type);
+
+    // - 새로운 10개의 제품 생성
+    for (int i = 0; i < 10; i++) {
+      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      em.persist(targetProduct);
+
+      // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
+      ProductReport noProcessedReport =
+          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+      em.persist(noProcessedReport);
+
+      // 제품마다 처리된 신고데이터 작성 (총 10개)
+      ProductReport processedReport =
+          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+      em.persist(processedReport);
+    }
+    em.flush();
+    em.clear();
+
+    // - 인자세팅
+    long inputProductSellerId = givenProductSellerId;
+    int inputSliceNum = 0;
+    int inputSliceSize = 15;
+    PageRequest inputPageRequest =
+        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    // when
+    Slice<ProductReport> sliceResult =
+        target.findProductReportsByProductSeller(inputProductSellerId, inputPageRequest);
+
+    // target
+    // - 페이지 검증
+    assertTrue(sliceResult.isFirst());
+    assertFalse(sliceResult.isLast());
+    List<ProductReport> resultProductReport = sliceResult.getContent();
+    assertEquals(15, resultProductReport.size());
+
+    // - fetch 로딩 검증
+    resultProductReport.forEach(
+        productReport -> {
+          assertTrue(emUtil.isLoaded(productReport, "reporter"));
+          assertTrue(emUtil.isLoaded(productReport, "product"));
+          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
+          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
+        });
+
+    // - where 조건 검증
+    resultProductReport.forEach(
+        productReport -> {
+          assertEquals(givenProductSellerId, productReport.getProduct().getSeller().getId());
+        });
+  }
+
+  @Test
+  @DisplayName("findProductReportsByProductSeller() : 정상흐름 - 마지막 페이지")
+  public void findProductReportsByProductSeller_ok_lastPage() throws IOException {
+    // given
+    // - 새로운 판매자와 신고자 생성
+    Member seller = MemberBuilder.fullData().build();
+    em.persist(seller);
+    long givenProductSellerId = seller.getId();
+    Member reporter = MemberBuilder.fullData().build();
+    em.persist(reporter);
+
+    // - 새로운 제품 타입 생성
+    String givenProductTypeName = "test%test2";
+    ProductType type = new ProductType(givenProductTypeName);
+    em.persist(type);
+
+    // - 새로운 10개의 제품 생성
+    for (int i = 0; i < 10; i++) {
+      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      em.persist(targetProduct);
+
+      // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
+      ProductReport noProcessedReport =
+          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+      em.persist(noProcessedReport);
+
+      // 제품마다 처리된 신고데이터 작성 (총 10개)
+      ProductReport processedReport =
+          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+      em.persist(processedReport);
+    }
+    em.flush();
+    em.clear();
+
+    // - 인자세팅
+    long inputProductSellerId = givenProductSellerId;
+    int inputSliceNum = 1;
+    int inputSliceSize = 15;
+    PageRequest inputPageRequest =
+        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    // when
+    Slice<ProductReport> sliceResult =
+        target.findProductReportsByProductSeller(inputProductSellerId, inputPageRequest);
+
+    // target
+    // - 페이지 검증
+    assertFalse(sliceResult.isFirst());
+    assertTrue(sliceResult.isLast());
+    List<ProductReport> resultProductReport = sliceResult.getContent();
+    assertEquals(5, resultProductReport.size());
+
+    // - fetch 로딩 검증
+    resultProductReport.forEach(
+        productReport -> {
+          assertTrue(emUtil.isLoaded(productReport, "reporter"));
+          assertTrue(emUtil.isLoaded(productReport, "product"));
+          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
+          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
+        });
+
+    // - where 조건 검증
+    resultProductReport.forEach(
+        productReport -> {
+          assertEquals(givenProductSellerId, productReport.getProduct().getSeller().getId());
+        });
+  }
 }
