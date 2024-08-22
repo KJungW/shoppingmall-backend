@@ -33,11 +33,13 @@ class ReviewReportRetrieveRepositoryTest {
   public void beforeEach() throws IOException {
     emUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
 
-    // 판매자와 구매자 생성
+    // 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
     em.persist(seller);
     Member buyer = MemberBuilder.fullData().build();
     em.persist(buyer);
+    Member reporter = MemberBuilder.fullData().build();
+    em.persist(reporter);
 
     // 제품 타입 생성
     ProductType type = new ProductType("test$test");
@@ -62,11 +64,12 @@ class ReviewReportRetrieveRepositoryTest {
 
         // Review마다 처리되지 않은 신고데이터 생성
         ReviewReport noProcessedReport =
-            ReviewReportBuilder.makeNoProcessedReviewReport(review, buyer);
+            ReviewReportBuilder.makeNoProcessedReviewReport(reporter, review);
         em.persist(noProcessedReport);
 
         // Review마다 처리완료된 신고데이터 생성
-        ReviewReport processedReport = ReviewReportBuilder.makeProcessedReviewReport(review, buyer);
+        ReviewReport processedReport =
+            ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
         em.persist(processedReport);
       }
 
@@ -79,11 +82,13 @@ class ReviewReportRetrieveRepositoryTest {
   @DisplayName("findUnprocessedReviewReportReport() : 정상흐름 - 첫번째 페이지")
   public void findUnprocessedReviewReportReport_ok_firstPage() throws IOException {
     // given
-    // - 새로운 판매자와 구매자 생성
+    // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
     em.persist(seller);
     Member buyer = MemberBuilder.fullData().build();
     em.persist(buyer);
+    Member reporter = MemberBuilder.fullData().build();
+    em.persist(reporter);
 
     // - 새로운 제품 타입 생성
     ProductType type = new ProductType("test$test");
@@ -109,11 +114,12 @@ class ReviewReportRetrieveRepositoryTest {
 
         // Review마다 처리되지 않은 신고데이터 생성
         ReviewReport noProcessedReport =
-            ReviewReportBuilder.makeNoProcessedReviewReport(review, buyer);
+            ReviewReportBuilder.makeNoProcessedReviewReport(reporter, review);
         em.persist(noProcessedReport);
 
         // Review마다 처리완료된 신고데이터 생성
-        ReviewReport processedReport = ReviewReportBuilder.makeProcessedReviewReport(review, buyer);
+        ReviewReport processedReport =
+            ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
         em.persist(processedReport);
       }
 
@@ -165,11 +171,13 @@ class ReviewReportRetrieveRepositoryTest {
   @DisplayName("findUnprocessedReviewReportReport() : 정상흐름 - 마지막 페이지")
   public void findUnprocessedReviewReportReport_ok_lastPage() throws IOException {
     // given
-    // - 새로운 판매자와 구매자 생성
+    // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
     em.persist(seller);
     Member buyer = MemberBuilder.fullData().build();
     em.persist(buyer);
+    Member reporter = MemberBuilder.fullData().build();
+    em.persist(reporter);
 
     // - 새로운 제품 타입 생성
     ProductType type = new ProductType("test$test");
@@ -195,11 +203,12 @@ class ReviewReportRetrieveRepositoryTest {
 
         // Review마다 처리되지 않은 신고데이터 생성
         ReviewReport noProcessedReport =
-            ReviewReportBuilder.makeNoProcessedReviewReport(review, buyer);
+            ReviewReportBuilder.makeNoProcessedReviewReport(reporter, review);
         em.persist(noProcessedReport);
 
         // Review마다 처리완료된 신고데이터 생성
-        ReviewReport processedReport = ReviewReportBuilder.makeProcessedReviewReport(review, buyer);
+        ReviewReport processedReport =
+            ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
         em.persist(processedReport);
       }
 
@@ -251,7 +260,7 @@ class ReviewReportRetrieveRepositoryTest {
   @DisplayName("findReviewReportsByReviewWriter() : 정상흐름 - 첫번째 페이지")
   public void findReviewReportsByReviewWriter_ok_firstPage() throws IOException {
     // given
-    // - 새로운 판매자와 구매자 생성
+    // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
     em.persist(seller);
     Member buyer = MemberBuilder.fullData().build();
@@ -281,12 +290,12 @@ class ReviewReportRetrieveRepositoryTest {
 
       // Review마다 처리되지 않은 신고데이터 생성 (총 10개)
       ReviewReport noProcessedReport =
-          ReviewReportBuilder.makeNoProcessedReviewReport(review, reporter);
+          ReviewReportBuilder.makeNoProcessedReviewReport(reporter, review);
       em.persist(noProcessedReport);
 
       // Review마다 처리완료된 신고데이터 생성 (총 10개)
       ReviewReport processedReport =
-          ReviewReportBuilder.makeProcessedReviewReport(review, reporter);
+          ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
       em.persist(processedReport);
     }
 
@@ -334,7 +343,7 @@ class ReviewReportRetrieveRepositoryTest {
   @DisplayName("findReviewReportsByReviewWriter() : 정상흐름 - 마지막 페이지")
   public void findReviewReportsByReviewWriter_ok_lastPage() throws IOException {
     // given
-    // - 새로운 판매자와 구매자 생성
+    // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
     em.persist(seller);
     Member buyer = MemberBuilder.fullData().build();
@@ -364,12 +373,12 @@ class ReviewReportRetrieveRepositoryTest {
 
       // Review마다 처리되지 않은 신고데이터 생성 (총 10개)
       ReviewReport noProcessedReport =
-          ReviewReportBuilder.makeNoProcessedReviewReport(review, reporter);
+          ReviewReportBuilder.makeNoProcessedReviewReport(reporter, review);
       em.persist(noProcessedReport);
 
       // Review마다 처리완료된 신고데이터 생성 (총 10개)
       ReviewReport processedReport =
-          ReviewReportBuilder.makeProcessedReviewReport(review, reporter);
+          ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
       em.persist(processedReport);
     }
 

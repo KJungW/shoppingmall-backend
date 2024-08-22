@@ -16,14 +16,14 @@ public class ReviewReportBuilder {
         .review(ReviewBuilder.fullData().build());
   }
 
-  public static ReviewReport makeNoProcessedReviewReport(Review review, Member reporter)
+  public static ReviewReport makeNoProcessedReviewReport(Member reporter, Review review)
       throws IOException {
     ReviewReport report = ReviewReportBuilder.fullData().review(review).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", false);
     return report;
   }
 
-  public static ReviewReport makeProcessedReviewReport(Review review, Member reporter)
+  public static ReviewReport makeProcessedReviewReport(Member reporter, Review review)
       throws IOException {
     ReviewReport report = ReviewReportBuilder.fullData().review(review).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", true);
