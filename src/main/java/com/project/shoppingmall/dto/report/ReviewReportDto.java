@@ -1,6 +1,7 @@
 package com.project.shoppingmall.dto.report;
 
 import com.project.shoppingmall.entity.report.ReviewReport;
+import com.project.shoppingmall.type.ReportResultType;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class ReviewReportDto {
   private String title;
   private String description;
   private Boolean isProcessedComplete;
+  private ReportResultType reportResultType;
   private Long reviewId;
   private String reviewTitle;
   private Long writer;
@@ -28,6 +30,7 @@ public class ReviewReportDto {
     this.title = report.getTitle();
     this.description = report.getDescription();
     this.isProcessedComplete = report.isProcessedComplete();
+    this.reportResultType = report.getReportResult();
     this.reviewId = report.getReview().getId();
     this.reviewTitle = report.getReview().getTitle();
     this.writer = report.getReview().getWriter().getId();
