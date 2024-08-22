@@ -5,6 +5,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
+import com.project.shoppingmall.exception.AlreadyProcessedReport;
 import com.project.shoppingmall.exception.ContinuousReportError;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductReportRepository;
@@ -12,8 +13,11 @@ import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.type.ReportResultType;
+import com.project.shoppingmall.type.ReportResultTypeForApi;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -81,6 +85,31 @@ public class ReportService {
     reviewReportRepository.save(report);
   }
 
+  @Transactional
+  public ProductReport processProductReport(
+      long productReportId, ReportResultTypeForApi resultType) {
+    ProductReport productReport =
+        finaProductReportById(productReportId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 제품 신고 데이터가 없습니다."));
+    if (!productReport.getReportResult().equals(ReportResultType.WAITING_PROCESSED))
+      throw new AlreadyProcessedReport("이미 처리가 완료된 신고데이터 입니다.");
+
+    productReport.completeReportProcess(resultType.toReportResultType());
+    return productReport;
+  }
+
+  @Transactional
+  public ReviewReport processReviewReport(long reviewReportId, ReportResultTypeForApi resultType) {
+    ReviewReport reviewReport =
+        findReviewReportById(reviewReportId)
+            .orElseThrow(() -> new DataNotFound("ID에 해당하는 리뷰 신고 데이터가 없습니다."));
+    if (!reviewReport.getReportResult().equals(ReportResultType.WAITING_PROCESSED))
+      throw new AlreadyProcessedReport("이미 처리가 완료된 신고데이터 입니다.");
+
+    reviewReport.completeReportProcess(resultType.toReportResultType());
+    return reviewReport;
+  }
+
   private boolean checkProductReportIsWithinOneDay(Long memberId, Long productId) {
     PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createDate"));
     Slice<ProductReport> sliceResult =
@@ -101,6 +130,14 @@ public class ReportService {
       return latestReport.getCreateDate().isAfter(LocalDateTime.now().minusDays(1));
     }
     return false;
+  }
+
+  public Optional<ProductReport> finaProductReportById(long productReviewId) {
+    return productReportRepository.findById(productReviewId);
+  }
+
+  public Optional<ReviewReport> findReviewReportById(long reviewReportId) {
+    return reviewReportRepository.findById(reviewReportId);
   }
 
   public List<ProductReport> findAllByProduct(long productId) {

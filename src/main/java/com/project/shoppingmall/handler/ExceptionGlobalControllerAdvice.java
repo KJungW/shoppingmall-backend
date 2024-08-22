@@ -159,4 +159,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult AlreadyExistReviewHandler(AlreadyExistReview e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "이미 현재 구매 아이템에 대해 작성한 리뷰가 이미 존재합니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AlreadyProcessedReport.class)
+  public ErrorResult AlreadyProcessedReportHandler(AlreadyProcessedReport e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미 처리된 신고입니다.");
+  }
 }

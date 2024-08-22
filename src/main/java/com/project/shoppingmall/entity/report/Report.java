@@ -25,6 +25,8 @@ public abstract class Report extends BaseEntity {
   private String title;
   private String description;
   private boolean isProcessedComplete;
+
+  @Enumerated(value = EnumType.STRING)
   private ReportResultType reportResult;
 
   public Report(Member reporter, String title, String description) {
@@ -50,5 +52,14 @@ public abstract class Report extends BaseEntity {
     if (isProcessedComplete == null)
       throw new ServerLogicError("Report의 title과 isProcessedComplete에 빈값이 들어왔습니다.");
     this.isProcessedComplete = isProcessedComplete;
+  }
+
+  public void completeReportProcess(ReportResultType reportResult) {
+    if (reportResult == null) throw new ServerLogicError("Report의 reportResult에 빈값이 들어왔습니다.");
+    if (reportResult.equals(ReportResultType.WAITING_PROCESSED))
+      throw new ServerLogicError("Report의 reportResult에 절절하지 않은 값이 들어왔습니다.");
+
+    updateIsProcessedComplete(true);
+    this.reportResult = reportResult;
   }
 }
