@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.report.output;
+package com.project.shoppingmall.controller_manage.report_retrieve.output;
 
 import com.project.shoppingmall.dto.report.ReviewReportDto;
 import com.project.shoppingmall.entity.report.ReviewReport;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.Slice;
 
 @Getter
 @AllArgsConstructor
-public class OutputRetrieveReviewReportsByReviewWriter {
+public class OutputRetrieveReviewReportByType {
   private int currentSliceNumber;
   private int sliceSize;
   private boolean isFirst;
@@ -18,7 +18,7 @@ public class OutputRetrieveReviewReportsByReviewWriter {
   private boolean hasPrevious;
   private List<ReviewReportDto> reviewReportList;
 
-  public OutputRetrieveReviewReportsByReviewWriter(Slice<ReviewReport> sliceResult) {
+  public OutputRetrieveReviewReportByType(Slice<ReviewReport> sliceResult) {
     this.currentSliceNumber = sliceResult.getNumber();
     this.sliceSize = sliceResult.getSize();
     this.isFirst = sliceResult.isFirst();

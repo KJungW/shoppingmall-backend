@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.manager;
+package com.project.shoppingmall.service_manage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -10,6 +10,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service_manage.ban.BanManagerService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ReviewBuilder;

@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller_manage.ban.output.OutputBanReview;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
-import com.project.shoppingmall.service.manager.BanManagerService;
+import com.project.shoppingmall.service_manage.ban.BanManagerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

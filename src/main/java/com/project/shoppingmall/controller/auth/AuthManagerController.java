@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller.auth.output.OutputReissueManagerToken
 import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
 import com.project.shoppingmall.exception.TokenNotFound;
-import com.project.shoppingmall.service.auth.AuthManagerTokenService;
+import com.project.shoppingmall.service_manage.auth.AuthManagerTokenService;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.http.Cookie;

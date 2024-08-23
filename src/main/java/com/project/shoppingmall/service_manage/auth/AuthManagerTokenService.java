@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.auth;
+package com.project.shoppingmall.service_manage.auth;
 
 import com.project.shoppingmall.dto.token.AccessTokenData;
 import com.project.shoppingmall.dto.token.RefreshAndAccessToken;
@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.entity.ManagerToken;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
-import com.project.shoppingmall.service.manager.ManagerService;
+import com.project.shoppingmall.service_manage.common.ManagerService;
 import com.project.shoppingmall.util.JwtUtil;
 import com.project.shoppingmall.util.PasswordEncoderUtil;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.auth;
+package com.project.shoppingmall.service_manage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -8,7 +8,8 @@ import static org.mockito.Mockito.when;
 import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.service.manager.ManagerService;
+import com.project.shoppingmall.service_manage.auth.AuthManagerDetailService;
+import com.project.shoppingmall.service_manage.common.ManagerService;
 import com.project.shoppingmall.testdata.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import java.util.Optional;

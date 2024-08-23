@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.auth;
+package com.project.shoppingmall.service_manage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -9,7 +9,8 @@ import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.entity.ManagerToken;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
-import com.project.shoppingmall.service.manager.ManagerService;
+import com.project.shoppingmall.service_manage.auth.AuthManagerTokenService;
+import com.project.shoppingmall.service_manage.common.ManagerService;
 import com.project.shoppingmall.testdata.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.util.JwtUtil;

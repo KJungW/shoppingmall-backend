@@ -3,7 +3,7 @@ package com.project.shoppingmall.controller.root_manager;
 import com.project.shoppingmall.controller.root_manager.output.OutputMakeCommonManger;
 import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.manager.MakeManagerResult;
-import com.project.shoppingmall.service.manager.RootManagerService;
+import com.project.shoppingmall.service_manage.common.RootManagerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;

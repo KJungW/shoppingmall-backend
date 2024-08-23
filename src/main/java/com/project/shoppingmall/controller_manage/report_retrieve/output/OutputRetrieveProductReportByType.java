@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.report.output;
+package com.project.shoppingmall.controller_manage.report_retrieve.output;
 
 import com.project.shoppingmall.dto.report.ProductReportDto;
 import com.project.shoppingmall.entity.report.ProductReport;

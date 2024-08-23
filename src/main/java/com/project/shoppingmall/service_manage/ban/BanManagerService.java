@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.manager;
+package com.project.shoppingmall.service_manage.ban;
 
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;

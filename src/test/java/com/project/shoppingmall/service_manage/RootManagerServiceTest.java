@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.manager;
+package com.project.shoppingmall.service_manage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ManagerRepository;
+import com.project.shoppingmall.service_manage.common.RootManagerService;
 import com.project.shoppingmall.testdata.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import java.util.Optional;

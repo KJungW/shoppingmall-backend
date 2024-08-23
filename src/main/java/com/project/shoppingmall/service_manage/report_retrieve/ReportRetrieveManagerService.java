@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.report;
+package com.project.shoppingmall.service_manage.report_retrieve;
 
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReportRetrieveService {
+public class ReportRetrieveManagerService {
   private final MemberService memberService;
   private final ProductReportRetrieveRepository productReportRetrieveRepository;
   private final ReviewReportRetrieveRepository reviewReportRetrieveRepository;

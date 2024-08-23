@@ -1,9 +1,9 @@
-package com.project.shoppingmall.service.auth;
+package com.project.shoppingmall.service_manage.auth;
 
 import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.service.manager.ManagerService;
+import com.project.shoppingmall.service_manage.common.ManagerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.report;
+package com.project.shoppingmall.service_manage;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductReportRetrieveRepository;
 import com.project.shoppingmall.repository.ReviewReportRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service_manage.report_retrieve.ReportRetrieveManagerService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class ReportRetrieveServiceTest {
-  private ReportRetrieveService target;
+class ReportRetrieveManagerServiceTest {
+  private ReportRetrieveManagerService target;
   private MemberService mockMemberService;
   private ProductReportRetrieveRepository mockProductReportRetrieveRepository;
   private ReviewReportRetrieveRepository mockReviewReportRetrieveRepository;
@@ -29,7 +30,7 @@ class ReportRetrieveServiceTest {
     mockProductReportRetrieveRepository = mock(ProductReportRetrieveRepository.class);
     mockReviewReportRetrieveRepository = mock(ReviewReportRetrieveRepository.class);
     target =
-        new ReportRetrieveService(
+        new ReportRetrieveManagerService(
             mockMemberService,
             mockProductReportRetrieveRepository,
             mockReviewReportRetrieveRepository);

@@ -1,8 +1,8 @@
 package com.project.shoppingmall.filter;
 
 import com.project.shoppingmall.dto.token.AccessTokenData;
-import com.project.shoppingmall.service.auth.AuthManagerDetailService;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
+import com.project.shoppingmall.service_manage.auth.AuthManagerDetailService;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.FilterChain;

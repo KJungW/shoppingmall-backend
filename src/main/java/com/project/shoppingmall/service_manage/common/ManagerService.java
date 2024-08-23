@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.manager;
+package com.project.shoppingmall.service_manage.common;
 
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.repository.ManagerRepository;
