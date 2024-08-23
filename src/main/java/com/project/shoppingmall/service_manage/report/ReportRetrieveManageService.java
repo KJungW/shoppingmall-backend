@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReportRetrieveManagerService {
+public class ReportRetrieveManageService {
   private final MemberService memberService;
   private final ProductReportRetrieveRepository productReportRetrieveRepository;
   private final ReviewReportRetrieveRepository reviewReportRetrieveRepository;

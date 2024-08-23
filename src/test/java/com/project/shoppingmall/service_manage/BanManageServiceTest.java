@@ -10,7 +10,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
-import com.project.shoppingmall.service_manage.ban.BanManagerService;
+import com.project.shoppingmall.service_manage.ban.BanManageService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ReviewBuilder;
@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class BanManagerServiceTest {
-  private BanManagerService target;
+class BanManageServiceTest {
+  private BanManageService target;
   private MemberService mockMemberService;
   private ProductService mockProductService;
   private ReviewService mockReviewService;
@@ -34,7 +34,7 @@ class BanManagerServiceTest {
     mockMemberService = mock(MemberService.class);
     mockProductService = mock(ProductService.class);
     mockReviewService = mock(ReviewService.class);
-    target = new BanManagerService(mockMemberService, mockProductService, mockReviewService);
+    target = new BanManageService(mockMemberService, mockProductService, mockReviewService);
   }
 
   @Test

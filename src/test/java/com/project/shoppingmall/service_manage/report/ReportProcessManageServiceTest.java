@@ -20,14 +20,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class ReportProcessManagerServiceTest {
-  private ReportProcessManagerService target;
+class ReportProcessManageServiceTest {
+  private ReportProcessManageService target;
   private ReportService mockReportService;
 
   @BeforeEach
   public void beforeEach() {
     mockReportService = mock(ReportService.class);
-    target = new ReportProcessManagerService(mockReportService);
+    target = new ReportProcessManageService(mockReportService);
   }
 
   @Test

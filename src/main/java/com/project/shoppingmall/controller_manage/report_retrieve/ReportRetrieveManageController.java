@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller_manage.report_retrieve.output.OutputR
 import com.project.shoppingmall.controller_manage.report_retrieve.output.OutputRetrieveReviewReportsByReviewWriter;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.service_manage.report.ReportRetrieveManagerService;
+import com.project.shoppingmall.service_manage.report.ReportRetrieveManageService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ReportRetrieveController {
-  private final ReportRetrieveManagerService reportRetrieveManagerService;
+public class ReportRetrieveManageController {
+  private final ReportRetrieveManageService reportRetrieveManageService;
 
   @GetMapping("/product-type/product-report")
   @PreAuthorize("hasAnyRole('ROLE_ROOT_MANAGER', 'ROLE_COMMON_MANAGER')")
@@ -28,7 +28,7 @@ public class ReportRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("productTypeId") Long productTypeId) {
     Slice<ProductReport> sliceResult =
-        reportRetrieveManagerService.findUnprocessedProductReport(
+        reportRetrieveManageService.findUnprocessedProductReport(
             productTypeId, sliceNumber, sliceSize);
     return new OutputRetrieveProductReportByType(sliceResult);
   }
@@ -40,7 +40,7 @@ public class ReportRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("productTypeId") Long productTypeId) {
     Slice<ReviewReport> sliceResult =
-        reportRetrieveManagerService.findUnprocessedReviewReportReport(
+        reportRetrieveManageService.findUnprocessedReviewReportReport(
             productTypeId, sliceNumber, sliceSize);
     return new OutputRetrieveReviewReportByType(sliceResult);
   }
@@ -52,7 +52,7 @@ public class ReportRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("productSellerId") Long productSellerId) {
     Slice<ProductReport> sliceResult =
-        reportRetrieveManagerService.findProductReportsByProductSeller(
+        reportRetrieveManageService.findProductReportsByProductSeller(
             productSellerId, sliceNumber, sliceSize);
     return new OutputRetrieveProductReportsByProductSeller(sliceResult);
   }
@@ -64,7 +64,7 @@ public class ReportRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("reviewWriterId") Long reviewWriterId) {
     Slice<ReviewReport> sliceResult =
-        reportRetrieveManagerService.findReviewReportsByReviewWriter(
+        reportRetrieveManageService.findReviewReportsByReviewWriter(
             reviewWriterId, sliceNumber, sliceSize);
     return new OutputRetrieveReviewReportsByReviewWriter(sliceResult);
   }

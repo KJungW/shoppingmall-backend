@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReportProcessManagerService {
+public class ReportProcessManageService {
   private final ReportService reportService;
 
   @Transactional

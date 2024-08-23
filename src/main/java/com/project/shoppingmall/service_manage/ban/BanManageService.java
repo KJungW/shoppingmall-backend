@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class BanManagerService {
+public class BanManageService {
   private final MemberService memberService;
   private final ProductService productService;
   private final ReviewService reviewService;
