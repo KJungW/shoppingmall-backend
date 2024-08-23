@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service_manage.report_retrieve;
+package com.project.shoppingmall.service_manage.report;
 
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;

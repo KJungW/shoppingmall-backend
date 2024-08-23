@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.report.input;
+package com.project.shoppingmall.controller_manage.report.input;
 
 import com.project.shoppingmall.type.ReportResultTypeForApi;
 import jakarta.validation.constraints.NotNull;

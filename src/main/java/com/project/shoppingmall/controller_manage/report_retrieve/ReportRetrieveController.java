@@ -6,7 +6,7 @@ import com.project.shoppingmall.controller_manage.report_retrieve.output.OutputR
 import com.project.shoppingmall.controller_manage.report_retrieve.output.OutputRetrieveReviewReportsByReviewWriter;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.service_manage.report_retrieve.ReportRetrieveManagerService;
+import com.project.shoppingmall.service_manage.report.ReportRetrieveManagerService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

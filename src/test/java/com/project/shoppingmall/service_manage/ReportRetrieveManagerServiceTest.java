@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductReportRetrieveRepository;
 import com.project.shoppingmall.repository.ReviewReportRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberService;
-import com.project.shoppingmall.service_manage.report_retrieve.ReportRetrieveManagerService;
+import com.project.shoppingmall.service_manage.report.ReportRetrieveManagerService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
