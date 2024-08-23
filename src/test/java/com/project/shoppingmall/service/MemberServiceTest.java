@@ -1,14 +1,10 @@
 package com.project.shoppingmall.service;
 
 import com.project.shoppingmall.dto.file.FileUploadResult;
-import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.entity.Member;
-import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.MemberRepository;
-import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.ManagerBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
 import java.io.FileInputStream;
@@ -27,16 +23,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 class MemberServiceTest {
   private MemberService memberService;
-  private ManagerService managerService;
   private MemberRepository memberRepository;
   private S3Service s3Service;
 
   @BeforeEach
   public void beforeEach() {
-    managerService = Mockito.mock(ManagerService.class);
     memberRepository = Mockito.mock(MemberRepository.class);
     s3Service = Mockito.mock(S3Service.class);
-    memberService = new MemberService(managerService, memberRepository, s3Service);
+    memberService = new MemberService(memberRepository, s3Service);
   }
 
   @Test
@@ -217,49 +211,5 @@ class MemberServiceTest {
     Assertions.assertEquals(givenNickname, member.getNickName());
     Assertions.assertEquals(givenServerUri, member.getProfileImageUrl());
     Assertions.assertEquals(givenDownloadUrl, member.getProfileImageDownLoadUrl());
-  }
-
-  @Test
-  @DisplayName("banMember() : 정상흐름")
-  public void banMember_ok() {
-    // given
-    long givenManagerId = 10L;
-    long givenMemberId = 20L;
-    boolean givenIsBan = true;
-
-    Manager givenManager = ManagerBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
-    Mockito.when(managerService.findById(Mockito.anyLong())).thenReturn(Optional.of(givenManager));
-
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    ReflectionTestUtils.setField(givenMember, "isBan", !givenIsBan);
-    Mockito.when(memberService.findById(Mockito.anyLong())).thenReturn(Optional.of(givenMember));
-
-    // when
-    memberService.banMember(givenManagerId, givenMemberId, givenIsBan);
-
-    // then
-    Assertions.assertEquals(givenIsBan, givenMember.getIsBan());
-  }
-
-  @Test
-  @DisplayName("banMember() : 조회된 회원이 존재하지 않음")
-  public void banMember_noMember() {
-    // given
-    long givenManagerId = 10L;
-    long givenMemberId = 20L;
-    boolean givenIsBan = true;
-
-    Manager givenManager = ManagerBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenManager, "id", givenManagerId);
-    Mockito.when(managerService.findById(Mockito.anyLong())).thenReturn(Optional.of(givenManager));
-
-    Mockito.when(memberService.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-
-    // when
-    Assertions.assertThrows(
-        DataNotFound.class,
-        () -> memberService.banMember(givenManagerId, givenMemberId, givenIsBan));
   }
 }

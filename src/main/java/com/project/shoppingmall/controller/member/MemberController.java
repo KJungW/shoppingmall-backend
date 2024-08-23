@@ -1,10 +1,8 @@
 package com.project.shoppingmall.controller.member;
 
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
-import com.project.shoppingmall.controller.member.output.OutputBanMember;
 import com.project.shoppingmall.controller.member.output.OutputGetMember;
 import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
-import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
@@ -43,15 +41,5 @@ public class MemberController {
         memberService.updateMemberNickNameAndProfileImg(
             userDetail.getId(), memberInfo.getNickName(), memberInfo.getProfileImg());
     return new OutputUpdateMemberInfo(member);
-  }
-
-  @PostMapping("/ban")
-  @PreAuthorize("hasAnyRole('ROLE_ROOT_MANAGER', 'ROLE_COMMON_MANAGER')")
-  public OutputBanMember banMember(
-      @RequestParam("memberId") Long memberId, @RequestParam("isBan") Boolean isBan) {
-    AuthManagerDetail userDetail =
-        (AuthManagerDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Member member = memberService.banMember(userDetail.getId(), memberId, isBan);
-    return new OutputBanMember(member.getId());
   }
 }

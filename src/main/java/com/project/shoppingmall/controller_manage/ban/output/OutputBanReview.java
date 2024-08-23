@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.review.output;
+package com.project.shoppingmall.controller_manage.ban.output;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

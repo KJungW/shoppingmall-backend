@@ -3,7 +3,6 @@ package com.project.shoppingmall.controller.product;
 import com.project.shoppingmall.controller.product.input.InputSaveProduct;
 import com.project.shoppingmall.controller.product.input.InputUpdateProduct;
 import com.project.shoppingmall.controller.product.output.*;
-import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.entity.Product;
@@ -109,15 +108,5 @@ public class ProductController {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     productDeleteService.deleteProductBySeller(userDetail.getId(), productId);
-  }
-
-  @PostMapping("/ban")
-  @PreAuthorize("hasAnyRole('ROLE_ROOT_MANAGER', 'ROLE_COMMON_MANAGER')")
-  public OutputBanProduct banProduct(
-      @RequestParam("productId") Long productId, @RequestParam("isBan") Boolean isBan) {
-    AuthManagerDetail userDetail =
-        (AuthManagerDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Product product = productService.banProduct(userDetail.getId(), productId, isBan);
-    return new OutputBanProduct(product.getId());
   }
 }

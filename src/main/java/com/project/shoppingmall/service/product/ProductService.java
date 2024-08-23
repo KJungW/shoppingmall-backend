@@ -11,7 +11,6 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
 import com.project.shoppingmall.repository.ProductRepository;
-import com.project.shoppingmall.service.manager.ManagerService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -29,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProductService {
-  private final ManagerService managerService;
   private final MemberService memberService;
   private final ProductTypeService productTypeService;
   private final ProductRepository productRepository;
@@ -258,18 +256,6 @@ public class ProductService {
       throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
     }
     product.changeSalesStateToDiscontinued();
-    return product;
-  }
-
-  @Transactional
-  public Product banProduct(long managerId, long productId, boolean isBan) {
-    Manager manager =
-        managerService
-            .findById(managerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 관리자 데이터가 존재하지 않습니다."));
-    Product product =
-        findById(productId).orElseThrow(() -> new DataNotFound("id에 해당하는 제품 데이터가 존재하지 않습니다."));
-    product.updateIsBan(isBan);
     return product;
   }
 }

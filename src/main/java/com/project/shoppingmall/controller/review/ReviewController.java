@@ -2,10 +2,8 @@ package com.project.shoppingmall.controller.review;
 
 import com.project.shoppingmall.controller.review.input.InputSaveReview;
 import com.project.shoppingmall.controller.review.input.InputUpdateReview;
-import com.project.shoppingmall.controller.review.output.OutputBanReview;
 import com.project.shoppingmall.controller.review.output.OutputSaveReview;
 import com.project.shoppingmall.controller.review.output.OutputUpdateReview;
-import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.review.ReviewMakeData;
 import com.project.shoppingmall.dto.review.ReviewUpdateData;
@@ -71,15 +69,5 @@ public class ReviewController {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     reviewDeleteService.deleteReviewByWriter(userDetail.getId(), reviewId);
-  }
-
-  @PostMapping("/review/ban")
-  @PreAuthorize("hasAnyRole('ROLE_ROOT_MANAGER', 'ROLE_COMMON_MANAGER')")
-  public OutputBanReview banReview(
-      @RequestParam("reviewId") Long reviewId, @RequestParam("isBan") Boolean isBan) {
-    AuthManagerDetail userDetail =
-        (AuthManagerDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Review review = reviewService.banReview(userDetail.getId(), reviewId, isBan);
-    return new OutputBanReview(review.getId());
   }
 }
