@@ -1,4 +1,4 @@
-package com.project.shoppingmall.controller.root_manager.output;
+package com.project.shoppingmall.controller_manage.root_manager.output;
 
 import com.project.shoppingmall.dto.manager.MakeManagerResult;
 import lombok.AllArgsConstructor;

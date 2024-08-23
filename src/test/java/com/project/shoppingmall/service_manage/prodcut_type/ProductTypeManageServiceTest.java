@@ -1,12 +1,14 @@
-package com.project.shoppingmall.service.product_type;
+package com.project.shoppingmall.service_manage.prodcut_type;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ProductTypeRepository;
+import com.project.shoppingmall.service.product_type.ProductTypeService;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,14 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class ProductTypeServiceTest {
-  private ProductTypeService target;
+class ProductTypeManageServiceTest {
+  private ProductTypeManageService target;
+  private ProductTypeService mockProductTypeService;
   private ProductTypeRepository mockProductTypeRepository;
 
   @BeforeEach
   public void beforeEach() {
+    this.mockProductTypeService = mock(ProductTypeService.class);
     this.mockProductTypeRepository = mock(ProductTypeRepository.class);
-    this.target = new ProductTypeService(mockProductTypeRepository);
+    this.target = new ProductTypeManageService(mockProductTypeService, mockProductTypeRepository);
   }
 
   @Test
@@ -58,7 +62,7 @@ class ProductTypeServiceTest {
 
     ProductType givenProductType = new ProductType("테스트1$given");
     ReflectionTestUtils.setField(givenProductType, "id", inputTypeId);
-    when(mockProductTypeRepository.findById(anyLong())).thenReturn(Optional.of(givenProductType));
+    when(mockProductTypeService.findById(anyLong())).thenReturn(Optional.of(givenProductType));
 
     // when
     ProductType updateResult = target.update(inputTypeId, inputTypeName);
@@ -76,7 +80,7 @@ class ProductTypeServiceTest {
 
     ProductType givenProductType = new ProductType("테스트1$given");
     ReflectionTestUtils.setField(givenProductType, "id", inputTypeId);
-    when(mockProductTypeRepository.findById(anyLong())).thenReturn(Optional.of(givenProductType));
+    when(mockProductTypeService.findById(anyLong())).thenReturn(Optional.of(givenProductType));
 
     // when
     assertThrows(ServerLogicError.class, () -> target.update(inputTypeId, inputTypeName));

@@ -1,6 +1,6 @@
-package com.project.shoppingmall.controller.root_manager;
+package com.project.shoppingmall.controller_manage.root_manager;
 
-import com.project.shoppingmall.controller.root_manager.output.OutputMakeCommonManger;
+import com.project.shoppingmall.controller_manage.root_manager.output.OutputMakeCommonManger;
 import com.project.shoppingmall.dto.auth.AuthManagerDetail;
 import com.project.shoppingmall.dto.manager.MakeManagerResult;
 import com.project.shoppingmall.service_manage.common.RootManagerService;
