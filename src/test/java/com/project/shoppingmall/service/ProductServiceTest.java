@@ -10,6 +10,7 @@ import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
+import com.project.shoppingmall.repository.ProductBulkRepository;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
@@ -33,6 +34,7 @@ class ProductServiceTest {
   private MemberService memberService;
   private ProductTypeService productTypeService;
   private ProductRepository productRepository;
+  private ProductBulkRepository productBulkRepository;
   private S3Service s3Service;
   private static MockedStatic<JsonUtil> jsonUtil;
 
@@ -41,10 +43,12 @@ class ProductServiceTest {
     memberService = mock(MemberService.class);
     productTypeService = mock(ProductTypeService.class);
     productRepository = mock(ProductRepository.class);
+    productBulkRepository = mock(ProductBulkRepository.class);
     s3Service = mock(S3Service.class);
     jsonUtil = mockStatic(JsonUtil.class);
     productService =
-        new ProductService(memberService, productTypeService, productRepository, s3Service);
+        new ProductService(
+            memberService, productTypeService, productRepository, productBulkRepository, s3Service);
   }
 
   @AfterEach

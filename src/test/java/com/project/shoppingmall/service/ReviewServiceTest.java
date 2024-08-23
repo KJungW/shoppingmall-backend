@@ -12,6 +12,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 class ReviewServiceTest {
   private ReviewService target;
   private ReviewRepository mockReviewRepository;
+  private ReviewBulkRepository mockReviewBulkRepository;
   private PurchaseItemService mockPurchaseItemService;
   private ProductService mockProductService;
   private S3Service mockS3Service;
@@ -40,12 +42,17 @@ class ReviewServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockReviewRepository = mock(ReviewRepository.class);
+    mockReviewBulkRepository = mock(ReviewBulkRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockProductService = mock(ProductService.class);
     mockS3Service = mock(S3Service.class);
     target =
         new ReviewService(
-            mockReviewRepository, mockPurchaseItemService, mockProductService, mockS3Service);
+            mockReviewRepository,
+            mockReviewBulkRepository,
+            mockPurchaseItemService,
+            mockProductService,
+            mockS3Service);
   }
 
   @Test

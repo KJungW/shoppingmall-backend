@@ -4,6 +4,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -18,6 +19,7 @@ public class BanManageService {
   private final MemberService memberService;
   private final ProductService productService;
   private final ReviewService reviewService;
+  private final EntityManagerService entityManagerService;
 
   @Transactional
   public Member banMember(long memberId, boolean isBan) {
@@ -25,7 +27,11 @@ public class BanManageService {
         memberService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원 데이터가 존재하지 않습니다."));
+    if (member.getIsBan().equals(isBan)) return member;
     member.updateMemberBan(isBan);
+    entityManagerService.flush();
+    productService.banProductsBySellerId(memberId, isBan);
+    reviewService.banReviewsByWriterId(memberId, isBan);
     return member;
   }
 

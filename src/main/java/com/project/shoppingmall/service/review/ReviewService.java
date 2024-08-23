@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AlreadyDeletedProduct;
 import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReviewService {
   private final ReviewRepository reviewRepository;
+  private final ReviewBulkRepository reviewBulkRepository;
   private final PurchaseItemService purchaseItemService;
   private final ProductService productService;
   private final S3Service s3Service;
@@ -105,6 +107,11 @@ public class ReviewService {
     product.refreshScore(scoreCalcResult);
 
     return review;
+  }
+
+  @Transactional
+  public int banReviewsByWriterId(long writerId, boolean isBan) {
+    return reviewBulkRepository.banReviewsByWriterId(writerId, isBan);
   }
 
   public Optional<Review> findById(long refundId) {

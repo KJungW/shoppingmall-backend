@@ -10,6 +10,7 @@ import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
+import com.project.shoppingmall.repository.ProductBulkRepository;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
@@ -31,6 +32,7 @@ public class ProductService {
   private final MemberService memberService;
   private final ProductTypeService productTypeService;
   private final ProductRepository productRepository;
+  private final ProductBulkRepository productBulkRepository;
   private final S3Service s3Service;
 
   @Transactional
@@ -109,6 +111,11 @@ public class ProductService {
     product.updateMultiOptions(productMultipleOptions);
     product.updateProductImages(productImages);
     product.updateContents(productContents);
+  }
+
+  @Transactional
+  public int banProductsBySellerId(long sellerId, boolean isBan) {
+    return productBulkRepository.banProductsBySellerId(sellerId, isBan);
   }
 
   public Optional<Product> findById(Long productId) {

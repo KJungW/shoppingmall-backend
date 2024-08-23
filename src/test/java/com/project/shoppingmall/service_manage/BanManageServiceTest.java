@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -28,13 +30,17 @@ class BanManageServiceTest {
   private MemberService mockMemberService;
   private ProductService mockProductService;
   private ReviewService mockReviewService;
+  private EntityManagerService mockEntityManagerService;
 
   @BeforeEach
   public void beforeEach() {
     mockMemberService = mock(MemberService.class);
     mockProductService = mock(ProductService.class);
     mockReviewService = mock(ReviewService.class);
-    target = new BanManageService(mockMemberService, mockProductService, mockReviewService);
+    mockEntityManagerService = mock(EntityManagerService.class);
+    target =
+        new BanManageService(
+            mockMemberService, mockProductService, mockReviewService, mockEntityManagerService);
   }
 
   @Test
@@ -54,6 +60,41 @@ class BanManageServiceTest {
 
     // then
     assertEquals(givenIsBan, givenMember.getIsBan());
+
+    ArgumentCaptor<Long> sellerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Boolean> productBanCaptor = ArgumentCaptor.forClass(Boolean.class);
+    verify(mockProductService, times(1))
+        .banProductsBySellerId(sellerIdCaptor.capture(), productBanCaptor.capture());
+    assertEquals(givenMemberId, sellerIdCaptor.getValue());
+    assertEquals(givenIsBan, productBanCaptor.getValue());
+
+    ArgumentCaptor<Long> writerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Boolean> reviewBanCaptor = ArgumentCaptor.forClass(Boolean.class);
+    verify(mockReviewService, times(1))
+        .banReviewsByWriterId(writerIdCaptor.capture(), reviewBanCaptor.capture());
+    assertEquals(givenMemberId, writerIdCaptor.getValue());
+    assertEquals(givenIsBan, reviewBanCaptor.getValue());
+  }
+
+  @Test
+  @DisplayName("banMember() : 현재 회원의 벤상태와 입력값 벤상태가 동일함")
+  public void banMember_equalIsBan() {
+    // given
+    long givenMemberId = 20L;
+    boolean givenIsBan = true;
+
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    ReflectionTestUtils.setField(givenMember, "isBan", givenIsBan);
+    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    // when
+    target.banMember(givenMemberId, givenIsBan);
+
+    // then
+    assertEquals(givenIsBan, givenMember.getIsBan());
+    verify(mockProductService, times(0)).banProductsBySellerId(anyLong(), anyBoolean());
+    verify(mockReviewService, times(0)).banReviewsByWriterId(anyLong(), anyBoolean());
   }
 
   @Test
