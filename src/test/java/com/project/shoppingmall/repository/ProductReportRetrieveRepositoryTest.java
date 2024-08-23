@@ -74,7 +74,7 @@ class ProductReportRetrieveRepositoryTest {
     em.persist(reporter);
 
     // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test%test2";
+    String givenProductTypeName = "test$test2";
     ProductType type = new ProductType(givenProductTypeName);
     em.persist(type);
     long givenProductTypeId = type.getId();
@@ -146,7 +146,7 @@ class ProductReportRetrieveRepositoryTest {
     em.persist(reporter);
 
     // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test%test2";
+    String givenProductTypeName = "test$test2";
     ProductType type = new ProductType(givenProductTypeName);
     em.persist(type);
     long givenProductTypeId = type.getId();
@@ -219,7 +219,7 @@ class ProductReportRetrieveRepositoryTest {
     em.persist(reporter);
 
     // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test%test2";
+    String givenProductTypeName = "test$test2";
     ProductType type = new ProductType(givenProductTypeName);
     em.persist(type);
 
@@ -287,7 +287,7 @@ class ProductReportRetrieveRepositoryTest {
     em.persist(reporter);
 
     // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test%test2";
+    String givenProductTypeName = "test$test2";
     ProductType type = new ProductType(givenProductTypeName);
     em.persist(type);
 

@@ -13,7 +13,7 @@ public class ProductBuilder {
   public static final Integer IMAGE_BLOCK_COUNT = 3;
 
   public static Product.ProductBuilder fullData() throws IOException {
-    ProductType givenType = new ProductType("test/type");
+    ProductType givenType = new ProductType("test$type");
     ReflectionTestUtils.setField(givenType, "id", 1L);
     List<ProductSingleOption> givenSingleOptions =
         new ArrayList() {

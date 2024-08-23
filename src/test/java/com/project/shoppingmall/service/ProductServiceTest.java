@@ -66,7 +66,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
 
     Long givenProductTypeId = 2L;
-    ProductType givenProductType = new ProductType("test/detail");
+    ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
 
     FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
@@ -186,7 +186,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
 
     Long givenProductTypeId = 2L;
-    ProductType givenProductType = new ProductType("test/detail");
+    ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
 
     FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
@@ -222,7 +222,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
     when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
 
-    ProductType givenProductType = new ProductType("test/detail");
+    ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
 
@@ -273,7 +273,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenProductSellerId);
     when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
 
-    ProductType givenProductType = new ProductType("test/detail");
+    ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
 
@@ -307,7 +307,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
     when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
 
-    ProductType givenProductType = new ProductType("test/detail");
+    ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
 
