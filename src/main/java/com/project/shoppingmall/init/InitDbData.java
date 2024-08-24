@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.entity.value.DeliveryInfo;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.final_value.FinalValue;
 import com.project.shoppingmall.repository.*;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.LoginType;
@@ -15,6 +16,7 @@ import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
 import jakarta.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,8 +53,9 @@ public class InitDbData {
   private final ReviewReportRepository reviewReportRepository;
 
   @PostConstruct
-  public void init() {
+  public void init() throws NoSuchFieldException, IllegalAccessException {
     initRootAccount();
+    initBaseProductType();
     if (envType.equals("dev") || envType.equals("stage")) {
       if (ddlType.equals("create") || ddlType.equals("create-drop")) {
         initData();
@@ -69,6 +72,17 @@ public class InitDbData {
               .role(ManagerRoleType.ROLE_ROOT_MANAGER)
               .build();
       managerRepository.save(rootManager);
+    }
+  }
+
+  private void initBaseProductType() throws NoSuchFieldException, IllegalAccessException {
+    if (productTypeRepository.findBaseProductType(FinalValue.BASE_PRODUCT_TYPE_PREFIX).isEmpty()) {
+      ProductType baseProductType = new ProductType(FinalValue.BASE_PRODUCT_TYPE_NAME);
+      Field typeNameField = ProductType.class.getDeclaredField("typeName");
+      typeNameField.setAccessible(true);
+      typeNameField.set(
+          baseProductType, FinalValue.BASE_PRODUCT_TYPE_PREFIX + FinalValue.BASE_PRODUCT_TYPE_NAME);
+      productTypeRepository.save(baseProductType);
     }
   }
 
