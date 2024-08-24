@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.delivery.DeliveryDto;
 import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.dto.purchase.PurchaseItemMakeData;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.CannotPurchaseBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
@@ -330,6 +331,54 @@ class PurchaseServiceTest {
     // when
     assertThrows(
         DataNotFound.class,
+        () -> target.readyPurchase(givenMemberId, givenPurchaseItemMakeData, givenDeliveryDto));
+  }
+
+  @Test
+  @DisplayName("readyPurchase() : 벤상태의 회원이 제품을 구매하려고 시도함")
+  public void readyPurchase_bannedMember() {
+    // given
+    // - memberId 인자 세팅
+    Long givenMemberId = 2L;
+
+    // - purchaseItemMakeDataList 인자 세팅
+    List<Long> givenBasketItemIdList = new ArrayList<>(Arrays.asList(1L, 2L, 3L, 4L));
+    List<PurchaseItemMakeData> givenPurchaseItemMakeData = new ArrayList<>();
+    for (int i = 0; i < givenBasketItemIdList.size(); i++) {
+      PurchaseItemMakeData makeData = new PurchaseItemMakeData(givenBasketItemIdList.get(i), 10000);
+      givenPurchaseItemMakeData.add(makeData);
+    }
+
+    // - deliveryDto 인자 세팅
+    DeliveryDto givenDeliveryDto =
+        new DeliveryDto("Kim", "test도 test시 test아파트 000호", "10101", "010-000-0000");
+
+    // - memberService.findAllById() 세팅
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    ReflectionTestUtils.setField(givenMember, "isBan", true);
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+
+    // - basketItemService.findAllById() 세팅
+    List<BasketItem> givenBasketItemList = new ArrayList<>();
+    for (int i = 0; i < givenBasketItemIdList.size(); i++) {
+      BasketItem givenBasketItem = BasketItemBuilder.fullData().build();
+      ReflectionTestUtils.setField(givenBasketItem, "id", givenBasketItemIdList.get(i));
+      ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
+      ReflectionTestUtils.setField(givenBasketItem.getProduct(), "id", (long) i);
+      ReflectionTestUtils.setField(givenBasketItem.getProduct().getSeller(), "id", (long) i * 10);
+      ReflectionTestUtils.setField(
+          givenBasketItem.getProduct().getSeller(), "nickName", "seller" + i);
+      givenBasketItemList.add(givenBasketItem);
+    }
+    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+
+    // - basketItemService.validateMemberIsBasketItemOwner() 세팅
+    doNothing().when(mockBasketItemService).validateMemberIsBasketItemOwner(any(), any());
+
+    // when
+    assertThrows(
+        CannotPurchaseBecauseMemberBan.class,
         () -> target.readyPurchase(givenMemberId, givenPurchaseItemMakeData, givenDeliveryDto));
   }
 

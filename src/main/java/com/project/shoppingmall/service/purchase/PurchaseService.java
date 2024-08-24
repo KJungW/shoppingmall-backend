@@ -42,6 +42,8 @@ public class PurchaseService {
     List<BasketItem> basketItems = loadBasketItems(purchaseItemMakeDataList);
     basketItemService.validateMemberIsBasketItemOwner(memberId, basketItems);
 
+    if (buyer.getIsBan()) throw new CannotPurchaseBecauseMemberBan("벤상태의 회원은 제품을 구매할 수 없습니다.");
+
     ArrayList<PurchaseItem> purchaseItems = new ArrayList<>();
     for (BasketItem basketItem : basketItems) {
       PurchaseItemMakeData currentPurchaseItemMakeData =
