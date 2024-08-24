@@ -165,4 +165,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult AlreadyProcessedReportHandler(AlreadyProcessedReport e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "이미 처리된 신고입니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotSaveProductBecauseMemberBan.class)
+  public ErrorResult CannotSaveProductBecauseMemberBanHandler(CannotSaveProductBecauseMemberBan e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "벤상태의 회원은 제품등록이 불가능합니다.");
+  }
 }

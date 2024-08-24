@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductBulkRepository;
@@ -205,6 +206,34 @@ class ProductServiceTest {
     // when
     assertThrows(
         WrongPriceAndDiscount.class,
+        () -> productService.save(givenMemberId, givenProductMakeData));
+  }
+
+  @Test
+  @DisplayName("save() : 벤상태의 회원이 제품을 등록하려 시도함")
+  public void save_bannedMember() throws IOException {
+    // given
+    Long givenMemberId = 1L;
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    ReflectionTestUtils.setField(givenMember, "isBan", true);
+
+    Long givenProductTypeId = 2L;
+    ProductType givenProductType = new ProductType("test$detail");
+    ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
+
+    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
+
+    ProductMakeData givenProductMakeData =
+        ProductMakeDataBuilder.fullData().productTypeId(givenProductTypeId).build();
+
+    when(memberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+
+    // when
+    assertThrows(
+        CannotSaveProductBecauseMemberBan.class,
         () -> productService.save(givenMemberId, givenProductMakeData));
   }
 

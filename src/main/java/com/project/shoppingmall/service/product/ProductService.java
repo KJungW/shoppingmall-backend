@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
+import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
 import com.project.shoppingmall.repository.ProductBulkRepository;
@@ -45,6 +46,8 @@ public class ProductService {
         productTypeService
             .findById(productData.getProductTypeId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
+
+    if (seller.getIsBan()) throw new CannotSaveProductBecauseMemberBan("벤상태의 회원은 제품등록이 불가능합니다.");
 
     List<ProductSingleOption> productSingleOptions =
         makeProductSingleOptionList(productData.getSingleOptions());
