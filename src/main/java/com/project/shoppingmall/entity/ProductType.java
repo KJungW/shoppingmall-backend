@@ -1,6 +1,7 @@
 package com.project.shoppingmall.entity;
 
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.final_value.FinalValue;
 import com.project.shoppingmall.final_value.RegularExpressions;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,5 +32,14 @@ public class ProductType extends BaseEntity {
     if (!Pattern.matches(RegularExpressions.PRODUCT_TYPE_PATTERN, typeName))
       throw new ServerLogicError("ProductType의 typeName필드에 부적절한 값이 입력되었습니다.");
     this.typeName = typeName;
+  }
+
+  public boolean checkBaseProductType() {
+    int prefixLength = FinalValue.BASE_PRODUCT_TYPE_PREFIX.length();
+    if (this.id == null || this.typeName == null || this.typeName.isBlank()) return false;
+    if (this.typeName.length() <= prefixLength) return false;
+    if (this.typeName.substring(0, prefixLength).equals(FinalValue.BASE_PRODUCT_TYPE_PREFIX)) {
+      return true;
+    } else return false;
   }
 }

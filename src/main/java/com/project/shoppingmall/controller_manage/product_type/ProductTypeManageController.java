@@ -12,7 +12,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/product")
 @RequiredArgsConstructor
 public class ProductTypeManageController {
   private final ProductTypeManageService productTypeManageService;
@@ -31,5 +30,11 @@ public class ProductTypeManageController {
     ProductType newType =
         productTypeManageService.update(input.getProductTypeId(), input.getTypeName());
     return new OutputUpdateProductType(newType.getId());
+  }
+
+  @DeleteMapping("/product/type")
+  @PreAuthorize("hasRole('ROLE_ROOT_MANAGER')")
+  public void deleteProductType(@RequestParam("productTypeId") Long productTypeId) {
+    productTypeManageService.delete(productTypeId);
   }
 }
