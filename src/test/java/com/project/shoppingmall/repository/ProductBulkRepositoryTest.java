@@ -102,4 +102,52 @@ class ProductBulkRepositoryTest {
             .getResultList();
     assertEquals(0, queryResult.size());
   }
+
+  @Test
+  @DisplayName("changeProductTypeToBaseType() : 정상흐름")
+  public void changeProductTypeToBaseType() throws IOException {
+    // given
+    // - 새로운 판매자 생성
+    Member seller = MemberBuilder.fullData().build();
+    em.persist(seller);
+
+    // - 새로운 제품 타입 생성
+    ProductType baseType = new ProductType("base$type");
+    em.persist(baseType);
+    ProductType commonType = new ProductType("common$type");
+    em.persist(commonType);
+    long givenTypeId = commonType.getId();
+
+    // - 새로운 제품 생성
+    for (int i = 0; i < 8; i++) {
+      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, commonType);
+      em.persist(targetProduct);
+    }
+    em.flush();
+    em.clear();
+
+    // - 인자세팅
+    String baseProductGetQuery = "select pt from ProductType pt where pt.typeName like 'base$type'";
+    ProductType inputBaseType =
+        em.createQuery(baseProductGetQuery, ProductType.class).getSingleResult();
+    long inputTypeId = givenTypeId;
+
+    // when
+    int rowCount = target.changeProductTypeToBaseType(inputBaseType, inputTypeId);
+
+    // then
+    assertEquals(8, rowCount);
+
+    String getProductQuery =
+        "select p from Product p "
+            + "left join fetch p.productType pt "
+            + "where pt.id = :baseProductTypeId";
+    List<Product> queryResult =
+        em.createQuery(getProductQuery, Product.class)
+            .setParameter("baseProductTypeId", inputBaseType.getId())
+            .getResultList();
+    assertEquals(8, queryResult.size());
+    queryResult.forEach(
+        product -> assertEquals(inputBaseType.getId(), product.getProductType().getId()));
+  }
 }
