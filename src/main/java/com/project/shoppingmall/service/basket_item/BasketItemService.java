@@ -4,6 +4,7 @@ import com.project.shoppingmall.dto.basket.*;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AddBannedProductInBasket;
 import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
+import com.project.shoppingmall.exception.CannotSaveBasketItemBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.member.MemberService;
@@ -37,6 +38,8 @@ public class BasketItemService {
             .findById(basketItemMakeData.getProductId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품이 존재하지 않습니다."));
 
+    if (member.getIsBan())
+      throw new CannotSaveBasketItemBecauseMemberBan("벤상태의 회원은 장바구니에 아이템을 추가할 수 없습니다.");
     if (product.getIsBan()) throw new AddBannedProductInBasket("벤처리된 제품을 장바구니에 넣으려고 시도하고 있습니다.");
     if (product.getSaleState().equals(ProductSaleType.DISCONTINUED))
       throw new AddDiscontinuedProductInBasket("판매중단된 제품을 장바구니에 넣으려고 시도하고 있습니다.");

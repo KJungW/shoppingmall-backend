@@ -171,4 +171,11 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotSaveProductBecauseMemberBanHandler(CannotSaveProductBecauseMemberBan e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "벤상태의 회원은 제품등록이 불가능합니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotSaveBasketItemBecauseMemberBan.class)
+  public ErrorResult CannotSaveBasketItemBecauseMemberBanHandler(
+      CannotSaveBasketItemBecauseMemberBan e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "벤상태의 회원은 장바구니에 아이템을 추가할 수 없습니다.");
+  }
 }

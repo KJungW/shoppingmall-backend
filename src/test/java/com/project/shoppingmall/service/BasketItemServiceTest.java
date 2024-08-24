@@ -11,6 +11,7 @@ import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.AddBannedProductInBasket;
 import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
+import com.project.shoppingmall.exception.CannotSaveBasketItemBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
@@ -101,6 +102,34 @@ class BasketItemServiceTest {
     assertArrayEquals(
         givenMakeData.getMultipleOptionId().toArray(),
         optionInResult.getMultipleOptionId().toArray());
+  }
+
+  @Test
+  @DisplayName("saveBasketItem() : 벤처리된 제품을 장바구니에 넣으려고 시도")
+  public void saveBasketItem_BannedMember() throws IOException {
+    // given
+    Long givenMemberId = 62L;
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    ReflectionTestUtils.setField(givenMember, "isBan", true);
+    Long givenProductId = 30L;
+    Product givenProduct = ProductBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+
+    BasketItemMakeData givenMakeData =
+        BasketItemMakeDataBuilder.fullData()
+            .memberId(givenMemberId)
+            .productId(givenProductId)
+            .singleOptionId(null)
+            .multipleOptionId(null)
+            .build();
+
+    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+
+    // when
+    assertThrows(
+        CannotSaveBasketItemBecauseMemberBan.class, () -> target.saveBasketItem(givenMakeData));
   }
 
   @Test
