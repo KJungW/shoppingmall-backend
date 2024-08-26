@@ -1,0 +1,78 @@
+package com.project.shoppingmall.service.alarm;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.project.shoppingmall.entity.Alarm;
+import com.project.shoppingmall.entity.Member;
+import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.repository.AlarmRepository;
+import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.testdata.AlamBuilder;
+import com.project.shoppingmall.testdata.MemberBuilder;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
+
+class AlarmDeleteServiceTest {
+  private AlarmDeleteService target;
+  private AlarmRepository mockAlarmRepository;
+  private MemberService mockMemberService;
+
+  @BeforeEach
+  public void beforeEach() {
+    mockAlarmRepository = mock(AlarmRepository.class);
+    mockMemberService = mock(MemberService.class);
+    target = new AlarmDeleteService(mockAlarmRepository, mockMemberService);
+  }
+
+  @Test
+  @DisplayName("deleteAlarmByListener() : 정상흐름")
+  public void deleteAlarmByListener_ok() {
+    // given
+    long inputListenerId = 10L;
+    long inputAlarmId = 20L;
+
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", inputListenerId);
+    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    Alarm givenAlarm = AlamBuilder.memberBanFullData().build();
+    ReflectionTestUtils.setField(givenAlarm, "id", inputAlarmId);
+    ReflectionTestUtils.setField(givenAlarm.getListener(), "id", inputListenerId);
+    when(mockAlarmRepository.findById(anyLong())).thenReturn(Optional.of(givenAlarm));
+
+    // when
+    target.deleteAlarmByListener(inputListenerId, inputAlarmId);
+
+    // then
+    ArgumentCaptor<Long> alarmIdCaptor = ArgumentCaptor.forClass(Long.class);
+    verify(mockAlarmRepository, times(1)).deleteById(alarmIdCaptor.capture());
+    assertEquals(givenAlarm.getId(), alarmIdCaptor.getValue());
+  }
+
+  @Test
+  @DisplayName("deleteAlarmByListener() : 다른 회원의 알림을 제거하려고 시도함")
+  public void deleteAlarmByListener_otherMemberAlarm() {
+    // given
+    long inputListenerId = 10L;
+    long inputAlarmId = 20L;
+
+    Member givenMember = MemberBuilder.fullData().build();
+    ReflectionTestUtils.setField(givenMember, "id", inputListenerId);
+    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+
+    long otherMemberId = 30L;
+    Alarm givenAlarm = AlamBuilder.memberBanFullData().build();
+    ReflectionTestUtils.setField(givenAlarm, "id", inputAlarmId);
+    ReflectionTestUtils.setField(givenAlarm.getListener(), "id", otherMemberId);
+    when(mockAlarmRepository.findById(anyLong())).thenReturn(Optional.of(givenAlarm));
+
+    // when then
+    assertThrows(
+        DataNotFound.class, () -> target.deleteAlarmByListener(inputListenerId, inputAlarmId));
+  }
+}
