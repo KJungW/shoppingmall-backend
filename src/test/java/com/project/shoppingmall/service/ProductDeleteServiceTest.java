@@ -3,14 +3,13 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.project.shoppingmall.entity.BasketItem;
-import com.project.shoppingmall.entity.Product;
-import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.entity.Review;
+import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.RecentlyPurchasedProduct;
 import com.project.shoppingmall.repository.ProductRepository;
+import com.project.shoppingmall.service.alarm.AlarmDeleteService;
+import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.product.ProductDeleteService;
@@ -43,6 +42,8 @@ class ProductDeleteServiceTest {
   private ReportService mockReportService;
   private ReportDeleteService mockReportDeleteService;
   private PurchaseItemService mockPurchaseItemService;
+  private AlarmFindService mockAlarmFindService;
+  private AlarmDeleteService mockAlarmDeleteService;
 
   @BeforeEach
   public void beforeEach() {
@@ -55,6 +56,9 @@ class ProductDeleteServiceTest {
     mockReportService = mock(ReportService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockAlarmFindService = mock(AlarmFindService.class);
+    mockAlarmDeleteService = mock(AlarmDeleteService.class);
+
     target =
         new ProductDeleteService(
             mockProductService,
@@ -65,7 +69,9 @@ class ProductDeleteServiceTest {
             mockReviewDeleteService,
             mockReportService,
             mockReportDeleteService,
-            mockPurchaseItemService);
+            mockPurchaseItemService,
+            mockAlarmFindService,
+            mockAlarmDeleteService);
 
     ReflectionTestUtils.setField(target, "productDeletePossibleDate", 30);
   }
@@ -114,6 +120,14 @@ class ProductDeleteServiceTest {
                 ProductReportBuilder.fullData().build(), ProductReportBuilder.fullData().build()));
     when(mockReportService.findAllByProduct(anyLong())).thenReturn(givenProductReports);
 
+    // - alarmFindService.findByTargetProduct() 세팅
+    List<Alarm> givenAlarms =
+        new ArrayList<>(
+            List.of(
+                AlamBuilder.productBanFullData().build(),
+                AlamBuilder.productBanFullData().build()));
+    when(mockAlarmFindService.findByTargetProduct(anyLong())).thenReturn(givenAlarms);
+
     // when
     target.deleteProductBySeller(givenSellerId, givenProductId);
 
@@ -135,6 +149,11 @@ class ProductDeleteServiceTest {
     verify(mockReportDeleteService, times(1))
         .deleteProductReportList(productReportListCaptor.capture());
     assertEquals(givenProductReports.size(), productReportListCaptor.getValue().size());
+
+    // - alarmDeleteService.deleteAlarmList() 체크
+    ArgumentCaptor<List<Alarm>> alarmListCaptor = ArgumentCaptor.forClass(List.class);
+    verify(mockAlarmDeleteService, times(1)).deleteAlarmList(alarmListCaptor.capture());
+    assertEquals(givenAlarms.size(), alarmListCaptor.getValue().size());
 
     // - productRepository.delete() 체크
     ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);

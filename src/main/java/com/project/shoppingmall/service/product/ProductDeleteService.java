@@ -1,14 +1,13 @@
 package com.project.shoppingmall.service.product;
 
-import com.project.shoppingmall.entity.BasketItem;
-import com.project.shoppingmall.entity.Product;
-import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.entity.Review;
+import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.RecentlyPurchasedProduct;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ProductRepository;
+import com.project.shoppingmall.service.alarm.AlarmDeleteService;
+import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
@@ -36,6 +35,8 @@ public class ProductDeleteService {
   private final ReportService reportService;
   private final ReportDeleteService reportDeleteService;
   private final PurchaseItemService purchaseItemService;
+  private final AlarmFindService alarmFindService;
+  private final AlarmDeleteService alarmDeleteService;
 
   @Value("${project_role.product.delete_possible_day}")
   private Integer productDeletePossibleDate;
@@ -51,6 +52,9 @@ public class ProductDeleteService {
 
     List<ProductReport> productReportList = reportService.findAllByProduct(product.getId());
     reportDeleteService.deleteProductReportList(productReportList);
+
+    List<Alarm> alarmsList = alarmFindService.findByTargetProduct(product.getId());
+    alarmDeleteService.deleteAlarmList(alarmsList);
 
     productRepository.delete(product);
   }

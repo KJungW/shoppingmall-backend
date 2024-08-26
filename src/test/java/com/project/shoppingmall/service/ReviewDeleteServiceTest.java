@@ -6,22 +6,22 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
+import com.project.shoppingmall.entity.Alarm;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
+import com.project.shoppingmall.service.alarm.AlarmDeleteService;
+import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.PurchaseItemBuilder;
-import com.project.shoppingmall.testdata.ReviewBuilder;
-import com.project.shoppingmall.testdata.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,8 @@ class ReviewDeleteServiceTest {
   private PurchaseItemService mockPurchaseItemService;
   private ReportService mockReportService;
   private ReportDeleteService mockReportDeleteService;
+  private AlarmFindService mockAlarmFindService;
+  private AlarmDeleteService mockAlarmDeleteService;
   private S3Service mockS3Service;
 
   @BeforeEach
@@ -48,6 +50,8 @@ class ReviewDeleteServiceTest {
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockReportService = mock(ReportService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
+    mockAlarmFindService = mock(AlarmFindService.class);
+    mockAlarmDeleteService = mock(AlarmDeleteService.class);
     mockS3Service = mock(S3Service.class);
     target =
         new ReviewDeleteService(
@@ -56,6 +60,8 @@ class ReviewDeleteServiceTest {
             mockPurchaseItemService,
             mockReportService,
             mockReportDeleteService,
+            mockAlarmFindService,
+            mockAlarmDeleteService,
             mockS3Service);
   }
 
@@ -92,6 +98,13 @@ class ReviewDeleteServiceTest {
                 ReviewReportBuilder.fullData().build()));
     when(mockReportService.findAllByReview(anyLong())).thenReturn(givenReviewReport);
 
+    // - alarmFindService.findByTargetProduct() 세팅
+    List<Alarm> givenAlarms =
+        new ArrayList<>(
+            List.of(
+                AlamBuilder.reviewBanFullData().build(), AlamBuilder.reviewBanFullData().build()));
+    when(mockAlarmFindService.findByTargetReview(anyLong())).thenReturn(givenAlarms);
+
     // - reviewService.calcReviewScoresInProduct() 세팅
     ReviewScoresCalcResult givenReviewCalcResult = new ReviewScoresCalcResult(20L, 4.5);
     when(mockReviewService.calcReviewScoresInProduct(anyLong())).thenReturn(givenReviewCalcResult);
@@ -100,18 +113,23 @@ class ReviewDeleteServiceTest {
     target.deleteReviewByWriter(givenWriterId, givenReviewId);
 
     // then
-    // - 리뷰 이미지 제거 확인
-    ArgumentCaptor<String> imageUriCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockS3Service, times(1)).deleteFile(imageUriCaptor.capture());
-    assertEquals(givenReviewImageUri, imageUriCaptor.getValue());
-
-    // - Review를 참조하는 PurchaseItem의 외래키의 null 확인
-    assertNull(givenPurchaseItem.getReview());
-
     // - Review와 연결된 ReviewReport 제거 확인
     ArgumentCaptor<List<ReviewReport>> reviewListCaptor = ArgumentCaptor.forClass(List.class);
     verify(mockReportDeleteService, times(1)).deleteReviewReportList(reviewListCaptor.capture());
     assertEquals(givenReviewReport.size(), reviewListCaptor.getValue().size());
+
+    // - Review와 연결된 Alarm 제거 확인
+    ArgumentCaptor<List<Alarm>> alarmListCaptor = ArgumentCaptor.forClass(List.class);
+    verify(mockAlarmDeleteService, times(1)).deleteAlarmList(alarmListCaptor.capture());
+    assertEquals(givenAlarms.size(), alarmListCaptor.getValue().size());
+
+    // - Review를 참조하는 PurchaseItem의 외래키의 null 확인
+    assertNull(givenPurchaseItem.getReview());
+
+    // - 리뷰 이미지 제거 확인
+    ArgumentCaptor<String> imageUriCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).deleteFile(imageUriCaptor.capture());
+    assertEquals(givenReviewImageUri, imageUriCaptor.getValue());
 
     // - Review 제거 확인
     ArgumentCaptor<Review> reviewCaptor = ArgumentCaptor.forClass(Review.class);
