@@ -5,6 +5,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.EntityManagerService;
+import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -19,6 +20,7 @@ public class BanManageService {
   private final MemberService memberService;
   private final ProductService productService;
   private final ReviewService reviewService;
+  private final AlarmService alarmService;
   private final EntityManagerService entityManagerService;
 
   @Transactional
@@ -28,8 +30,11 @@ public class BanManageService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원 데이터가 존재하지 않습니다."));
     if (member.getIsBan().equals(isBan)) return member;
+
     member.updateMemberBan(isBan);
+    alarmService.makeMemberBanAlarm(member.getId());
     entityManagerService.flush();
+
     productService.banProductsBySellerId(memberId, isBan);
     reviewService.banReviewsByWriterId(memberId, isBan);
     return member;
@@ -39,9 +44,10 @@ public class BanManageService {
   public Product banProduct(long productId, boolean isBan) {
     Product product =
         productService
-            .findById(productId)
+            .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품 데이터가 존재하지 않습니다."));
     product.updateIsBan(isBan);
+    alarmService.makeProductBanAlarm(product.getSeller().getId(), product.getId());
     return product;
   }
 
@@ -52,6 +58,7 @@ public class BanManageService {
             .findById(reviewId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰 데이터가 존재하지 않습니다."));
     review.updateIsBan(isBan);
+    alarmService.makeReviewBanAlarm(review.getWriter().getId(), review.getId());
     return review;
   }
 }

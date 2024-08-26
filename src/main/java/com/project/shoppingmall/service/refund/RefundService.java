@@ -1,11 +1,9 @@
 package com.project.shoppingmall.service.refund;
 
-import com.project.shoppingmall.entity.Member;
-import com.project.shoppingmall.entity.Purchase;
-import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.entity.Refund;
+import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
+import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.type.PurchaseStateType;
@@ -30,6 +28,7 @@ public class RefundService {
   private final MemberService memberService;
   private final PurchaseItemService purchaseItemService;
   private final IamportClient iamportClient;
+  private final AlarmService alarmService;
 
   @Value("${project_role.refund.create_possible_day}")
   private Integer refundSavePossibleDate;
@@ -68,9 +67,10 @@ public class RefundService {
             .requestContent(requestContent)
             .build();
     purchaseItem.addRefund(newRefund);
-
     refundRepository.save(newRefund);
 
+    alarmService.makeRefundRequestAlarm(
+        newRefund.getPurchaseItem().getSellerId(), newRefund.getId());
     return newRefund;
   }
 

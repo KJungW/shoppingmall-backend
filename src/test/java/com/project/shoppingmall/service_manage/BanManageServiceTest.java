@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.EntityManagerService;
+import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -17,7 +18,6 @@ import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ReviewBuilder;
 import java.io.IOException;
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +30,7 @@ class BanManageServiceTest {
   private MemberService mockMemberService;
   private ProductService mockProductService;
   private ReviewService mockReviewService;
+  private AlarmService mockAlarmService;
   private EntityManagerService mockEntityManagerService;
 
   @BeforeEach
@@ -37,10 +38,15 @@ class BanManageServiceTest {
     mockMemberService = mock(MemberService.class);
     mockProductService = mock(ProductService.class);
     mockReviewService = mock(ReviewService.class);
+    mockAlarmService = mock(AlarmService.class);
     mockEntityManagerService = mock(EntityManagerService.class);
     target =
         new BanManageService(
-            mockMemberService, mockProductService, mockReviewService, mockEntityManagerService);
+            mockMemberService,
+            mockProductService,
+            mockReviewService,
+            mockAlarmService,
+            mockEntityManagerService);
   }
 
   @Test
@@ -60,6 +66,10 @@ class BanManageServiceTest {
 
     // then
     assertEquals(givenIsBan, givenMember.getIsBan());
+
+    ArgumentCaptor<Long> alarmListenerId = ArgumentCaptor.forClass(Long.class);
+    verify(mockAlarmService, times(1)).makeMemberBanAlarm(alarmListenerId.capture());
+    assertEquals(givenMember.getId(), alarmListenerId.getValue());
 
     ArgumentCaptor<Long> sellerIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<Boolean> productBanCaptor = ArgumentCaptor.forClass(Boolean.class);
@@ -117,16 +127,25 @@ class BanManageServiceTest {
     long givenProductId = 20L;
     boolean givenIsBan = true;
 
+    long givenSellerId = 30L;
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct, "isBan", !givenIsBan);
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
+    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when
     target.banProduct(givenProductId, givenIsBan);
 
     // then
     assertEquals(givenIsBan, givenProduct.getIsBan());
+
+    ArgumentCaptor<Long> alarmListenerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Long> productIdCaptor = ArgumentCaptor.forClass(Long.class);
+    verify(mockAlarmService, times(1))
+        .makeProductBanAlarm(alarmListenerIdCaptor.capture(), productIdCaptor.capture());
+    assertEquals(givenSellerId, alarmListenerIdCaptor.getValue());
+    assertEquals(givenProduct.getId(), productIdCaptor.getValue());
   }
 
   @Test
@@ -136,7 +155,7 @@ class BanManageServiceTest {
     long givenProductId = 20L;
     boolean givenIsBan = true;
 
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.empty());
 
     // when then
     assertThrows(DataNotFound.class, () -> target.banProduct(givenProductId, givenIsBan));
@@ -149,16 +168,25 @@ class BanManageServiceTest {
     long givenReviewId = 20L;
     boolean givenIsBan = true;
 
+    long givenReviewWriterId = 30L;
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
     ReflectionTestUtils.setField(givenReview, "isBan", !givenIsBan);
+    ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenReviewWriterId);
     Mockito.when(mockReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     // when
     target.banReview(givenReviewId, givenIsBan);
 
     // then
-    Assertions.assertEquals(givenIsBan, givenReview.getIsBan());
+    assertEquals(givenIsBan, givenReview.getIsBan());
+
+    ArgumentCaptor<Long> reviewIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Long> alarmListenerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    verify(mockAlarmService, times(1))
+        .makeReviewBanAlarm(alarmListenerIdCaptor.capture(), reviewIdCaptor.capture());
+    assertEquals(givenReview.getId(), reviewIdCaptor.getValue());
+    assertEquals(givenReview.getWriter().getId(), alarmListenerIdCaptor.getValue());
   }
 
   @Test

@@ -9,6 +9,7 @@ import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
+import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.refund.RefundFindService;
@@ -41,6 +42,7 @@ class RefundServiceTest {
   private MemberService mockMemberService;
   private PurchaseItemService mockPurchaseItemService;
   private IamportClient mockIamportClient;
+  private AlarmService mockAlarmService;
   private Integer givenRefundPossibleDate = 30;
 
   @BeforeEach
@@ -50,13 +52,15 @@ class RefundServiceTest {
     mockMemberService = mock(MemberService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockIamportClient = mock(IamportClient.class);
+    mockAlarmService = mock(AlarmService.class);
     target =
         new RefundService(
             mockRefundRepository,
             mockRefundFindService,
             mockMemberService,
             mockPurchaseItemService,
-            mockIamportClient);
+            mockIamportClient,
+            mockAlarmService);
 
     ReflectionTestUtils.setField(target, "refundSavePossibleDate", givenRefundPossibleDate);
   }
@@ -80,11 +84,14 @@ class RefundServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
+
     int givenFinalPrice = 100000;
+    long givenSellerId = 20L;
     PurchaseItem givenPurchaseItem =
         PurchaseItemBuilder.fullData().finalPrice(givenFinalPrice).build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", givenPurchase);
+    ReflectionTestUtils.setField(givenPurchaseItem, "sellerId", givenSellerId);
     ReflectionTestUtils.setField(
         givenPurchaseItem,
         "createDate",
@@ -94,6 +101,17 @@ class RefundServiceTest {
 
     // - purchaseItemService.refundIsPossible() 세팅
     when(mockPurchaseItemService.refundIsPossible(any())).thenReturn(true);
+
+    // - refundRepository.save() 세팅
+    long givenNewRefundId = 26L;
+    doAnswer(
+            invocation -> {
+              Refund refund = invocation.getArgument(0);
+              ReflectionTestUtils.setField(refund, "id", givenNewRefundId);
+              return refund;
+            })
+        .when(mockRefundRepository)
+        .save(any(Refund.class));
 
     // when
     Refund resultRefund =
@@ -109,6 +127,13 @@ class RefundServiceTest {
     assertFalse(givenPurchaseItem.getIsRefund());
     assertNotNull(givenPurchaseItem.getFinalRefundCreatedDate());
     assertEquals(RefundStateTypeForPurchaseItem.REQUEST, givenPurchaseItem.getFinalRefundState());
+
+    ArgumentCaptor<Long> alarmListenIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<Long> refundIdCaptor = ArgumentCaptor.forClass(Long.class);
+    verify(mockAlarmService, times(1))
+        .makeRefundRequestAlarm(alarmListenIdCaptor.capture(), refundIdCaptor.capture());
+    assertEquals(givenSellerId, alarmListenIdCaptor.getValue());
+    assertEquals(givenNewRefundId, refundIdCaptor.getValue());
   }
 
   @Test
