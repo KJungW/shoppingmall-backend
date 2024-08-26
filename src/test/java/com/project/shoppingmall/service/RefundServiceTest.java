@@ -11,6 +11,7 @@ import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.refund.RefundService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.PurchaseBuilder;
@@ -36,6 +37,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class RefundServiceTest {
   private RefundService target;
   private RefundRepository mockRefundRepository;
+  private RefundFindService mockRefundFindService;
   private MemberService mockMemberService;
   private PurchaseItemService mockPurchaseItemService;
   private IamportClient mockIamportClient;
@@ -44,12 +46,17 @@ class RefundServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockRefundRepository = mock(RefundRepository.class);
+    mockRefundFindService = mock(RefundFindService.class);
     mockMemberService = mock(MemberService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockIamportClient = mock(IamportClient.class);
     target =
         new RefundService(
-            mockRefundRepository, mockMemberService, mockPurchaseItemService, mockIamportClient);
+            mockRefundRepository,
+            mockRefundFindService,
+            mockMemberService,
+            mockPurchaseItemService,
+            mockIamportClient);
 
     ReflectionTestUtils.setField(target, "refundSavePossibleDate", givenRefundPossibleDate);
   }
@@ -286,7 +293,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when
@@ -321,7 +328,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", wrongMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when then
@@ -349,7 +356,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when then
@@ -377,7 +384,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when
@@ -411,7 +418,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", wrongMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when
@@ -439,7 +446,7 @@ class RefundServiceTest {
     givenRefund.registerPurchaseItem(PurchaseItemBuilder.fullData().build());
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMemberId);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when
@@ -471,7 +478,7 @@ class RefundServiceTest {
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
     givenRefund.registerPurchaseItem(givenPurchaseItem);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // - iamportClient.cancelPaymentByImpUid() 세팅
@@ -524,7 +531,7 @@ class RefundServiceTest {
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
     givenRefund.registerPurchaseItem(givenPurchaseItem);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when then
@@ -554,7 +561,7 @@ class RefundServiceTest {
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.REQUEST);
     givenRefund.registerPurchaseItem(givenPurchaseItem);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when then
@@ -585,7 +592,7 @@ class RefundServiceTest {
     ReflectionTestUtils.setField(givenRefund, "refundPrice", givenRefundPrice);
     ReflectionTestUtils.setField(givenRefund, "state", RefundStateType.ACCEPT);
     givenRefund.registerPurchaseItem(givenPurchaseItem);
-    when(mockRefundRepository.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // - iamportClient.cancelPaymentByImpUid() 세팅

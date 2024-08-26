@@ -5,7 +5,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
-import com.project.shoppingmall.service.refund.RefundService;
+import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.type.AlarmType;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class AlarmService {
   private final MemberService memberService;
   private final ReviewService reviewService;
   private final ProductService productService;
-  private final RefundService refundService;
+  private final RefundFindService refundFindService;
 
   public Alarm makeMemberBanAlarm(long listenerId) {
     Member listener =
@@ -89,7 +89,7 @@ public class AlarmService {
             .findById(listenerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
-        refundService
+        refundFindService
             .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 

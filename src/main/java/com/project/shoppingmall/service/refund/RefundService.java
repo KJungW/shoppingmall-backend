@@ -16,7 +16,6 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RefundService {
   private final RefundRepository refundRepository;
+  private final RefundFindService refundFindService;
   private final MemberService memberService;
   private final PurchaseItemService purchaseItemService;
   private final IamportClient iamportClient;
@@ -81,7 +81,8 @@ public class RefundService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
-        findByIdWithPurchaseItemProduct(refundId)
+        refundFindService
+            .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
 
     if (!member.getId().equals(refund.getPurchaseItem().getSellerId())) {
@@ -103,7 +104,8 @@ public class RefundService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
-        findByIdWithPurchaseItemProduct(refundId)
+        refundFindService
+            .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
 
     if (!member.getId().equals(refund.getPurchaseItem().getSellerId())) {
@@ -123,7 +125,8 @@ public class RefundService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
-        findByIdWithPurchaseItemProduct(refundId)
+        refundFindService
+            .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 환불이 존재하지 않습니다."));
 
     if (!member.getId().equals(refund.getPurchaseItem().getSellerId())) {
@@ -146,9 +149,5 @@ public class RefundService {
         iamportClient.cancelPaymentByImpUid(
             new CancelData(paymentUid, true, new BigDecimal(refundPrice)));
     if (paymentIamportResponse.getResponse() == null) throw new FailRefundException("환불에 실패했습니다.");
-  }
-
-  public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
-    return refundRepository.findByIdWithPurchaseItemProduct(refundId);
   }
 }

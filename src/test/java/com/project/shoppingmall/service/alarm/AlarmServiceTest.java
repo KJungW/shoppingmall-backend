@@ -8,7 +8,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
-import com.project.shoppingmall.service.refund.RefundService;
+import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
@@ -29,7 +29,7 @@ class AlarmServiceTest {
   private MemberService mockMemberService;
   private ReviewService mockReviewService;
   private ProductService mockProductService;
-  private RefundService mockRefundService;
+  private RefundFindService mockRefundFindService;
 
   @BeforeEach
   public void beforeEach() {
@@ -37,14 +37,14 @@ class AlarmServiceTest {
     mockMemberService = mock(MemberService.class);
     mockReviewService = mock(ReviewService.class);
     mockProductService = mock(ProductService.class);
-    mockRefundService = mock(RefundService.class);
+    mockRefundFindService = mock(RefundFindService.class);
     target =
         new AlarmService(
             mockAlarmRepository,
             mockMemberService,
             mockReviewService,
             mockProductService,
-            mockRefundService);
+            mockRefundFindService);
   }
 
   @Test
@@ -192,7 +192,7 @@ class AlarmServiceTest {
     Refund givenRefund = RefundBuilder.makeRefundWithPurchaseItem();
     ReflectionTestUtils.setField(givenRefund, "id", inputRefundId);
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", inputListenerId);
-    when(mockRefundService.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when
@@ -227,7 +227,7 @@ class AlarmServiceTest {
     Refund givenRefund = RefundBuilder.makeRefundWithPurchaseItem();
     ReflectionTestUtils.setField(givenRefund, "id", inputRefundId);
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", otherMemberId);
-    when(mockRefundService.findByIdWithPurchaseItemProduct(anyLong()))
+    when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
 
     // when then
