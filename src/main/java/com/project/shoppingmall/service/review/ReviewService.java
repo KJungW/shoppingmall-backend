@@ -114,8 +114,12 @@ public class ReviewService {
     return reviewBulkRepository.banReviewsByWriterId(writerId, isBan);
   }
 
-  public Optional<Review> findById(long refundId) {
-    return reviewRepository.findById(refundId);
+  public Optional<Review> findById(long reviewId) {
+    return reviewRepository.findById(reviewId);
+  }
+
+  public Optional<Review> findByIdWithWriter(long reviewId) {
+    return reviewRepository.findByIdWithWriter(reviewId);
   }
 
   public List<Review> findByProduct(long productId) {

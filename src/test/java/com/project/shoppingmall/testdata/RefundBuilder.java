@@ -1,6 +1,8 @@
 package com.project.shoppingmall.testdata;
 
+import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
+import java.io.IOException;
 
 public class RefundBuilder {
   public static Refund.RefundBuilder fullData() {
@@ -8,5 +10,12 @@ public class RefundBuilder {
         .refundPrice(10000)
         .requestTitle("TestRefundRequestTitle")
         .requestContent("TestRefundRequestContent");
+  }
+
+  public static Refund makeRefundWithPurchaseItem() throws IOException {
+    Refund refund = RefundBuilder.fullData().build();
+    PurchaseItem purchaseItem = PurchaseItemBuilder.fullData().build();
+    purchaseItem.addRefund(refund);
+    return refund;
   }
 }
