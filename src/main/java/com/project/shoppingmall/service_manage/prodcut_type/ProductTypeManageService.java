@@ -2,6 +2,7 @@ package com.project.shoppingmall.service_manage.prodcut_type;
 
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.exception.CannotDeleteBaseProductType;
+import com.project.shoppingmall.exception.CannotUpdateBaseProductType;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductTypeRepository;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
@@ -29,6 +30,8 @@ public class ProductTypeManageService {
         productTypeService
             .findById(productTypeId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 ProductType이 존재하지 않습니다."));
+    if (productType.checkBaseProductType())
+      throw new CannotUpdateBaseProductType("기본 제품 타입을 삭제할 수 없습니다.");
     productType.updateTypeName(typeName);
     return productType;
   }

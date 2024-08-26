@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.exception.CannotDeleteBaseProductType;
+import com.project.shoppingmall.exception.CannotUpdateBaseProductType;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.final_value.FinalValue;
 import com.project.shoppingmall.repository.ProductTypeRepository;
@@ -76,6 +77,26 @@ class ProductTypeManageServiceTest {
 
     // then
     assertEquals(inputTypeName, updateResult.getTypeName());
+  }
+
+  @Test
+  @DisplayName("update() :  기본 제품타입을 수정하려고 시도")
+  public void update_updateProductType() {
+    // given
+    long inputTypeId = 10L;
+    String inputTypeName = "테스트1-test1";
+
+    ProductType givenBaseProductType = new ProductType("temp$temp");
+    ReflectionTestUtils.setField(givenBaseProductType, "id", inputTypeId);
+    ReflectionTestUtils.setField(
+        givenBaseProductType,
+        "typeName",
+        FinalValue.BASE_PRODUCT_TYPE_PREFIX + FinalValue.BASE_PRODUCT_TYPE_NAME);
+    when(mockProductTypeService.findById(anyLong())).thenReturn(Optional.of(givenBaseProductType));
+
+    // when
+    assertThrows(
+        CannotUpdateBaseProductType.class, () -> target.update(inputTypeId, inputTypeName));
   }
 
   @Test

@@ -190,4 +190,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotDeleteBaseProductTypeHandler(CannotDeleteBaseProductType e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "기본 제품타입은 제거할 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotUpdateBaseProductType.class)
+  public ErrorResult CannotUpdateBaseProductTypeHandler(CannotUpdateBaseProductType e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "기본 제품타입은 수정할 수 없습니다.");
+  }
 }
