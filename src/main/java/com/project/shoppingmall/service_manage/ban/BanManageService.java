@@ -9,6 +9,7 @@ import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service_manage.product.ProductManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BanManageService {
   private final MemberService memberService;
   private final ProductService productService;
+  private final ProductManageService productManageService;
   private final ReviewService reviewService;
   private final AlarmService alarmService;
   private final EntityManagerService entityManagerService;
@@ -35,7 +37,7 @@ public class BanManageService {
     alarmService.makeMemberBanAlarm(member.getId());
     entityManagerService.flush();
 
-    productService.banProductsBySellerId(memberId, isBan);
+    productManageService.banProductsBySellerId(memberId, isBan);
     reviewService.banReviewsByWriterId(memberId, isBan);
     return member;
   }

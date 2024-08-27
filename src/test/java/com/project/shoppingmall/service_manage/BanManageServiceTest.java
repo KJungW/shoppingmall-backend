@@ -13,6 +13,7 @@ import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.ban.BanManageService;
+import com.project.shoppingmall.service_manage.product.ProductManageService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.ReviewBuilder;
@@ -29,6 +30,7 @@ class BanManageServiceTest {
   private BanManageService target;
   private MemberService mockMemberService;
   private ProductService mockProductService;
+  private ProductManageService mockProductManageService;
   private ReviewService mockReviewService;
   private AlarmService mockAlarmService;
   private EntityManagerService mockEntityManagerService;
@@ -37,6 +39,7 @@ class BanManageServiceTest {
   public void beforeEach() {
     mockMemberService = mock(MemberService.class);
     mockProductService = mock(ProductService.class);
+    mockProductManageService = mock(ProductManageService.class);
     mockReviewService = mock(ReviewService.class);
     mockAlarmService = mock(AlarmService.class);
     mockEntityManagerService = mock(EntityManagerService.class);
@@ -44,6 +47,7 @@ class BanManageServiceTest {
         new BanManageService(
             mockMemberService,
             mockProductService,
+            mockProductManageService,
             mockReviewService,
             mockAlarmService,
             mockEntityManagerService);
@@ -73,7 +77,7 @@ class BanManageServiceTest {
 
     ArgumentCaptor<Long> sellerIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<Boolean> productBanCaptor = ArgumentCaptor.forClass(Boolean.class);
-    verify(mockProductService, times(1))
+    verify(mockProductManageService, times(1))
         .banProductsBySellerId(sellerIdCaptor.capture(), productBanCaptor.capture());
     assertEquals(givenMemberId, sellerIdCaptor.getValue());
     assertEquals(givenIsBan, productBanCaptor.getValue());
@@ -103,7 +107,7 @@ class BanManageServiceTest {
 
     // then
     assertEquals(givenIsBan, givenMember.getIsBan());
-    verify(mockProductService, times(0)).banProductsBySellerId(anyLong(), anyBoolean());
+    verify(mockProductManageService, times(0)).banProductsBySellerId(anyLong(), anyBoolean());
     verify(mockReviewService, times(0)).banReviewsByWriterId(anyLong(), anyBoolean());
   }
 

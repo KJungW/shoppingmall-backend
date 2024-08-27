@@ -13,6 +13,11 @@ public class ProductManageService {
   private final ProductBulkRepository productBulkRepository;
 
   @Transactional
+  public int banProductsBySellerId(long sellerId, boolean isBan) {
+    return productBulkRepository.banProductsBySellerId(sellerId, isBan);
+  }
+
+  @Transactional
   public int changeProductTypeToBaseType(ProductType baseProductType, long targetProductTypeId) {
     return productBulkRepository.changeProductTypeToBaseType(baseProductType, targetProductTypeId);
   }
