@@ -12,6 +12,10 @@ public class AlamBuilder {
     return Alarm.builder().listener(givenMember).alarmType(AlarmType.MEMBER_BAN);
   }
 
+  public static Alarm.AlarmBuilder memberBanFullData(Member listener) {
+    return Alarm.builder().listener(listener).alarmType(AlarmType.MEMBER_BAN);
+  }
+
   public static Alarm.AlarmBuilder reviewBanFullData() throws IOException {
     Member givenMember = MemberBuilder.fullData().build();
     Review givenReview = ReviewBuilder.fullData().build();
@@ -21,6 +25,11 @@ public class AlamBuilder {
         .listener(givenMember)
         .alarmType(AlarmType.REVIEW_BAN)
         .targetReview(givenReview);
+  }
+
+  public static Alarm.AlarmBuilder reviewBanFullData(Member listener, Review review)
+      throws IOException {
+    return Alarm.builder().listener(listener).alarmType(AlarmType.REVIEW_BAN).targetReview(review);
   }
 
   public static Alarm.AlarmBuilder productBanFullData() throws IOException {
@@ -34,7 +43,15 @@ public class AlamBuilder {
         .targetProduct(givenProduct);
   }
 
-  public static Alarm.AlarmBuilder makeRefundFullData() throws IOException {
+  public static Alarm.AlarmBuilder productBanFullData(Member listener, Product product)
+      throws IOException {
+    return Alarm.builder()
+        .listener(listener)
+        .alarmType(AlarmType.PRODUCT_BAN)
+        .targetProduct(product);
+  }
+
+  public static Alarm.AlarmBuilder refundRequestFullData() throws IOException {
     Member givenMember = MemberBuilder.fullData().build();
     Refund givenRefund = RefundBuilder.makeRefundWithPurchaseItem();
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", givenMember.getId());
@@ -43,6 +60,14 @@ public class AlamBuilder {
         .listener(givenMember)
         .alarmType(AlarmType.REFUND_REQUEST)
         .targetRefund(givenRefund);
+  }
+
+  public static Alarm.AlarmBuilder refundRequestFullData(Member listener, Refund refund)
+      throws IOException {
+    return Alarm.builder()
+        .listener(listener)
+        .alarmType(AlarmType.REFUND_REQUEST)
+        .targetRefund(refund);
   }
 
   public static Alarm.AlarmBuilder typeDeleteFullData() throws IOException {
