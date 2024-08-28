@@ -2,12 +2,15 @@ package com.project.shoppingmall.service.alarm;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.type.AlarmType;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ public class AlarmService {
   private final ProductService productService;
   private final RefundFindService refundFindService;
 
+  @Transactional
   public Alarm makeMemberBanAlarm(long listenerId) {
     Member listener =
         memberService
@@ -35,6 +39,7 @@ public class AlarmService {
     return memberBanAlarm;
   }
 
+  @Transactional
   public Alarm makeReviewBanAlarm(long reviewId) {
     Review review =
         reviewService
@@ -52,6 +57,7 @@ public class AlarmService {
     return reviewBanAlarm;
   }
 
+  @Transactional
   public Alarm makeProductBanAlarm(long productId) {
     Product product =
         productService
@@ -69,6 +75,7 @@ public class AlarmService {
     return productBanAlarm;
   }
 
+  @Transactional
   public Alarm makeRefundRequestAlarm(long refundId) {
     Refund refund =
         refundFindService
@@ -90,6 +97,7 @@ public class AlarmService {
     return refundRequestAlarm;
   }
 
+  @Transactional
   public Alarm makeTypeDeleteAlarm(long productId) {
     Product product =
         productService
@@ -107,6 +115,29 @@ public class AlarmService {
     return typeDeleteAlarm;
   }
 
+  @Transactional
+  public List<Alarm> makeAllTypeDeleteAlarm(List<Product> products) {
+    List<Alarm> newAlarms = new ArrayList<>();
+    products.forEach(
+        product -> {
+          newAlarms.add(
+              Alarm.builder()
+                  .listener(product.getSeller())
+                  .alarmType(AlarmType.TYPE_DELETE)
+                  .targetProduct(product)
+                  .build());
+        });
+
+    try {
+      alarmRepository.saveAll(newAlarms);
+    } catch (Exception ex) {
+      throw new ServerLogicError("product들 중에 DB에 존재하지 않는 product가 존재합니다.");
+    }
+
+    return newAlarms;
+  }
+
+  @Transactional
   public Alarm makeTypeUpdateAlarm(long productId) {
     Product product =
         productService
@@ -122,5 +153,27 @@ public class AlarmService {
 
     alarmRepository.save(typeUpdateAlarm);
     return typeUpdateAlarm;
+  }
+
+  @Transactional
+  public List<Alarm> makeAllTypeUpdateAlarm(List<Product> products) {
+    List<Alarm> newAlarms = new ArrayList<>();
+    products.forEach(
+        product -> {
+          newAlarms.add(
+              Alarm.builder()
+                  .listener(product.getSeller())
+                  .alarmType(AlarmType.TYPE_UPDATE)
+                  .targetProduct(product)
+                  .build());
+        });
+
+    try {
+      alarmRepository.saveAll(newAlarms);
+    } catch (Exception ex) {
+      throw new ServerLogicError("product들 중에 DB에 존재하지 않는 product가 존재합니다.");
+    }
+
+    return newAlarms;
   }
 }

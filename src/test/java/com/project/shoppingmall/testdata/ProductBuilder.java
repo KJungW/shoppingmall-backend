@@ -102,6 +102,22 @@ public class ProductBuilder {
         .contents(givenContents);
   }
 
+  public static Product.ProductBuilder lightData() throws IOException {
+    return Product.builder()
+        .seller(MemberBuilder.fullData().build())
+        .productType(new ProductType("test$type"))
+        .name("testProduct")
+        .price(2000)
+        .discountAmount(100)
+        .discountRate(10.5)
+        .isBan(false)
+        .scoreAvg(0.0)
+        .singleOptions(new ArrayList<>())
+        .multipleOptions(new ArrayList<>())
+        .productImages(new ArrayList<>())
+        .contents(new ArrayList<>());
+  }
+
   public static Product makeNoBannedProduct(Member seller, ProductType type) throws IOException {
     return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
   }

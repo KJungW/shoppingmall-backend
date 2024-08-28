@@ -27,9 +27,9 @@ public class ProductTypeManageController {
   @PreAuthorize("hasRole('ROLE_ROOT_MANAGER')")
   public OutputUpdateProductType updateProductType(
       @Valid @RequestBody InputUpdateProductType input) {
-    ProductType newType =
+    ProductType updatedType =
         productTypeManageService.update(input.getProductTypeId(), input.getTypeName());
-    return new OutputUpdateProductType(newType.getId());
+    return new OutputUpdateProductType(updatedType.getId());
   }
 
   @DeleteMapping("/product/type")
