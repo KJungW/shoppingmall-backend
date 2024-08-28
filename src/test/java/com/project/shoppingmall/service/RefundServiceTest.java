@@ -128,11 +128,8 @@ class RefundServiceTest {
     assertNotNull(givenPurchaseItem.getFinalRefundCreatedDate());
     assertEquals(RefundStateTypeForPurchaseItem.REQUEST, givenPurchaseItem.getFinalRefundState());
 
-    ArgumentCaptor<Long> alarmListenIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<Long> refundIdCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockAlarmService, times(1))
-        .makeRefundRequestAlarm(alarmListenIdCaptor.capture(), refundIdCaptor.capture());
-    assertEquals(givenSellerId, alarmListenIdCaptor.getValue());
+    verify(mockAlarmService, times(1)).makeRefundRequestAlarm(refundIdCaptor.capture());
     assertEquals(givenNewRefundId, refundIdCaptor.getValue());
   }
 

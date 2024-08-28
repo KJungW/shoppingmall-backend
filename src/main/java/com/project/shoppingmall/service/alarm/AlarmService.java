@@ -35,22 +35,15 @@ public class AlarmService {
     return memberBanAlarm;
   }
 
-  public Alarm makeReviewBanAlarm(long listenerId, long reviewId) {
-    Member listener =
-        memberService
-            .findById(listenerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+  public Alarm makeReviewBanAlarm(long reviewId) {
     Review review =
         reviewService
             .findByIdWithWriter(reviewId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰가 존재하지 않습니다."));
 
-    if (!review.getWriter().getId().equals(listener.getId()))
-      throw new DataNotFound("현재 리뷰는 현재 회원이 작성한 리뷰가 아닙니다.");
-
     Alarm reviewBanAlarm =
         Alarm.builder()
-            .listener(listener)
+            .listener(review.getWriter())
             .alarmType(AlarmType.REVIEW_BAN)
             .targetReview(review)
             .build();
@@ -59,22 +52,15 @@ public class AlarmService {
     return reviewBanAlarm;
   }
 
-  public Alarm makeProductBanAlarm(long listenerId, long productId) {
-    Member listener =
-        memberService
-            .findById(listenerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+  public Alarm makeProductBanAlarm(long productId) {
     Product product =
         productService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 
-    if (!product.getSeller().getId().equals(listener.getId()))
-      throw new DataNotFound("현재 제품은 현재 회원이 판매중인 제품이 아닙니다.");
-
     Alarm productBanAlarm =
         Alarm.builder()
-            .listener(listener)
+            .listener(product.getSeller())
             .alarmType(AlarmType.PRODUCT_BAN)
             .targetProduct(product)
             .build();
@@ -83,18 +69,15 @@ public class AlarmService {
     return productBanAlarm;
   }
 
-  public Alarm makeRefundRequestAlarm(long listenerId, long refundId) {
-    Member listener =
-        memberService
-            .findById(listenerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+  public Alarm makeRefundRequestAlarm(long refundId) {
     Refund refund =
         refundFindService
             .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
-
-    if (!refund.getPurchaseItem().getSellerId().equals(listener.getId()))
-      throw new DataNotFound("현재 환불은 다른 회원의 판매상품에 대한 환불입니다.");
+    Member listener =
+        memberService
+            .findById(refund.getPurchaseItem().getSellerId())
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
 
     Alarm refundRequestAlarm =
         Alarm.builder()
@@ -107,22 +90,15 @@ public class AlarmService {
     return refundRequestAlarm;
   }
 
-  public Alarm makeTypeDeleteAlarm(long listenerId, long productId) {
-    Member listener =
-        memberService
-            .findById(listenerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+  public Alarm makeTypeDeleteAlarm(long productId) {
     Product product =
         productService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 
-    if (!product.getSeller().getId().equals(listener.getId()))
-      throw new DataNotFound("현재 제품은 현재 회원이 판매중인 제품이 아닙니다.");
-
     Alarm typeDeleteAlarm =
         Alarm.builder()
-            .listener(listener)
+            .listener(product.getSeller())
             .alarmType(AlarmType.TYPE_DELETE)
             .targetProduct(product)
             .build();
@@ -131,22 +107,15 @@ public class AlarmService {
     return typeDeleteAlarm;
   }
 
-  public Alarm makeTypeUpdateAlarm(long listenerId, long productId) {
-    Member listener =
-        memberService
-            .findById(listenerId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
+  public Alarm makeTypeUpdateAlarm(long productId) {
     Product product =
         productService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 
-    if (!product.getSeller().getId().equals(listener.getId()))
-      throw new DataNotFound("현재 제품은 현재 회원이 판매중인 제품이 아닙니다.");
-
     Alarm typeUpdateAlarm =
         Alarm.builder()
-            .listener(listener)
+            .listener(product.getSeller())
             .alarmType(AlarmType.TYPE_UPDATE)
             .targetProduct(product)
             .build();

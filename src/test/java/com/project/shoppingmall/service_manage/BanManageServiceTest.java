@@ -144,11 +144,8 @@ class BanManageServiceTest {
     // then
     assertEquals(givenIsBan, givenProduct.getIsBan());
 
-    ArgumentCaptor<Long> alarmListenerIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<Long> productIdCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockAlarmService, times(1))
-        .makeProductBanAlarm(alarmListenerIdCaptor.capture(), productIdCaptor.capture());
-    assertEquals(givenSellerId, alarmListenerIdCaptor.getValue());
+    verify(mockAlarmService, times(1)).makeProductBanAlarm(productIdCaptor.capture());
     assertEquals(givenProduct.getId(), productIdCaptor.getValue());
   }
 
@@ -186,11 +183,8 @@ class BanManageServiceTest {
     assertEquals(givenIsBan, givenReview.getIsBan());
 
     ArgumentCaptor<Long> reviewIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<Long> alarmListenerIdCaptor = ArgumentCaptor.forClass(Long.class);
-    verify(mockAlarmService, times(1))
-        .makeReviewBanAlarm(alarmListenerIdCaptor.capture(), reviewIdCaptor.capture());
+    verify(mockAlarmService, times(1)).makeReviewBanAlarm(reviewIdCaptor.capture());
     assertEquals(givenReview.getId(), reviewIdCaptor.getValue());
-    assertEquals(givenReview.getWriter().getId(), alarmListenerIdCaptor.getValue());
   }
 
   @Test

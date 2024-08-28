@@ -69,8 +69,7 @@ public class RefundService {
     purchaseItem.addRefund(newRefund);
     refundRepository.save(newRefund);
 
-    alarmService.makeRefundRequestAlarm(
-        newRefund.getPurchaseItem().getSellerId(), newRefund.getId());
+    alarmService.makeRefundRequestAlarm(newRefund.getId());
     return newRefund;
   }
 

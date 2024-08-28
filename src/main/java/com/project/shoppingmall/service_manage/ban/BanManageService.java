@@ -49,7 +49,7 @@ public class BanManageService {
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품 데이터가 존재하지 않습니다."));
     product.updateIsBan(isBan);
-    alarmService.makeProductBanAlarm(product.getSeller().getId(), product.getId());
+    alarmService.makeProductBanAlarm(product.getId());
     return product;
   }
 
@@ -60,7 +60,7 @@ public class BanManageService {
             .findById(reviewId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰 데이터가 존재하지 않습니다."));
     review.updateIsBan(isBan);
-    alarmService.makeReviewBanAlarm(review.getWriter().getId(), review.getId());
+    alarmService.makeReviewBanAlarm(review.getId());
     return review;
   }
 }
