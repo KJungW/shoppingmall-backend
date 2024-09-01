@@ -196,4 +196,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotUpdateBaseProductTypeHandler(CannotUpdateBaseProductType e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "기본 제품타입은 수정할 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(AlreadyMakedChatRoom.class)
+  public ErrorResult AlreadyMakedChatRoomHandler(AlreadyMakedChatRoom e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미 만들어진 채팅방이 존재합니다.");
+  }
 }
