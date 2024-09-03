@@ -27,6 +27,7 @@ public class ChatMessagingPreProcessInterceptor implements ChannelInterceptor {
   @Override
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
     StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+
     try {
       switch (accessor.getMessageType()) {
         case SUBSCRIBE -> {
@@ -41,12 +42,14 @@ public class ChatMessagingPreProcessInterceptor implements ChannelInterceptor {
           deleteChatConnectCache(accessTokenData);
         }
         case MESSAGE -> {
+          String destination = accessor.getDestination();
+          if (destination == null || !destination.startsWith("/pub/chat/message"))
+            throw new IncorrectChatUrl("잘못된 경로입니다. 다시 한번 확인해주세요!");
           checkJwtAccessToken(accessor);
         }
       }
     } catch (IncorrectChatUrl ex) {
-      ErrorResult errorResult =
-          new ErrorResult(ErrorCode.INCORRECT_CHAT_URL, "토큰이 존재하지 않거나 만료되었습니다.");
+      ErrorResult errorResult = new ErrorResult(ErrorCode.INCORRECT_CHAT_URL, "잘못된 URL 경로입니다.");
       String errorResultJson = JsonUtil.convertObjectToJson(errorResult);
       throw new IncorrectChatDataInput(errorResultJson);
     } catch (JwtTokenException ex) {
@@ -55,6 +58,10 @@ public class ChatMessagingPreProcessInterceptor implements ChannelInterceptor {
       throw new JwtTokenException(errorResultJson);
     } catch (IncorrectChatDataInput ex) {
       ErrorResult errorResult = new ErrorResult(ErrorCode.BAD_INPUT, "잘못된 데이터가 입력되엇습니다.");
+      String errorResultJson = JsonUtil.convertObjectToJson(errorResult);
+      throw new IncorrectChatDataInput(errorResultJson);
+    } catch (Exception ex) {
+      ErrorResult errorResult = new ErrorResult(ErrorCode.SERVER_ERROR, "예상치 못한 에러발생");
       String errorResultJson = JsonUtil.convertObjectToJson(errorResult);
       throw new IncorrectChatDataInput(errorResultJson);
     }

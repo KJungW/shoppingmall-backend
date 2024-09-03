@@ -39,6 +39,11 @@ out/
 **/application*
 infra/local/dbdata
 infra/local/s3data
+infra/local/mongo-data
+
 infra/test/dbdata
 infra/test/s3data
+infra/test/mongo-data
+
 infra/stage/dbdata
+infra/stage/mongo-data

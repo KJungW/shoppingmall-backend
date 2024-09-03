@@ -1,4 +1,4 @@
-package com.project.shoppingmall.dto.chat;
+package com.project.shoppingmall.controller.chat.input;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ChatMessage {
+public class InputPublishMessage {
   @NotNull private Long chatRoomId;
   @NotBlank private String message;
 }

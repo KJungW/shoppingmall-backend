@@ -39,7 +39,7 @@ public class ChatRoom {
     this.seller = product.getSeller();
   }
 
-  public boolean checkConnectableMember(Member member) {
+  public boolean checkMemberIsParticipant(Member member) {
     return this.getSeller().getId().equals(member.getId())
         || this.getBuyer().getId().equals(member.getId());
   }

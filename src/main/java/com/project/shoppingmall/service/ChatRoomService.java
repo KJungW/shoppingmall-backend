@@ -48,4 +48,8 @@ public class ChatRoomService {
   public Optional<ChatRoom> findByProduct(long productId) {
     return chatRoomRepository.findByProduct(productId);
   }
+
+  public Optional<ChatRoom> findByIdWithMember(long chatId) {
+    return chatRoomRepository.findByIdWithMember(chatId);
+  }
 }
