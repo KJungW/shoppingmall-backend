@@ -8,16 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
 
 @Getter
 @Document(collection = "chatMessage")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatMessage extends BaseEntity {
-  @Id
-  @Field(value = "_id", targetType = FieldType.OBJECT_ID)
-  private String chatId;
+  @Id private String id;
 
   @Indexed private Long chatRoomId;
   private Long writerId;

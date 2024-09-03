@@ -22,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatService {
   private final CacheRepository cacheRepository;
-  private final ChatRoomService chatRoomService;
+  private final ChatReadRecordService chatReadRecordService;
+  private final ChatRoomFindService chatRoomFindService;
   private final MemberService memberService;
   private final MongoTemplate mongoTemplate;
 
@@ -33,7 +34,7 @@ public class ChatService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     ChatRoom chatRoom =
-        chatRoomService
+        chatRoomFindService
             .findById(chatroomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
 
@@ -53,7 +54,7 @@ public class ChatService {
   @Transactional
   public WriteMessageResult writeMessage(long chatRoomId, long writerId, String message) {
     ChatRoom chatRoom =
-        chatRoomService
+        chatRoomFindService
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member writer =
@@ -71,7 +72,8 @@ public class ChatService {
             .message(message)
             .build();
 
-    mongoTemplate.save(chatMessage);
-    return new WriteMessageResult(chatRoom, writer, message);
+    ChatMessage savedChatMessage = mongoTemplate.insert(chatMessage);
+    chatReadRecordService.updateRecord(chatRoom.getId(), writer.getId(), savedChatMessage.getId());
+    return new WriteMessageResult(savedChatMessage, chatRoom, writer);
   }
 }

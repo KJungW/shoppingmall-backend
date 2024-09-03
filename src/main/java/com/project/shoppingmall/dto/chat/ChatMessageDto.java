@@ -15,7 +15,7 @@ public class ChatMessageDto {
   private LocalDateTime createDate;
 
   public ChatMessageDto(ChatMessage chatMessage) {
-    this.chatId = chatMessage.getChatId();
+    this.chatId = chatMessage.getId().toString();
     this.chatRoomId = chatMessage.getChatRoomId();
     this.writerId = chatMessage.getWriterId();
     this.message = chatMessage.getMessage();

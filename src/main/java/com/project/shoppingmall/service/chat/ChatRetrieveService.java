@@ -19,14 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatRetrieveService {
-  private final ChatRoomService chatRoomService;
+  private final ChatRoomFindService chatRoomFindService;
+  private final ChatReadRecordService chatReadRecordService;
   private final MemberService memberService;
   private final MongoTemplate mongoTemplate;
 
+  @Transactional
   public List<ChatMessageDto> retrieveInitChatMessages(
       int sliceSize, long chatRoomId, long listenerId) {
     ChatRoom chatRoom =
-        chatRoomService
+        chatRoomFindService
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member listener =
@@ -41,18 +43,17 @@ public class ChatRetrieveService {
     query.limit(sliceSize);
     List<ChatMessage> chatMessages = mongoTemplate.find(query, ChatMessage.class);
 
-    chatMessages.forEach(
-        message -> {
-          System.out.println("message.getChatId() = " + message.getChatId());
-          System.out.println("message.getCreateDate() = " + message.getCreateDate());
-        });
+    if (!chatMessages.isEmpty())
+      chatReadRecordService.updateRecord(
+          chatRoom.getId(), listener.getId(), chatMessages.get(0).getId());
+
     return chatMessages.stream().map(ChatMessageDto::new).toList();
   }
 
   public List<ChatMessageDto> retrieveChatMessages(
       int sliceSize, long chatRoomId, String startChatMessageId, long listenerId) {
     ChatRoom chatRoom =
-        chatRoomService
+        chatRoomFindService
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member listener =

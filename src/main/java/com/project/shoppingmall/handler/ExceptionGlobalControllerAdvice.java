@@ -202,4 +202,11 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult AlreadyMakedChatRoomHandler(AlreadyMakedChatRoom e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "이미 만들어진 채팅방이 존재합니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotCreateChatRoomAboutOwnProduct.class)
+  public ErrorResult CannotCreateChatRoomAboutOwnProductHandler(
+      CannotCreateChatRoomAboutOwnProduct e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "자신이 등록한 제품에 대해 자신이 채팅방을 생성할 수 없습니다.");
+  }
 }
