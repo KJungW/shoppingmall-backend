@@ -11,7 +11,7 @@ import com.project.shoppingmall.dto.chat.ChatConnectRequestResult;
 import com.project.shoppingmall.dto.chat.WriteMessageResult;
 import com.project.shoppingmall.dto.token.AccessTokenData;
 import com.project.shoppingmall.entity.ChatRoom;
-import com.project.shoppingmall.service.ChatRoomService;
+import com.project.shoppingmall.service.chat.ChatRoomService;
 import com.project.shoppingmall.service.chat.ChatService;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.validation.Valid;

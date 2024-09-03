@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service;
+package com.project.shoppingmall.service.chat;
 
 import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.entity.Member;
