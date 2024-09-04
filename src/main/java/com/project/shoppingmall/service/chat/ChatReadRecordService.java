@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ChatReadRecordRepository;
 import com.project.shoppingmall.service.member.MemberService;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -67,5 +68,9 @@ public class ChatReadRecordService {
 
   Optional<ChatReadRecord> findByChatRoomAndMember(long chatId, long memberId) {
     return chatReadRecordRepository.findByChatRoomAndMember(chatId, memberId);
+  }
+
+  List<ChatReadRecord> findAllByChatRoomAndMember(List<Long> chatRoomIds, long memberId) {
+    return chatReadRecordRepository.findAllByChatRoomAndMember(chatRoomIds, memberId);
   }
 }

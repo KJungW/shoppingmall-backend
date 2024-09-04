@@ -63,7 +63,7 @@ public class ChatRetrieveService {
     if (!chatRoom.checkMemberIsParticipant(listener)) throw new DataNotFound("회원이 참여중인 채팅방이 아닙니다.");
 
     Query startChatMessageQuery = new Query();
-    startChatMessageQuery.addCriteria(Criteria.where("chatId").is(startChatMessageId));
+    startChatMessageQuery.addCriteria(Criteria.where("id").is(startChatMessageId));
     startChatMessageQuery.limit(1);
     List<ChatMessage> startChatQueryResult =
         mongoTemplate.find(startChatMessageQuery, ChatMessage.class);
