@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.chat;
+package com.project.shoppingmall.service.chat_room;
 
 import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.repository.ChatRoomRepository;

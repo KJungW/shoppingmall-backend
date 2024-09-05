@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.chat;
+package com.project.shoppingmall.service.chat_read_record;
 
 import com.project.shoppingmall.entity.ChatMessage;
 import com.project.shoppingmall.entity.ChatReadRecord;
@@ -6,8 +6,8 @@ import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ChatReadRecordRepository;
+import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
 import com.project.shoppingmall.service.member.MemberService;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatReadRecordService {
   private final MemberService memberService;
   private final ChatReadRecordRepository chatReadRecordRepository;
+  private final ChatReadRecordFindService chatReadRecordFindService;
   private final ChatRoomFindService chatRoomFindService;
   private final MongoTemplate mongoTemplate;
 
@@ -35,8 +36,9 @@ public class ChatReadRecordService {
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     if (!chatRoom.checkMemberIsParticipant(member))
       throw new DataNotFound("입력된 회원은 현재 채팅방의 참가자가 아닙니다.");
-    if (findByChatRoomAndMember(chatRoom.getId(), member.getId()).isPresent())
-      throw new DataNotFound("이미 채팅 메세지 읽기 기록이 존재합니다.");
+    if (chatReadRecordFindService
+        .findByChatRoomAndMember(chatRoom.getId(), member.getId())
+        .isPresent()) throw new DataNotFound("이미 채팅 메세지 읽기 기록이 존재합니다.");
     ChatReadRecord readRecord = ChatReadRecord.builder().chatRoom(chatRoom).member(member).build();
     chatReadRecordRepository.save(readRecord);
     return readRecord;
@@ -45,7 +47,8 @@ public class ChatReadRecordService {
   @Transactional
   public void updateRecord(long chatRoomId, long memberId, String chatMessageId) {
     ChatReadRecord chatReadRecord =
-        findByChatRoomAndMember(chatRoomId, memberId)
+        chatReadRecordFindService
+            .findByChatRoomAndMember(chatRoomId, memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅 읽기 기록이 존재하지 않습니다."));
     ChatMessage postChatMessage =
         Optional.ofNullable(mongoTemplate.findById(chatMessageId, ChatMessage.class))
@@ -61,16 +64,7 @@ public class ChatReadRecordService {
       if (preChatMessage.getCreateDate().isAfter(postChatMessage.getCreateDate()))
         throw new DataNotFound("이미 읽은 채팅메세지는 읽기기록으로 남길 수 없습니다.");
     }
-    ;
 
     chatReadRecord.updateLatestReadMessageId(postChatMessage.getId());
-  }
-
-  Optional<ChatReadRecord> findByChatRoomAndMember(long chatId, long memberId) {
-    return chatReadRecordRepository.findByChatRoomAndMember(chatId, memberId);
-  }
-
-  List<ChatReadRecord> findAllByChatRoomAndMember(List<Long> chatRoomIds, long memberId) {
-    return chatReadRecordRepository.findAllByChatRoomAndMember(chatRoomIds, memberId);
   }
 }

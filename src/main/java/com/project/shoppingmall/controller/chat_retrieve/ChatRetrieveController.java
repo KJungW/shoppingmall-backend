@@ -8,7 +8,7 @@ import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.chat.ChatMessageDto;
 import com.project.shoppingmall.dto.chat.ChatRoomDto;
 import com.project.shoppingmall.service.chat.ChatRetrieveService;
-import com.project.shoppingmall.service.chat.ChatRoomRetrieveService;
+import com.project.shoppingmall.service.chat_room.ChatRoomRetrieveService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.chat;
+package com.project.shoppingmall.service.chat_room;
 
 import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.entity.Member;
@@ -7,6 +7,7 @@ import com.project.shoppingmall.exception.AlreadyMakedChatRoom;
 import com.project.shoppingmall.exception.CannotCreateChatRoomAboutOwnProduct;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ChatRoomRepository;
+import com.project.shoppingmall.service.chat_read_record.ChatReadRecordService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.product.ProductService;
 import lombok.RequiredArgsConstructor;

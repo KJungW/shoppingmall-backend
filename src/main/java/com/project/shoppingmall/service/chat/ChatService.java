@@ -9,6 +9,8 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
+import com.project.shoppingmall.service.chat_read_record.ChatReadRecordService;
+import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.util.JsonUtil;
 import java.util.UUID;

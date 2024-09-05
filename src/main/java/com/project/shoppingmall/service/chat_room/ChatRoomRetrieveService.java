@@ -1,4 +1,4 @@
-package com.project.shoppingmall.service.chat;
+package com.project.shoppingmall.service.chat_room;
 
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.chat.ChatRoomDto;
@@ -7,6 +7,7 @@ import com.project.shoppingmall.entity.ChatReadRecord;
 import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ChatRoomRetrieveRepository;
+import com.project.shoppingmall.service.chat_read_record.ChatReadRecordFindService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomRetrieveService {
   private final ChatRoomRetrieveRepository chatRoomRetrieveRepository;
-  private final ChatReadRecordService chatReadRecordService;
+  private final ChatReadRecordFindService chatReadRecordFindService;
   private final MongoTemplate mongoTemplate;
 
   public SliceResult<ChatRoomDto> retrieveChatRoomBySeller(
@@ -35,7 +36,7 @@ public class ChatRoomRetrieveService {
 
     List<Long> chatRoomIdList = sliceResult.getContent().stream().map(ChatRoom::getId).toList();
     List<ChatReadRecord> readRecordList =
-        chatReadRecordService.findAllByChatRoomAndMember(chatRoomIdList, sellerId);
+        chatReadRecordFindService.findAllByChatRoomAndMember(chatRoomIdList, sellerId);
 
     List<ChatRoomDto> chatRoomDtoList =
         sliceResult.getContent().stream()
@@ -70,7 +71,7 @@ public class ChatRoomRetrieveService {
 
     List<Long> chatRoomIdList = sliceResult.getContent().stream().map(ChatRoom::getId).toList();
     List<ChatReadRecord> readRecordList =
-        chatReadRecordService.findAllByChatRoomAndMember(chatRoomIdList, buyerId);
+        chatReadRecordFindService.findAllByChatRoomAndMember(chatRoomIdList, buyerId);
 
     List<ChatRoomDto> chatRoomDtoList =
         sliceResult.getContent().stream()
