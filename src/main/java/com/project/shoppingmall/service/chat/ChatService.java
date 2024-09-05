@@ -15,6 +15,7 @@ import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.util.JsonUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,9 @@ public class ChatService {
   private final ChatRoomFindService chatRoomFindService;
   private final MemberService memberService;
   private final MongoTemplate mongoTemplate;
+
+  @Value("${project_role.chat.chat_connect_cache_expiration_time}")
+  private Long chatConnectCacheExpirationTime;
 
   @Transactional
   public ChatConnectRequestResult requestChatConnect(long memberId, long chatroomId) {
@@ -48,7 +52,9 @@ public class ChatService {
     ChatConnectCache chatConnectCacheValue =
         new ChatConnectCache(member.getId(), chatRoom.getId(), secretNumber);
     cacheRepository.saveCache(
-        chatConnectCacheKey, JsonUtil.convertObjectToJson(chatConnectCacheValue), 30L);
+        chatConnectCacheKey,
+        JsonUtil.convertObjectToJson(chatConnectCacheValue),
+        chatConnectCacheExpirationTime);
 
     return new ChatConnectRequestResult(member.getId(), chatRoom.getId(), secretNumber);
   }
