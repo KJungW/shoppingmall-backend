@@ -209,4 +209,16 @@ public class ExceptionGlobalControllerAdvice {
       CannotCreateChatRoomAboutOwnProduct e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "자신이 등록한 제품에 대해 자신이 채팅방을 생성할 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(DuplicateMemberEmail.class)
+  public ErrorResult DuplicateMemberEmailHandler(DuplicateMemberEmail e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "이미 등록되어 있는 이메일입니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MemberSignupByEmailCacheError.class)
+  public ErrorResult MemberSignupByEmailCacheErrorHandler(MemberSignupByEmailCacheError e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "회원가입 인증 이메일의 유효기간이 지났습니다.");
+  }
 }

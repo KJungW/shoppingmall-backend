@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum LoginType {
   GOOGLE("google"),
   NAVER("naver"),
-  KAKAO("kakao");
+  KAKAO("kakao"),
+  EMAIL("email");
   private final String registrationId;
 }

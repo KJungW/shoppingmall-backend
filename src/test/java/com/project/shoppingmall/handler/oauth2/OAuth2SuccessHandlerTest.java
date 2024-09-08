@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -94,6 +95,9 @@ class OAuth2SuccessHandlerTest {
     OAuth2UserPrinciple mockUserPrinciple = mock(OAuth2UserPrinciple.class);
     when(mockAuthentication.getPrincipal()).thenReturn(mockUserPrinciple);
     OAuth2UserInfo mockUserInfo = mock(OAuth2UserInfo.class);
+    when(mockUserInfo.getLoginType()).thenReturn(LoginType.GOOGLE);
+    when(mockUserInfo.getSocialId()).thenReturn("dafsafrewr3123");
+    when(mockUserInfo.getName()).thenReturn("Kim");
     when(mockUserPrinciple.getUserInfo()).thenReturn(mockUserInfo);
     String givenMemberName = "testName1234";
     when(mockUserInfo.getName()).thenReturn(givenMemberName);
