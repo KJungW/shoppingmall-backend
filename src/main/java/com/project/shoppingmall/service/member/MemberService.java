@@ -18,6 +18,7 @@ import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.JwtUtil;
+import com.project.shoppingmall.util.PasswordEncoderUtil;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -130,6 +131,24 @@ public class MemberService {
         s3Service.uploadFile(profileImg, "profileImg/" + member.getId() + "-" + nickName + "/");
     member.updateProfile(uploadResult.getFileServerUri(), uploadResult.getDownLoadUrl());
     member.updateNickName(nickName);
+    return member;
+  }
+
+  public Member loginByEmail(String email, String password) {
+    Member member =
+        findByEmail(email).orElseThrow(() -> new DataNotFound("email에 해당하는 데이터가 존재하지 않습니다."));
+
+    if (!member.getLoginType().equals(LoginType.EMAIL))
+      throw new DataNotFound("이메일과 비밀번호를 통한 로그인은 이메일 로그인타임을 가진 회원만 가능합니다.");
+
+    if (!PasswordEncoderUtil.checkPassword(password, member.getPassword()))
+      throw new DataNotFound("회원의 비밀번호가 맞지 않습니다.");
+
+    RefreshTokenData refreshTokenData =
+        new RefreshTokenData(member.getId(), member.getRole().toString());
+    String refreshToken = jwtUtil.createRefreshToken(refreshTokenData);
+    member.getToken().updateRefresh(refreshToken);
+
     return member;
   }
 }

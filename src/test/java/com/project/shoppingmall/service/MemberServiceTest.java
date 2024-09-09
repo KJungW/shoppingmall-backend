@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.member.MemberEmailSignupDto;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.MemberToken;
+import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.DuplicateMemberEmail;
 import com.project.shoppingmall.exception.MemberSignupByEmailCacheError;
 import com.project.shoppingmall.final_value.CacheTemplate;
@@ -77,7 +78,7 @@ class MemberServiceTest {
     MemberEmailSignupDto inputDto =
         new MemberEmailSignupDto("example@temp.com", "ckkqkes1231254", "tempNickName");
 
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    set_memberRepository_findByEmail();
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when
@@ -101,8 +102,8 @@ class MemberServiceTest {
         new MemberEmailSignupDto("example@temp.com", "ckkqkes1231254", "tempNickName");
 
     Member duplicateEmailMember = MemberBuilder.fullData().email(inputDto.getEmail()).build();
-    when(mockMemberRepository.findByEmail(anyString()))
-        .thenReturn(Optional.of(duplicateEmailMember));
+
+    set_memberRepository_findByEmail(duplicateEmailMember);
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when then
@@ -120,13 +121,13 @@ class MemberServiceTest {
 
     long givenMemberId = 10L;
     String givenRefreshTokenValue = "tempRefreshToken";
-
-    Member givenMember = setMember(givenMemberId, inputSecretNumber);
-    setMemberToken(givenMember, givenRefreshTokenValue);
+    Member givenMember = MemberBuilder.makeMember(givenMemberId, LoginType.EMAIL, inputEmail);
     String givenCacheJson = setMemberSignupByEmailCache(givenMember, inputSecretNumber);
-    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.of(givenCacheJson));
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenRefreshTokenValue);
+    setMemberToken(givenMember, givenRefreshTokenValue);
+
+    set_cacheRepository_getCache(givenCacheJson);
+    set_memberRepository_findByEmail();
+    set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when
     Member resultMember = target.signupByEmail(inputEmail, inputSecretNumber);
@@ -144,7 +145,8 @@ class MemberServiceTest {
     // given
     String inputEmail = "example@temp.com";
     String inputSecretNumber = "kalfwr1235cxzvewr";
-    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.empty());
+
+    set_cacheRepository_getCache();
 
     // when then
     assertThrows(
@@ -162,13 +164,13 @@ class MemberServiceTest {
 
     long givenMemberId = 10L;
     String givenRefreshTokenValue = "tempRefreshToken";
-
-    Member givenMember = setMember(givenMemberId, inputSecretNumber);
-    setMemberToken(givenMember, givenRefreshTokenValue);
+    Member givenMember = MemberBuilder.makeMember(givenMemberId, LoginType.EMAIL, inputEmail);
     String givenCacheJson = setMemberSignupByEmailCache(givenMember, wrongSecretKey);
-    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.of(givenCacheJson));
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenRefreshTokenValue);
+    setMemberToken(givenMember, givenRefreshTokenValue);
+
+    set_cacheRepository_getCache(givenCacheJson);
+    set_memberRepository_findByEmail();
+    set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when then
     assertThrows(
@@ -185,14 +187,13 @@ class MemberServiceTest {
 
     long givenMemberId = 10L;
     String givenRefreshTokenValue = "tempRefreshToken";
-
-    Member givenMember = setMember(givenMemberId, inputSecretNumber);
-    setMemberToken(givenMember, givenRefreshTokenValue);
-    String givenCacheJson = setMemberSignupByEmailCache(givenMember, inputSecretNumber);
-    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.of(givenCacheJson));
-
+    Member givenMember = MemberBuilder.makeMember(givenMemberId, LoginType.EMAIL, inputEmail);
     Member otherMember = MemberBuilder.fullData().build();
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.of(otherMember));
+    String givenCacheJson = setMemberSignupByEmailCache(givenMember, inputSecretNumber);
+    setMemberToken(givenMember, givenRefreshTokenValue);
+
+    set_cacheRepository_getCache(givenCacheJson);
+    set_memberRepository_findByEmail(otherMember);
 
     // when then
     assertThrows(
@@ -200,161 +201,110 @@ class MemberServiceTest {
   }
 
   @Test
-  @DisplayName("MemberService.findByLonginTypeAndSocialId() : 정상흐름")
-  public void findByLonginTypeAndSocialId_ok() {
-    // given
-    LoginType givenLoginType = LoginType.NAVER;
-    String givenSocialId = "lskdfjkldsj123421351";
-    when(mockMemberRepository.findByLoginTypeAndSocialId(any(), any()))
-        .thenReturn(
-            Optional.of(
-                MemberBuilder.fullData()
-                    .loginType(givenLoginType)
-                    .socialId(givenSocialId)
-                    .build()));
-
-    // when
-    Optional<Member> result = target.findByLonginTypeAndSocialId(givenLoginType, givenSocialId);
-
-    // then
-    assertTrue(result.isPresent());
-    verify(mockMemberRepository, times(1))
-        .findByLoginTypeAndSocialId(givenLoginType, givenSocialId);
-
-    Member resultMember = result.get();
-    assertEquals(givenLoginType, resultMember.getLoginType());
-    assertEquals(givenSocialId, resultMember.getSocialId());
-  }
-
-  @Test
-  @DisplayName("MemberService.findByLonginTypeAndSocialId() : 조회데이터 없음")
-  public void findByLonginTypeAndSocialId_notData() {
-    // given
-    LoginType givenLoginType = LoginType.NAVER;
-    String givenSocialId = "lskdfjkldsj123421351";
-    when(mockMemberRepository.findByLoginTypeAndSocialId(any(), any()))
-        .thenReturn(Optional.empty());
-
-    // when
-    Optional<Member> result = target.findByLonginTypeAndSocialId(givenLoginType, givenSocialId);
-
-    // then
-    assertFalse(result.isPresent());
-    verify(mockMemberRepository, times(1))
-        .findByLoginTypeAndSocialId(givenLoginType, givenSocialId);
-  }
-
-  @Test
-  @DisplayName("MemberService.updateMemberNickNameAndProfileImg() : 정상 흐름")
+  @DisplayName("updateMemberNickNameAndProfileImg() : 정상 흐름")
   public void updateMemberNickNameAndProfileImg_ok() throws IOException {
     // given
-    Long givenMemberId = 1L;
-    String givenNickname = "testNickname";
-    MultipartFile givenProfileImage =
-        new MockMultipartFile(
-            "profileSampleImage.png",
-            new FileInputStream(new ClassPathResource("static/profileSampleImage.png").getFile()));
-    Member givenMember =
-        MemberBuilder.fullData()
-            .nickName("kim")
-            .profileImageUrl(null)
-            .profileImageDownLoadUrl(null)
-            .build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long inputMemberId = 10L;
+    String inputNickName = "testNickName";
+    MultipartFile inputProfileImage =
+        setProfileImage("profileSampleImage.png", "static/profileSampleImage.png");
+
+    Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
     String givenServerUri = "testServerUri";
     String givenDownloadUrl = "testDownLoadUrl";
 
-    when(mockMemberRepository.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockS3Service.uploadFile(any(), any()))
-        .thenReturn(new FileUploadResult(givenServerUri, givenDownloadUrl));
+    set_memberRepository_findById(givenMember);
+    set_s3Service_uploadFile(givenServerUri, givenDownloadUrl);
 
     // when
-    Member member =
-        target.updateMemberNickNameAndProfileImg(givenMemberId, givenNickname, givenProfileImage);
+    Member resultMember =
+        target.updateMemberNickNameAndProfileImg(inputMemberId, inputNickName, inputProfileImage);
 
     // then
-    // 기존에 저장된 프로필이미지 데이터가 없으므로, S3Service.deleteFile()가 실행되지 않아야한다.
-    verify(mockS3Service, times(0)).deleteFile(any());
-
-    // S3Service.uploadFile() 메서드 인자 검증
-    ArgumentCaptor<MultipartFile> multipartFileArgumentCaptor =
-        ArgumentCaptor.forClass(MultipartFile.class);
-    ArgumentCaptor<String> directoryPathCapture = ArgumentCaptor.forClass(String.class);
-    verify(mockS3Service, times(1))
-        .uploadFile(multipartFileArgumentCaptor.capture(), directoryPathCapture.capture());
-    assertEquals(givenProfileImage, multipartFileArgumentCaptor.getValue());
-    assertEquals(givenProfileImage, multipartFileArgumentCaptor.getValue());
-
-    // 회원정보 수정 결과 검증
-    assertEquals(givenNickname, member.getNickName());
-    assertEquals(givenServerUri, member.getProfileImageUrl());
-    assertEquals(givenDownloadUrl, member.getProfileImageDownLoadUrl());
+    checkMember(givenMember, resultMember);
+    check_s3Service_deleteFile_notRunning();
+    check_s3Service_uploadFile(givenMember, inputProfileImage);
   }
 
   @Test
-  @DisplayName("MemberService.updateMemberNickNameAndProfileImg() : 기존 데이터 덮어씌우기")
+  @DisplayName("updateMemberNickNameAndProfileImg() : 기존 데이터 덮어씌우기")
   public void updateMemberNickNameAndProfileImg_dataOverwrite() throws IOException {
     // given
-    Long givenMemberId = 1L;
-    String originNickName = "originNickname";
-    String originServerUri = "originServerUri";
-    String originDownloadUrl = "originDownloadUrl";
-    String givenNickname = "testNickname";
-    String givenServerUri = "testServerUri";
-    String givenDownloadUrl = "testDownLoadUrl";
-    MultipartFile givenProfileImage =
-        new MockMultipartFile(
-            "profileSampleImage.png",
-            new FileInputStream(new ClassPathResource("static/profileSampleImage.png").getFile()));
-    Member givenMember =
-        MemberBuilder.fullData()
-            .nickName(originNickName)
-            .profileImageUrl(originServerUri)
-            .profileImageDownLoadUrl(originDownloadUrl)
-            .build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long inputMemberId = 10L;
+    String inputNickName = "testNickName";
+    MultipartFile inputProfileImage =
+        setProfileImage("profileSampleImage.png", "static/profileSampleImage.png");
 
-    when(mockMemberRepository.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockS3Service.uploadFile(any(), any()))
-        .thenReturn(new FileUploadResult(givenServerUri, givenDownloadUrl));
+    String originServerUri = "originServerUri";
+    String originDownloadUrl = "originDownLoadUrl";
+    String newServerUri = "testServerUri";
+    String newDownloadUrl = "testDownLoadUrl";
+    Member givenMember =
+        MemberBuilder.makeMemberWithProfileImage(
+            inputMemberId, LoginType.NAVER, originServerUri, originDownloadUrl);
+
+    set_memberRepository_findById(givenMember);
+    set_s3Service_uploadFile(newServerUri, newDownloadUrl);
 
     // when
-    Member member =
-        target.updateMemberNickNameAndProfileImg(givenMemberId, givenNickname, givenProfileImage);
+    Member resultMember =
+        target.updateMemberNickNameAndProfileImg(inputMemberId, inputNickName, inputProfileImage);
 
     // then
-    // S3Service.deleteFile() 메서드 인자 검증
-    ArgumentCaptor<String> serverUriCapture = ArgumentCaptor.forClass(String.class);
-    verify(mockS3Service, times(1)).deleteFile(serverUriCapture.capture());
-    assertEquals(originServerUri, serverUriCapture.getValue());
-
-    // S3Service.uploadFile() 메서드 인자 검증
-    ArgumentCaptor<MultipartFile> multipartFileArgumentCaptor =
-        ArgumentCaptor.forClass(MultipartFile.class);
-    ArgumentCaptor<String> directoryPathCapture = ArgumentCaptor.forClass(String.class);
-    verify(mockS3Service, times(1))
-        .uploadFile(multipartFileArgumentCaptor.capture(), directoryPathCapture.capture());
-    assertEquals(givenProfileImage, multipartFileArgumentCaptor.getValue());
-    assertEquals(givenProfileImage, multipartFileArgumentCaptor.getValue());
-
-    // 회원정보 수정 결과 검증
-    assertEquals(givenNickname, member.getNickName());
-    assertEquals(givenServerUri, member.getProfileImageUrl());
-    assertEquals(givenDownloadUrl, member.getProfileImageDownLoadUrl());
+    check_s3Service_deleteFile(originServerUri);
+    check_s3Service_uploadFile(givenMember, inputProfileImage);
+    checkMember(givenMember, resultMember);
   }
 
-  public Member setMember(long givenMemberId, String givenEmail) {
-    Member givenMember =
-        MemberBuilder.fullData()
-            .loginType(LoginType.EMAIL)
-            .nickName("tempNicKName")
-            .email(givenEmail)
-            .password("tempPassword")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    return givenMember;
+  @Test
+  @DisplayName("loginByEmail() : 정상흐름")
+  public void loginByEmail_ok() {
+    // given
+    String inputEmail = "test@test.com";
+    String inputPassword = "gdfg123!@#";
+
+    Member givenMember = MemberBuilder.makeMember(10L, LoginType.EMAIL, inputEmail, inputPassword);
+    String givenRefreshTokenValue = "givenRefreshTokenValue";
+    MemberToken givenMemberToken = setMemberToken(givenMember, givenRefreshTokenValue).getToken();
+
+    set_memberRepository_findByEmail(givenMember);
+    set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
+
+    // when
+    Member resultMember = target.loginByEmail(inputEmail, inputPassword);
+
+    // then
+    checkMember(givenMember, resultMember);
+    checkMemberToken(givenMemberToken, resultMember.getToken());
+  }
+
+  @Test
+  @DisplayName("loginByEmail() : 이메일에 해당하는 회원이 존재하지 않음")
+  public void loginByEmail_notMember() {
+    // given
+    String inputEmail = "test@test.com";
+    String inputPassword = "gdfg123!@#";
+
+    set_memberRepository_findByEmail();
+
+    // when then
+    assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
+  }
+
+  @Test
+  @DisplayName("loginByEmail() : 비밀번호가 맞지 않을 경우")
+  public void loginByEmail_incorrectPassword() {
+    // given
+    String inputEmail = "test@test.com";
+    String inputPassword = "gdfg123!@#";
+
+    String otherPassword = "dsafkjwelr";
+    Member givenMember = MemberBuilder.makeMember(10L, LoginType.EMAIL, inputEmail, otherPassword);
+
+    set_memberRepository_findByEmail(givenMember);
+
+    // when then
+    assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
   }
 
   public Member setMemberToken(Member givenMember, String givenRefreshTokenValue) {
@@ -367,6 +317,57 @@ class MemberServiceTest {
     MemberSignupByEmailCache givenCache =
         new MemberSignupByEmailCache(givenMember, inputSecretNumber);
     return JsonUtil.convertObjectToJson(givenCache);
+  }
+
+  public MultipartFile setProfileImage(String name, String path) throws IOException {
+    return new MockMultipartFile(name, new FileInputStream(new ClassPathResource(path).getFile()));
+  }
+
+  public void checkMember(Member expectedMember, Member realMember) {
+    assertEquals(expectedMember.getId(), realMember.getId());
+    assertEquals(expectedMember.getLoginType(), realMember.getLoginType());
+    assertEquals(expectedMember.getNickName(), realMember.getNickName());
+    assertEquals(expectedMember.getEmail(), realMember.getEmail());
+    assertEquals(expectedMember.getPassword(), realMember.getPassword());
+    assertEquals(expectedMember.getRole(), realMember.getRole());
+    assertEquals(expectedMember.getIsBan(), realMember.getIsBan());
+    assertEquals(expectedMember.getProfileImageUrl(), realMember.getProfileImageUrl());
+    assertEquals(
+        expectedMember.getProfileImageDownLoadUrl(), realMember.getProfileImageDownLoadUrl());
+  }
+
+  public void checkMemberToken(MemberToken expectedMemberToken, MemberToken realMemberToken) {
+    assertEquals(expectedMemberToken.getId(), realMemberToken.getId());
+    assertEquals(expectedMemberToken.getRefresh(), realMemberToken.getRefresh());
+  }
+
+  public void set_memberRepository_findByEmail() {
+    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+  }
+
+  public void set_memberRepository_findByEmail(Member givenMember) {
+    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.of(givenMember));
+  }
+
+  public void set_jwtUtil_createRefreshToken(String givenRefreshToken) {
+    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenRefreshToken);
+  }
+
+  public void set_cacheRepository_getCache() {
+    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.empty());
+  }
+
+  public void set_cacheRepository_getCache(String givenCacheJson) {
+    when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.of(givenCacheJson));
+  }
+
+  public void set_memberRepository_findById(Member givenMember) {
+    when(mockMemberRepository.findById(any())).thenReturn(Optional.of(givenMember));
+  }
+
+  public void set_s3Service_uploadFile(String givenServerUri, String givenDownloadUrl) {
+    when(mockS3Service.uploadFile(any(), any()))
+        .thenReturn(new FileUploadResult(givenServerUri, givenDownloadUrl));
   }
 
   public void check_cacheRepository_saveCache(
@@ -436,18 +437,26 @@ class MemberServiceTest {
     assertEquals(givenSecretNumber.toString(), targetCache.getSecretNumber());
   }
 
-  public void checkMember(Member expectedMember, Member realMember) {
-    assertEquals(expectedMember.getId(), realMember.getId());
-    assertEquals(expectedMember.getLoginType(), realMember.getLoginType());
-    assertEquals(expectedMember.getNickName(), realMember.getNickName());
-    assertEquals(expectedMember.getEmail(), realMember.getEmail());
-    assertEquals(expectedMember.getPassword(), realMember.getPassword());
-    assertEquals(expectedMember.getRole(), realMember.getRole());
-    assertEquals(expectedMember.getIsBan(), realMember.getIsBan());
+  public void check_s3Service_deleteFile_notRunning() {
+    verify(mockS3Service, times(0)).deleteFile(any());
   }
 
-  public void checkMemberToken(MemberToken expectedMemberToken, MemberToken realMemberToken) {
-    assertEquals(expectedMemberToken.getId(), realMemberToken.getId());
-    assertEquals(expectedMemberToken.getRefresh(), realMemberToken.getRefresh());
+  public void check_s3Service_deleteFile(String givenServerUri) {
+    ArgumentCaptor<String> serverUriCapture = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).deleteFile(serverUriCapture.capture());
+    assertEquals(givenServerUri, serverUriCapture.getValue());
+  }
+
+  public void check_s3Service_uploadFile(Member givenMember, MultipartFile givenProfileImage) {
+    ArgumentCaptor<MultipartFile> imageCaptor = ArgumentCaptor.forClass(MultipartFile.class);
+    ArgumentCaptor<String> uriCapture = ArgumentCaptor.forClass(String.class);
+    verify(mockS3Service, times(1)).uploadFile(imageCaptor.capture(), uriCapture.capture());
+
+    assertEquals(givenProfileImage, imageCaptor.getValue());
+
+    String expectedUri =
+        "profileImg/" + givenMember.getId() + "-" + givenMember.getNickName() + "/";
+    String realUri = uriCapture.getValue();
+    assertEquals(expectedUri, realUri);
   }
 }

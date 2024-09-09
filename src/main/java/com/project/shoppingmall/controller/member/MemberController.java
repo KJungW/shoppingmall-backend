@@ -1,8 +1,10 @@
 package com.project.shoppingmall.controller.member;
 
+import com.project.shoppingmall.controller.member.input.InputLoginByEmail;
 import com.project.shoppingmall.controller.member.input.InputRequestSignup;
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
 import com.project.shoppingmall.controller.member.output.OutputGetMember;
+import com.project.shoppingmall.controller.member.output.OutputLoginByEmail;
 import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.member.MemberEmailSignupDto;
@@ -69,6 +71,19 @@ public class MemberController {
         throw new ServerLogicError("예상치 못한 리다이렉션을 세팅하는 도중 예상치 못한 에러가 발생했습니다");
       }
     }
+  }
+
+  @PostMapping("/login")
+  public OutputLoginByEmail loginByEmail(
+      HttpServletResponse response, @Valid @RequestBody InputLoginByEmail input) {
+    Member member = memberService.loginByEmail(input.getEmail(), input.getPassword());
+    ResponseCookie cookie =
+        cookieUtil.createCookie(
+            "refresh",
+            member.getToken().getRefresh(),
+            (int) (jwtUtil.getRefreshExpirationTimeMs() / 1000));
+    response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    return new OutputLoginByEmail(member);
   }
 
   @GetMapping("")
