@@ -21,6 +21,7 @@ import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.JwtUtil;
+import com.project.shoppingmall.util.PasswordEncoderUtil;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Optional;
@@ -428,7 +429,8 @@ class MemberServiceTest {
     assertEquals(LoginType.EMAIL, resultMember.getLoginType());
     assertEquals(givenDto.getNickName(), resultMember.getNickName());
     assertEquals(givenDto.getEmail(), resultMember.getEmail());
-    assertEquals(givenDto.getPassword(), resultMember.getPassword());
+    assertTrue(
+        PasswordEncoderUtil.checkPassword(givenDto.getPassword(), resultMember.getPassword()));
     assertEquals(MemberRoleType.ROLE_MEMBER, resultMember.getRole());
     assertFalse(resultMember.getIsBan());
     assertEquals(givenSecretNumber.toString(), targetCache.getSecretNumber());

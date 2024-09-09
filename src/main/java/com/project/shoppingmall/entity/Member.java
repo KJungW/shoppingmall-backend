@@ -3,6 +3,7 @@ package com.project.shoppingmall.entity;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
+import com.project.shoppingmall.util.PasswordEncoderUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -61,21 +62,25 @@ public class Member extends BaseEntity {
     }
 
     updateLoginType(loginType);
-    updateNickName(nickName);
-    updateMemberBan(isBan);
-    updateRole(role);
-
     this.socialId = socialId;
+    updateNickName(nickName);
     this.email = email;
-    this.password = password;
+    updatePassword(password);
     this.profileImageUrl = profileImageUrl;
     this.profileImageDownLoadUrl = profileImageDownLoadUrl;
+    updateRole(role);
+    updateMemberBan(isBan);
     this.token = token;
   }
 
   private void updateLoginType(LoginType loginType) {
     if (loginType == null) throw new ServerLogicError("Member의 loginType필드에 빈값이 입력되었습니다.");
     this.loginType = loginType;
+  }
+
+  private void updatePassword(String password) {
+    if (password == null || password.isBlank()) return;
+    this.password = PasswordEncoderUtil.encodePassword(password);
   }
 
   public void updateNickName(String nickName) {
