@@ -14,7 +14,7 @@ import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class ProductDeleteService {
   private final ProductRepository productRepository;
   private final BasketItemFindService basketItemFindService;
   private final BasketItemDeleteService basketItemDeleteService;
-  private final ReviewService reviewService;
+  private final ReviewFindService reviewFindService;
   private final ReviewDeleteService reviewDeleteService;
   private final ReportService reportService;
   private final ReportDeleteService reportDeleteService;
@@ -47,7 +47,7 @@ public class ProductDeleteService {
     List<BasketItem> basketItemList = basketItemFindService.findAllByProduct(product.getId());
     basketItemDeleteService.deleteBasketItemList(basketItemList);
 
-    List<Review> reviewList = reviewService.findByProduct(product.getId());
+    List<Review> reviewList = reviewFindService.findByProduct(product.getId());
     reviewDeleteService.deleteReviewList(reviewList);
 
     List<ProductReport> productReportList = reportService.findAllByProduct(product.getId());

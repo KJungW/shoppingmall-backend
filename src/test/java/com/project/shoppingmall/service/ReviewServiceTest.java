@@ -16,6 +16,7 @@ import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.*;
@@ -34,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 class ReviewServiceTest {
   private ReviewService target;
   private ReviewRepository mockReviewRepository;
+  private ReviewFindService mockReviewFindService;
   private ReviewBulkRepository mockReviewBulkRepository;
   private PurchaseItemService mockPurchaseItemService;
   private ProductFindService mockProductFindService;
@@ -42,6 +44,7 @@ class ReviewServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockReviewRepository = mock(ReviewRepository.class);
+    mockReviewFindService = mock(ReviewFindService.class);
     mockReviewBulkRepository = mock(ReviewBulkRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockProductFindService = mock(ProductFindService.class);
@@ -49,6 +52,7 @@ class ReviewServiceTest {
     target =
         new ReviewService(
             mockReviewRepository,
+            mockReviewFindService,
             mockReviewBulkRepository,
             mockPurchaseItemService,
             mockProductFindService,
@@ -386,7 +390,7 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenReview, "product", givenProduct);
     ReflectionTestUtils.setField(givenReview, "reviewImageUri", givenImageUriBeforeUpdate);
     ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
-    when(mockReviewRepository.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     String givenImageUrl = "test image url";
     String givenDownloadUrl = "test download url";
@@ -449,7 +453,7 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenReview, "product", givenProduct);
     ReflectionTestUtils.setField(givenReview, "reviewImageUri", givenImageUriBeforeUpdate);
     ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenWriterId);
-    when(mockReviewRepository.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(20L, 3.5d);
     when(mockReviewRepository.calcReviewScoresInProduct(anyLong()))

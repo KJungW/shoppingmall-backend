@@ -11,6 +11,7 @@ import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.ban.BanManageService;
 import com.project.shoppingmall.service_manage.product.ProductManageService;
@@ -32,6 +33,7 @@ class BanManageServiceTest {
   private ProductFindService mockProductFindService;
   private ProductManageService mockProductManageService;
   private ReviewService mockReviewService;
+  private ReviewFindService mockReviewFindService;
   private AlarmService mockAlarmService;
   private EntityManagerService mockEntityManagerService;
 
@@ -41,6 +43,7 @@ class BanManageServiceTest {
     mockProductFindService = mock(ProductFindService.class);
     mockProductManageService = mock(ProductManageService.class);
     mockReviewService = mock(ReviewService.class);
+    mockReviewFindService = mock(ReviewFindService.class);
     mockAlarmService = mock(AlarmService.class);
     mockEntityManagerService = mock(EntityManagerService.class);
     target =
@@ -49,6 +52,7 @@ class BanManageServiceTest {
             mockProductFindService,
             mockProductManageService,
             mockReviewService,
+            mockReviewFindService,
             mockAlarmService,
             mockEntityManagerService);
   }
@@ -175,7 +179,7 @@ class BanManageServiceTest {
     ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
     ReflectionTestUtils.setField(givenReview, "isBan", !givenIsBan);
     ReflectionTestUtils.setField(givenReview.getWriter(), "id", givenReviewWriterId);
-    Mockito.when(mockReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    Mockito.when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     // when
     target.banReview(givenReviewId, givenIsBan);
@@ -195,7 +199,7 @@ class BanManageServiceTest {
     long givenReviewId = 20L;
     boolean givenIsBan = true;
 
-    Mockito.when(mockReviewService.findById(anyLong())).thenReturn(Optional.empty());
+    Mockito.when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.empty());
 
     // when then
     assertThrows(DataNotFound.class, () -> target.banReview(givenReviewId, givenIsBan));

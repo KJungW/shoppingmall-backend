@@ -13,8 +13,6 @@ import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.s3.S3Service;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ReviewService {
   private final ReviewRepository reviewRepository;
+  private final ReviewFindService reviewFindService;
   private final ReviewBulkRepository reviewBulkRepository;
   private final PurchaseItemService purchaseItemService;
   private final ProductFindService productFindService;
@@ -78,7 +77,8 @@ public class ReviewService {
   @Transactional
   public Review updateReview(ReviewUpdateData updateData) {
     Review review =
-        findById(updateData.getReviewID())
+        reviewFindService
+            .findById(updateData.getReviewID())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 Review 데이터가 존재하지 않습니다."));
     Product product = review.getProduct();
 
@@ -112,18 +112,6 @@ public class ReviewService {
   @Transactional
   public int banReviewsByWriterId(long writerId, boolean isBan) {
     return reviewBulkRepository.banReviewsByWriterId(writerId, isBan);
-  }
-
-  public Optional<Review> findById(long reviewId) {
-    return reviewRepository.findById(reviewId);
-  }
-
-  public Optional<Review> findByIdWithWriter(long reviewId) {
-    return reviewRepository.findByIdWithWriter(reviewId);
-  }
-
-  public List<Review> findByProduct(long productId) {
-    return reviewRepository.findAllByProduct(productId);
   }
 
   public ReviewScoresCalcResult calcReviewScoresInProduct(long productId) {

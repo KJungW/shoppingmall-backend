@@ -11,7 +11,7 @@ import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
   private final MemberFindService memberFindService;
   private final ProductFindService productFindService;
-  private final ReviewService reviewService;
+  private final ReviewFindService reviewFindService;
   private final ProductReportRepository productReportRepository;
   private final ReviewReportRepository reviewReportRepository;
 
@@ -64,7 +64,7 @@ public class ReportService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Review review =
-        reviewService
+        reviewFindService
             .findById(reviewId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 제품이 존재하지 않습니다."));
 

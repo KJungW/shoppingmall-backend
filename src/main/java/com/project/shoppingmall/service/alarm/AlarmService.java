@@ -7,7 +7,7 @@ import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.type.AlarmType;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AlarmService {
   private final AlarmRepository alarmRepository;
   private final MemberFindService memberFindService;
-  private final ReviewService reviewService;
+  private final ReviewFindService reviewFindService;
   private final ProductFindService productFindService;
   private final RefundFindService refundFindService;
 
@@ -42,7 +42,7 @@ public class AlarmService {
   @Transactional
   public Alarm makeReviewBanAlarm(long reviewId) {
     Review review =
-        reviewService
+        reviewFindService
             .findByIdWithWriter(reviewId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰가 존재하지 않습니다."));
 

@@ -10,7 +10,7 @@ import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.RefundBuilder;
@@ -30,7 +30,7 @@ class AlarmServiceTest {
   private AlarmService target;
   private AlarmRepository mockAlarmRepository;
   private MemberFindService mockMemberFindService;
-  private ReviewService mockReviewService;
+  private ReviewFindService mockReviewFindService;
   private ProductFindService mockProductFindService;
   private RefundFindService mockRefundFindService;
 
@@ -38,14 +38,14 @@ class AlarmServiceTest {
   public void beforeEach() {
     mockAlarmRepository = mock(AlarmRepository.class);
     mockMemberFindService = mock(MemberFindService.class);
-    mockReviewService = mock(ReviewService.class);
+    mockReviewFindService = mock(ReviewFindService.class);
     mockProductFindService = mock(ProductFindService.class);
     mockRefundFindService = mock(RefundFindService.class);
     target =
         new AlarmService(
             mockAlarmRepository,
             mockMemberFindService,
-            mockReviewService,
+            mockReviewFindService,
             mockProductFindService,
             mockRefundFindService);
   }
@@ -74,7 +74,7 @@ class AlarmServiceTest {
 
     long givenWriterId = 10L;
     boolean givenIsBan = true;
-    Review givenReview = set_reviewService_findByIdWithWriter(givenWriterId, givenIsBan);
+    Review givenReview = set_reviewFindService_findByIdWithWriter(givenWriterId, givenIsBan);
 
     // when
     Alarm resultAlarm = target.makeReviewBanAlarm(inputReviewId);
@@ -235,12 +235,12 @@ class AlarmServiceTest {
     return givenMember;
   }
 
-  public Review set_reviewService_findByIdWithWriter(long writerId, boolean isBan)
+  public Review set_reviewFindService_findByIdWithWriter(long writerId, boolean isBan)
       throws IOException {
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "isBan", isBan);
     ReflectionTestUtils.setField(givenReview.getWriter(), "id", writerId);
-    when(mockReviewService.findByIdWithWriter(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findByIdWithWriter(anyLong())).thenReturn(Optional.of(givenReview));
     return givenReview;
   }
 

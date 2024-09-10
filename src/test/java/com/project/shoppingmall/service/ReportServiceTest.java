@@ -14,7 +14,7 @@ import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.report.ReportService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ class ReportServiceTest {
   private ReportService target;
   private MemberFindService mockMemberFindService;
   private ProductFindService mockProductFindService;
-  private ReviewService mockedReviewService;
+  private ReviewFindService mockReviewFindService;
   private ProductReportRepository mockedProductReportRepository;
   private ReviewReportRepository mockedReviewReportRepository;
 
@@ -40,14 +40,14 @@ class ReportServiceTest {
   public void beforeEach() {
     mockMemberFindService = mock(MemberFindService.class);
     mockProductFindService = mock(ProductFindService.class);
-    mockedReviewService = mock(ReviewService.class);
+    mockReviewFindService = mock(ReviewFindService.class);
     mockedProductReportRepository = mock(ProductReportRepository.class);
     mockedReviewReportRepository = mock(ReviewReportRepository.class);
     target =
         new ReportService(
             mockMemberFindService,
             mockProductFindService,
-            mockedReviewService,
+            mockReviewFindService,
             mockedProductReportRepository,
             mockedReviewReportRepository);
   }
@@ -202,7 +202,7 @@ class ReportServiceTest {
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
-    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     // - reviewReportRepository.findLatestReport() 세팅
     Slice mockedSlice = mock(Slice.class);
@@ -243,7 +243,7 @@ class ReportServiceTest {
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
-    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     // - reviewReportRepository.findLatestReport() 세팅
     ReviewReport givenLatestReport = ReviewReportBuilder.fullData().build();
@@ -279,7 +279,7 @@ class ReportServiceTest {
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "id", givenReviewId);
-    when(mockedReviewService.findById(anyLong())).thenReturn(Optional.of(givenReview));
+    when(mockReviewFindService.findById(anyLong())).thenReturn(Optional.of(givenReview));
 
     // - reviewReportRepository.findLatestReport() 세팅
     ReviewReport givenLatestReport = ReviewReportBuilder.fullData().build();

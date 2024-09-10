@@ -8,6 +8,7 @@ import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.product.ProductManageService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class BanManageService {
   private final ProductFindService productFindService;
   private final ProductManageService productManageService;
   private final ReviewService reviewService;
+  private final ReviewFindService reviewFindService;
   private final AlarmService alarmService;
   private final EntityManagerService entityManagerService;
 
@@ -56,7 +58,7 @@ public class BanManageService {
   @Transactional
   public Review banReview(long reviewId, boolean isBan) {
     Review review =
-        reviewService
+        reviewFindService
             .findById(reviewId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 리뷰 데이터가 존재하지 않습니다."));
     review.updateIsBan(isBan);

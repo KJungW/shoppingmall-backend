@@ -18,7 +18,7 @@ import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
-import com.project.shoppingmall.service.review.ReviewService;
+import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ class ProductDeleteServiceTest {
   private ProductRepository mockProductRepository;
   private BasketItemFindService mockBasketItemFindService;
   private BasketItemDeleteService mockBasketItemDeleteService;
-  private ReviewService mockReviewService;
+  private ReviewFindService mockReviewFindService;
   private ReviewDeleteService mockReviewDeleteService;
   private ReportService mockReportService;
   private ReportDeleteService mockReportDeleteService;
@@ -51,7 +51,7 @@ class ProductDeleteServiceTest {
     mockProductRepository = mock(ProductRepository.class);
     mockBasketItemFindService = mock(BasketItemFindService.class);
     mockBasketItemDeleteService = mock(BasketItemDeleteService.class);
-    mockReviewService = mock(ReviewService.class);
+    mockReviewFindService = mock(ReviewFindService.class);
     mockReviewDeleteService = mock(ReviewDeleteService.class);
     mockReportService = mock(ReportService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
@@ -65,7 +65,7 @@ class ProductDeleteServiceTest {
             mockProductRepository,
             mockBasketItemFindService,
             mockBasketItemDeleteService,
-            mockReviewService,
+            mockReviewFindService,
             mockReviewDeleteService,
             mockReportService,
             mockReportDeleteService,
@@ -112,7 +112,7 @@ class ProductDeleteServiceTest {
                 ReviewBuilder.fullData().build(),
                 ReviewBuilder.fullData().build(),
                 ReviewBuilder.fullData().build()));
-    when(mockReviewService.findByProduct(anyLong())).thenReturn(givenReviews);
+    when(mockReviewFindService.findByProduct(anyLong())).thenReturn(givenReviews);
 
     // - reportService.findAllByProduct() 세팅
     List<ProductReport> givenProductReports =
