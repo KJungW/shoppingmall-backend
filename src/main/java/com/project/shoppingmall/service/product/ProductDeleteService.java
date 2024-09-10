@@ -9,7 +9,7 @@ import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
-import com.project.shoppingmall.service.basket_item.BasketItemService;
+import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportService;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductDeleteService {
   private final ProductService productService;
   private final ProductRepository productRepository;
-  private final BasketItemService basketItemService;
+  private final BasketItemFindService basketItemFindService;
   private final BasketItemDeleteService basketItemDeleteService;
   private final ReviewService reviewService;
   private final ReviewDeleteService reviewDeleteService;
@@ -44,7 +44,7 @@ public class ProductDeleteService {
   public void deleteProduct(Product product) {
     if (product == null) throw new ServerLogicError("비어있는 Product를 제거하려고 시도하고 있습니다.");
 
-    List<BasketItem> basketItemList = basketItemService.findAllByProduct(product.getId());
+    List<BasketItem> basketItemList = basketItemFindService.findAllByProduct(product.getId());
     basketItemDeleteService.deleteBasketItemList(basketItemList);
 
     List<Review> reviewList = reviewService.findByProduct(product.getId());

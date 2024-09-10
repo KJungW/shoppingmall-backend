@@ -89,14 +89,6 @@ public class BasketItemService {
     }
   }
 
-  public List<BasketItem> findAllById(List<Long> basketIdList) {
-    return basketItemRepository.findAllById(basketIdList);
-  }
-
-  public List<BasketItem> findAllByProduct(long productId) {
-    return basketItemRepository.findAllByProduct(productId);
-  }
-
   public void validateMemberIsBasketItemOwner(Long memberId, List<BasketItem> basketItems) {
     basketItems.forEach(
         basketItem -> {

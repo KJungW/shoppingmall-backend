@@ -11,7 +11,7 @@ import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
-import com.project.shoppingmall.service.basket_item.BasketItemService;
+import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.product.ProductDeleteService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
@@ -35,7 +35,7 @@ class ProductDeleteServiceTest {
   private ProductDeleteService target;
   private ProductService mockProductService;
   private ProductRepository mockProductRepository;
-  private BasketItemService mockBasketItemService;
+  private BasketItemFindService mockBasketItemFindService;
   private BasketItemDeleteService mockBasketItemDeleteService;
   private ReviewService mockReviewService;
   private ReviewDeleteService mockReviewDeleteService;
@@ -49,7 +49,7 @@ class ProductDeleteServiceTest {
   public void beforeEach() {
     mockProductService = mock(ProductService.class);
     mockProductRepository = mock(ProductRepository.class);
-    mockBasketItemService = mock(BasketItemService.class);
+    mockBasketItemFindService = mock(BasketItemFindService.class);
     mockBasketItemDeleteService = mock(BasketItemDeleteService.class);
     mockReviewService = mock(ReviewService.class);
     mockReviewDeleteService = mock(ReviewDeleteService.class);
@@ -63,7 +63,7 @@ class ProductDeleteServiceTest {
         new ProductDeleteService(
             mockProductService,
             mockProductRepository,
-            mockBasketItemService,
+            mockBasketItemFindService,
             mockBasketItemDeleteService,
             mockReviewService,
             mockReviewDeleteService,
@@ -102,7 +102,7 @@ class ProductDeleteServiceTest {
                 BasketItemBuilder.fullData().build(),
                 BasketItemBuilder.fullData().build(),
                 BasketItemBuilder.fullData().build()));
-    when(mockBasketItemService.findAllByProduct(anyLong())).thenReturn(givenBasketItems);
+    when(mockBasketItemFindService.findAllByProduct(anyLong())).thenReturn(givenBasketItems);
 
     // - reviewService.findByProduct() 세팅
     List<Review> givenReviews =

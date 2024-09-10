@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.value.DeliveryInfo;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.PurchaseRepository;
+import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.refund.RefundService;
@@ -31,6 +32,7 @@ public class PurchaseService {
 
   private final MemberFindService memberFindService;
   private final BasketItemService basketItemService;
+  private final BasketItemFindService basketItemFindService;
   private final PurchaseRepository purchaseRepository;
   private final IamportClient iamportClient;
   private final RefundService refundService;
@@ -158,7 +160,7 @@ public class PurchaseService {
   private List<BasketItem> loadBasketItems(List<PurchaseItemMakeData> purchaseItemMakeDataList) {
     List<Long> basketIdList =
         purchaseItemMakeDataList.stream().map(PurchaseItemMakeData::getBasketItemId).toList();
-    List<BasketItem> basketItems = basketItemService.findAllById(basketIdList);
+    List<BasketItem> basketItems = basketItemFindService.findAllById(basketIdList);
     if (basketItems.size() != basketIdList.size())
       throw new DataNotFound("ID에 해당하는 제품이 존재하지 않습니다.");
     return basketItems;

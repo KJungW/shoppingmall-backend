@@ -11,6 +11,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.CannotPurchaseBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRepository;
+import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase.PurchaseService;
@@ -38,6 +39,7 @@ class PurchaseServiceTest {
   private PurchaseService target;
   private MemberFindService mockMemberFindService;
   private BasketItemService mockBasketItemService;
+  private BasketItemFindService mockBasketItemFindService;
   private PurchaseRepository mockPurchaseRepository;
   private IamportClient mockIamportClient;
   private RefundService mockrefundService;
@@ -46,6 +48,7 @@ class PurchaseServiceTest {
   public void beforeEach() {
     mockMemberFindService = mock(MemberFindService.class);
     mockBasketItemService = mock(BasketItemService.class);
+    mockBasketItemFindService = mock(BasketItemFindService.class);
     mockPurchaseRepository = mock(PurchaseRepository.class);
     mockIamportClient = mock(IamportClient.class);
     mockrefundService = mock(RefundService.class);
@@ -54,6 +57,7 @@ class PurchaseServiceTest {
         new PurchaseService(
             mockMemberFindService,
             mockBasketItemService,
+            mockBasketItemFindService,
             mockPurchaseRepository,
             mockIamportClient,
             mockrefundService);
@@ -95,7 +99,7 @@ class PurchaseServiceTest {
           givenBasketItem.getProduct().getSeller(), "nickName", "seller" + i);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // - basketItemService.validateMemberIsBasketItemOwner() 세팅
     doNothing().when(mockBasketItemService).validateMemberIsBasketItemOwner(any(), any());
@@ -167,7 +171,7 @@ class PurchaseServiceTest {
       ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // when
     assertThrows(
@@ -207,7 +211,7 @@ class PurchaseServiceTest {
       ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // - basketItemService.validateMemberIsBasketItemOwner() 세팅
     doThrow(new DataNotFound("장바구니 아이템들이 유효하지 않습니다"))
@@ -252,7 +256,7 @@ class PurchaseServiceTest {
       ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // - basketItemService.validateMemberIsBasketItemOwner() 세팅
     doNothing().when(mockBasketItemService).validateMemberIsBasketItemOwner(any(), any());
@@ -309,7 +313,7 @@ class PurchaseServiceTest {
       ReflectionTestUtils.setField(givenBasketItem.getMember(), "id", givenMemberId);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // - basketItemService.validateMemberIsBasketItemOwner() 세팅
     doNothing().when(mockBasketItemService).validateMemberIsBasketItemOwner(any(), any());
@@ -371,7 +375,7 @@ class PurchaseServiceTest {
           givenBasketItem.getProduct().getSeller(), "nickName", "seller" + i);
       givenBasketItemList.add(givenBasketItem);
     }
-    when(mockBasketItemService.findAllById(any())).thenReturn(givenBasketItemList);
+    when(mockBasketItemFindService.findAllById(any())).thenReturn(givenBasketItemList);
 
     // - basketItemService.validateMemberIsBasketItemOwner() 세팅
     doNothing().when(mockBasketItemService).validateMemberIsBasketItemOwner(any(), any());
