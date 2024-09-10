@@ -11,6 +11,7 @@ import com.project.shoppingmall.dto.member.MemberEmailSignupDto;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MemberController {
   private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final CookieUtil cookieUtil;
   private final JwtUtil jwtUtil;
 
@@ -92,7 +94,7 @@ public class MemberController {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Member member =
-        memberService
+        memberFindService
             .findById(userDetail.getId())
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 데이터가 존재하지 않습니다."));
     return new OutputGetMember(member);

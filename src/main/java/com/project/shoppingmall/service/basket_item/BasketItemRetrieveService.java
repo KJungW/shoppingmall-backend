@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,12 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BasketItemRetrieveService {
   private final BasketItemService basketItemService;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final BasketItemRetrieveRepository basketItemRetrieveRepository;
 
   public BasketItemDto getBasketItemDetail(Long memberId, Long basketItemId) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원정보가 없습니다."));
     BasketItem basketItem =
@@ -39,7 +39,7 @@ public class BasketItemRetrieveService {
 
   public BasketDto getBasket(Long memberId) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원정보가 없습니다."));
     List<BasketItem> basketItem = basketItemRetrieveRepository.retrieveBasketByMemberId(memberId);

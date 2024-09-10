@@ -6,7 +6,7 @@ import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RefundRetrieveService {
   private final RefundRetrieveRepository refundRetrieveRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final PurchaseItemService purchaseItemService;
 
   public Slice<Refund> retrieveAllByPurchaseItem(
       long memberId, long purchaseItemId, int sliceNumber, int sliceSize) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     PurchaseItem purchaseItem =

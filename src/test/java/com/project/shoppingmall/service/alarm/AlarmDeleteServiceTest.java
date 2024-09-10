@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Alarm;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.AlarmRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.AlamBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.Optional;
@@ -20,13 +20,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class AlarmDeleteServiceTest {
   private AlarmDeleteService target;
   private AlarmRepository mockAlarmRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockAlarmRepository = mock(AlarmRepository.class);
-    mockMemberService = mock(MemberService.class);
-    target = new AlarmDeleteService(mockAlarmRepository, mockMemberService);
+    mockMemberFindService = mock(MemberFindService.class);
+    target = new AlarmDeleteService(mockAlarmRepository, mockMemberFindService);
   }
 
   @Test
@@ -38,7 +38,7 @@ class AlarmDeleteServiceTest {
 
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", inputListenerId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     Alarm givenAlarm = AlamBuilder.memberBanFullData().build();
     ReflectionTestUtils.setField(givenAlarm, "id", inputAlarmId);
@@ -63,7 +63,7 @@ class AlarmDeleteServiceTest {
 
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", inputListenerId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     long otherMemberId = 30L;
     Alarm givenAlarm = AlamBuilder.memberBanFullData().build();

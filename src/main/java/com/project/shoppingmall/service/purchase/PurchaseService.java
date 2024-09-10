@@ -9,7 +9,7 @@ import com.project.shoppingmall.entity.value.DeliveryInfo;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.refund.RefundService;
 import com.project.shoppingmall.type.PaymentResultType;
 import com.project.shoppingmall.type.PurchaseStateType;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PurchaseService {
 
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final BasketItemService basketItemService;
   private final PurchaseRepository purchaseRepository;
   private final IamportClient iamportClient;
@@ -150,7 +150,7 @@ public class PurchaseService {
   }
 
   private Member loadMember(Long memberId) {
-    return memberService
+    return memberFindService
         .findById(memberId)
         .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
   }

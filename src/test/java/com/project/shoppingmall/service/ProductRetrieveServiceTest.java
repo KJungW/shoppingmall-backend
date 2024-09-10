@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
@@ -23,13 +23,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class ProductRetrieveServiceTest {
   private ProductRetrieveService target;
   private ProductRetrieveRepository mockProductRetrieveRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockProductRetrieveRepository = mock(ProductRetrieveRepository.class);
-    mockMemberService = mock(MemberService.class);
-    target = new ProductRetrieveService(mockProductRetrieveRepository, mockMemberService);
+    mockMemberFindService = mock(MemberFindService.class);
+    target = new ProductRetrieveService(mockProductRetrieveRepository, mockMemberFindService);
   }
 
   @Test
@@ -181,7 +181,7 @@ class ProductRetrieveServiceTest {
 
     Member givenSeller = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenSeller, "id", givenSellerId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenSeller));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenSeller));
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList());

@@ -12,7 +12,7 @@ import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -31,7 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class ProductServiceTest {
   private ProductService productService;
-  private MemberService memberService;
+  private MemberFindService mockMemberFindService;
   private ProductTypeService productTypeService;
   private ProductRepository productRepository;
   private S3Service s3Service;
@@ -39,13 +39,13 @@ class ProductServiceTest {
 
   @BeforeEach
   public void beforeEach() {
-    memberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     productTypeService = mock(ProductTypeService.class);
     productRepository = mock(ProductRepository.class);
     s3Service = mock(S3Service.class);
     jsonUtil = mockStatic(JsonUtil.class);
     productService =
-        new ProductService(memberService, productTypeService, productRepository, s3Service);
+        new ProductService(mockMemberFindService, productTypeService, productRepository, s3Service);
   }
 
   @AfterEach
@@ -70,7 +70,7 @@ class ProductServiceTest {
     ProductMakeData givenProductMakeData =
         ProductMakeDataBuilder.fullData().productTypeId(givenProductTypeId).build();
 
-    when(memberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
     when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
 
@@ -195,7 +195,7 @@ class ProductServiceTest {
             .discountRate(50d)
             .build();
 
-    when(memberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
     when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
 
@@ -223,7 +223,7 @@ class ProductServiceTest {
     ProductMakeData givenProductMakeData =
         ProductMakeDataBuilder.fullData().productTypeId(givenProductTypeId).build();
 
-    when(memberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
     when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
 

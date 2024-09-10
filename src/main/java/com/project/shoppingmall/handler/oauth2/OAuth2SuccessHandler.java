@@ -5,6 +5,7 @@ import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.MemberToken;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.CookieUtil;
@@ -25,14 +26,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-  @Value("${frontend.login_success_url}")
-  private String loginSuccessRedirectionUrl;
-
+  private final MemberFindService memberFindService;
   private final MemberService memberService;
   private final JwtUtil jwtUtil;
   private final CookieUtil cookieUtil;
 
-  public OAuth2SuccessHandler(MemberService memberService, JwtUtil jwtUtil, CookieUtil cookieUtil) {
+  @Value("${frontend.login_success_url}")
+  private String loginSuccessRedirectionUrl;
+
+  public OAuth2SuccessHandler(
+      MemberFindService memberFindService,
+      MemberService memberService,
+      JwtUtil jwtUtil,
+      CookieUtil cookieUtil) {
+    this.memberFindService = memberFindService;
     this.memberService = memberService;
     this.jwtUtil = jwtUtil;
     this.cookieUtil = cookieUtil;
@@ -65,7 +72,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   }
 
   private Optional<Member> findMemberByOAuth2UserInfo(OAuth2UserInfo oAuth2UserInfo) {
-    return memberService.findByLonginTypeAndSocialId(
+    return memberFindService.findByLonginTypeAndSocialId(
         oAuth2UserInfo.getLoginType(), oAuth2UserInfo.getSocialId());
   }
 

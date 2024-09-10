@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ChatReadRecordRepository;
 import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatReadRecordService {
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ChatReadRecordRepository chatReadRecordRepository;
   private final ChatReadRecordFindService chatReadRecordFindService;
   private final ChatRoomFindService chatRoomFindService;
@@ -31,7 +31,7 @@ public class ChatReadRecordService {
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     if (!chatRoom.checkMemberIsParticipant(member))

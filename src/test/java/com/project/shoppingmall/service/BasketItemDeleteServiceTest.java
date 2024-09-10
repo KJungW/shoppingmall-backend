@@ -11,7 +11,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.io.IOException;
@@ -28,13 +28,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class BasketItemDeleteServiceTest {
   private BasketItemDeleteService target;
   private BasketItemRepository mockBasketItemRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockBasketItemRepository = mock(BasketItemRepository.class);
-    mockMemberService = mock(MemberService.class);
-    target = new BasketItemDeleteService(mockBasketItemRepository, mockMemberService);
+    mockMemberFindService = mock(MemberFindService.class);
+    target = new BasketItemDeleteService(mockBasketItemRepository, mockMemberFindService);
   }
 
   @Test
@@ -46,7 +46,7 @@ class BasketItemDeleteServiceTest {
 
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     List<BasketItem> givenBasketItemLlist =
         new ArrayList<BasketItem>(
@@ -88,7 +88,7 @@ class BasketItemDeleteServiceTest {
 
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     List<BasketItem> givenBasketItemLlist =
         new ArrayList<BasketItem>(
@@ -117,7 +117,7 @@ class BasketItemDeleteServiceTest {
 
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(mockBasketItemRepository.findAllById(anyList())).thenReturn(new ArrayList<>());
 
     // when then

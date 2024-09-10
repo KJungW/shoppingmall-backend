@@ -7,7 +7,7 @@ import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.MemberRoleType;
 import java.util.Optional;
@@ -18,12 +18,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class AuthMemberDetailServiceTest {
   private AuthMemberDetailService target;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
 
   @BeforeEach
   public void beforeEach() {
-    mockMemberService = mock(MemberService.class);
-    target = new AuthMemberDetailService(mockMemberService);
+    mockMemberFindService = mock(MemberFindService.class);
+    target = new AuthMemberDetailService(mockMemberFindService);
   }
 
   @Test
@@ -38,7 +38,7 @@ class AuthMemberDetailServiceTest {
     MemberRoleType givenRoleType = MemberRoleType.ROLE_MEMBER;
     Member givenMember = MemberBuilder.fullData().role(givenRoleType).build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when
     AuthMemberDetail resultUserDetail = (AuthMemberDetail) target.loadUserByUsername(rightMemberId);
@@ -63,7 +63,7 @@ class AuthMemberDetailServiceTest {
     String rightMemberId = String.valueOf(givenMemberId);
 
     // - memberService.findById() 세팅
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.empty());
 
     // when
     assertThrows(DataNotFound.class, () -> target.loadUserByUsername(rightMemberId));

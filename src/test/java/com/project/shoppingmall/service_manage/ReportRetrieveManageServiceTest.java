@@ -6,7 +6,7 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductReportRetrieveRepository;
 import com.project.shoppingmall.repository.ReviewReportRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service_manage.report.ReportRetrieveManageService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.Optional;
@@ -20,18 +20,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class ReportRetrieveManageServiceTest {
   private ReportRetrieveManageService target;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private ProductReportRetrieveRepository mockProductReportRetrieveRepository;
   private ReviewReportRetrieveRepository mockReviewReportRetrieveRepository;
 
   @BeforeEach
   public void beforeEach() {
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockProductReportRetrieveRepository = mock(ProductReportRetrieveRepository.class);
     mockReviewReportRetrieveRepository = mock(ReviewReportRetrieveRepository.class);
     target =
         new ReportRetrieveManageService(
-            mockMemberService,
+            mockMemberFindService,
             mockProductReportRetrieveRepository,
             mockReviewReportRetrieveRepository);
   }
@@ -108,7 +108,7 @@ class ReportRetrieveManageServiceTest {
 
     Member givenProductSeller = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProductSeller, "id", inputProductSellerId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenProductSeller));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenProductSeller));
 
     // when
     target.findProductReportsByProductSeller(inputProductSellerId, givenSliceNum, givenSliceSize);
@@ -143,7 +143,7 @@ class ReportRetrieveManageServiceTest {
 
     Member givenReviewWriter = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReviewWriter, "id", inputReviewWriterId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenReviewWriter));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenReviewWriter));
 
     // when
     target.findReviewReportsByReviewWriter(inputReviewWriterId, givenSliceNum, givenSliceSize);

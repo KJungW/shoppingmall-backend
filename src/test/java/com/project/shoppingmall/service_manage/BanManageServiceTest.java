@@ -9,7 +9,7 @@ import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.ban.BanManageService;
@@ -28,7 +28,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class BanManageServiceTest {
   private BanManageService target;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private ProductService mockProductService;
   private ProductManageService mockProductManageService;
   private ReviewService mockReviewService;
@@ -37,7 +37,7 @@ class BanManageServiceTest {
 
   @BeforeEach
   public void beforeEach() {
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockProductService = mock(ProductService.class);
     mockProductManageService = mock(ProductManageService.class);
     mockReviewService = mock(ReviewService.class);
@@ -45,7 +45,7 @@ class BanManageServiceTest {
     mockEntityManagerService = mock(EntityManagerService.class);
     target =
         new BanManageService(
-            mockMemberService,
+            mockMemberFindService,
             mockProductService,
             mockProductManageService,
             mockReviewService,
@@ -63,7 +63,7 @@ class BanManageServiceTest {
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
     ReflectionTestUtils.setField(givenMember, "isBan", !givenIsBan);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when
     target.banMember(givenMemberId, givenIsBan);
@@ -100,7 +100,7 @@ class BanManageServiceTest {
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
     ReflectionTestUtils.setField(givenMember, "isBan", givenIsBan);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when
     target.banMember(givenMemberId, givenIsBan);
@@ -118,7 +118,7 @@ class BanManageServiceTest {
     long givenMemberId = 20L;
     boolean givenIsBan = true;
 
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.empty());
 
     // when
     assertThrows(DataNotFound.class, () -> target.banMember(givenMemberId, givenIsBan));

@@ -12,7 +12,7 @@ import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
 import com.project.shoppingmall.repository.ProductRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.type.BlockType;
@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProductService {
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ProductTypeService productTypeService;
   private final ProductRepository productRepository;
   private final S3Service s3Service;
@@ -37,7 +37,7 @@ public class ProductService {
   @Transactional
   public Product save(Long memberId, ProductMakeData productData) {
     Member seller =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
     ProductType productType =

@@ -11,7 +11,7 @@ import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.service.chat_read_record.ChatReadRecordService;
 import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.util.JsonUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ChatService {
   private final CacheRepository cacheRepository;
   private final ChatReadRecordService chatReadRecordService;
   private final ChatRoomFindService chatRoomFindService;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final MongoTemplate mongoTemplate;
 
   @Value("${project_role.chat.chat_connect_cache_expiration_time}")
@@ -36,7 +36,7 @@ public class ChatService {
   @Transactional
   public ChatConnectRequestResult requestChatConnect(long memberId, long chatroomId) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     ChatRoom chatRoom =
@@ -66,7 +66,7 @@ public class ChatService {
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member writer =
-        memberService
+        memberFindService
             .findById(writerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
 

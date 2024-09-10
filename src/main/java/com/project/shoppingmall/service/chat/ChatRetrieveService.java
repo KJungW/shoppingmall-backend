@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.chat_read_record.ChatReadRecordService;
 import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRetrieveService {
   private final ChatRoomFindService chatRoomFindService;
   private final ChatReadRecordService chatReadRecordService;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final MongoTemplate mongoTemplate;
 
   @Transactional
@@ -34,7 +34,7 @@ public class ChatRetrieveService {
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member listener =
-        memberService
+        memberFindService
             .findById(listenerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     if (!chatRoom.checkMemberIsParticipant(listener)) throw new DataNotFound("회원이 참여중인 채팅방이 아닙니다.");
@@ -59,7 +59,7 @@ public class ChatRetrieveService {
             .findByIdWithMember(chatRoomId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 채팅방이 존재하지 않습니다."));
     Member listener =
-        memberService
+        memberFindService
             .findById(listenerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     if (!chatRoom.checkMemberIsParticipant(listener)) throw new DataNotFound("회원이 참여중인 채팅방이 아닙니다.");

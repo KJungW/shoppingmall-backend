@@ -6,7 +6,7 @@ import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthMemberTokenService {
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final JwtUtil jwtUtil;
 
   @Transactional
@@ -25,7 +25,7 @@ public class AuthMemberTokenService {
       RefreshTokenData refreshTokenData = jwtUtil.decodeRefreshToken(inputRefreshToken);
       Long memberId = refreshTokenData.getId();
       Member member =
-          memberService
+          memberFindService
               .findById(memberId)
               .orElseThrow(() -> new DataNotFound("토큰에 해당하는 유저를 찾을 수 없습니다."));
       String dbRefreshToken = member.getToken().getRefresh();
@@ -42,7 +42,7 @@ public class AuthMemberTokenService {
   @Transactional
   public void deleteRefreshToken(Long memberId) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 유저가 존재하지 않습니다."));
     member.deleteRefreshToken();

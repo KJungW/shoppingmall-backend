@@ -4,7 +4,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.service.alarm.AlarmService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RefundService {
   private final RefundRepository refundRepository;
   private final RefundFindService refundFindService;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final PurchaseItemService purchaseItemService;
   private final IamportClient iamportClient;
   private final AlarmService alarmService;
@@ -37,7 +37,7 @@ public class RefundService {
   public Refund saveRefund(
       Long memberId, long purchaseItemId, String requestTitle, String requestContent) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 회원이 존재하지 않습니다."));
     PurchaseItem purchaseItem =
@@ -76,7 +76,7 @@ public class RefundService {
   @Transactional
   public Refund acceptRefund(long memberId, long refundId, String responseContent) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
@@ -99,7 +99,7 @@ public class RefundService {
   @Transactional
   public Refund rejectRefund(Long memberId, long refundId, String responseContent) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =
@@ -120,7 +120,7 @@ public class RefundService {
   @Transactional
   public Refund completeRefund(long memberId, long refundId) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Refund refund =

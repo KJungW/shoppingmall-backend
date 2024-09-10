@@ -7,7 +7,7 @@ import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
 import com.project.shoppingmall.exception.CannotSaveBasketItemBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -24,13 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BasketItemService {
   private final BasketItemRepository basketItemRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ProductService productService;
 
   @Transactional
   public BasketItem saveBasketItem(BasketItemMakeData basketItemMakeData) {
     Member member =
-        memberService
+        memberFindService
             .findById(basketItemMakeData.getMemberId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
     Product product =

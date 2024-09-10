@@ -10,7 +10,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRetrieveRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemRetrieveService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.ArrayList;
@@ -25,17 +25,17 @@ import org.springframework.test.util.ReflectionTestUtils;
 class BasketItemRetrieveServiceTest {
   private BasketItemRetrieveService target;
   private BasketItemService mockBasketItemService;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private BasketItemRetrieveRepository mockBasketItemRetrieveRepository;
 
   @BeforeEach
   public void beforeEach() {
     mockBasketItemService = mock(BasketItemService.class);
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockBasketItemRetrieveRepository = mock(BasketItemRetrieveRepository.class);
     target =
         new BasketItemRetrieveService(
-            mockBasketItemService, mockMemberService, mockBasketItemRetrieveRepository);
+            mockBasketItemService, mockMemberFindService, mockBasketItemRetrieveRepository);
   }
 
   @Test
@@ -49,7 +49,7 @@ class BasketItemRetrieveServiceTest {
     // - memberService.findById 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - basketItemRetrieveRepository.retrieveBasketItemDetail() 세팅
     BasketItem givenBasketItem = BasketItemBuilder.fullData().build();
@@ -85,7 +85,7 @@ class BasketItemRetrieveServiceTest {
     // - memberService.findById 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - basketItemRetrieveRepository.retrieveBasketItemDetail() 세팅
     BasketItem givenBasketItem = BasketItemBuilder.fullData().build();
@@ -109,7 +109,7 @@ class BasketItemRetrieveServiceTest {
     // - memberService.findById 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - basketItemRetrieveRepository.retrieveBasketByMemberId() 세팅
     int givenBasketItemSize = 5;
@@ -157,7 +157,7 @@ class BasketItemRetrieveServiceTest {
     // - memberService.findById 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - basketItemRetrieveRepository.retrieveBasketByMemberId() 세팅
     when(mockBasketItemRetrieveRepository.retrieveBasketByMemberId(anyLong()))

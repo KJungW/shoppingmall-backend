@@ -19,7 +19,6 @@ import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import com.project.shoppingmall.util.PasswordEncoderUtil;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
@@ -33,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MemberService {
   private final MemberRepository memberRepository;
+  private final MemberFindService memberFindService;
   private final CacheRepository cacheRepository;
   private final S3Service s3Service;
   private final EmailService emailService;
@@ -51,7 +51,7 @@ public class MemberService {
 
   @Transactional
   public void requestSignupByEmail(MemberEmailSignupDto dto) {
-    if (findByEmail(dto.getEmail()).isPresent())
+    if (memberFindService.findByEmail(dto.getEmail()).isPresent())
       throw new DuplicateMemberEmail("중복된 이메일로 회원가입이 불가능합니다.");
 
     Member member =
@@ -93,7 +93,7 @@ public class MemberService {
       throw new MemberSignupByEmailCacheError("시크릿키가 올바르지 않습니다.");
 
     Member targetMember = signupCache.getMember();
-    if (findByEmail(targetMember.getEmail()).isPresent())
+    if (memberFindService.findByEmail(targetMember.getEmail()).isPresent())
       throw new DuplicateMemberEmail("중복된 이메일로 회원가입이 불가능합니다.");
 
     String refreshToken =
@@ -107,23 +107,13 @@ public class MemberService {
     return targetMember;
   }
 
-  public Optional<Member> findById(Long memberId) {
-    return memberRepository.findById(memberId);
-  }
-
-  public Optional<Member> findByLonginTypeAndSocialId(LoginType loginType, String socialID) {
-    return memberRepository.findByLoginTypeAndSocialId(loginType, socialID);
-  }
-
-  public Optional<Member> findByEmail(String email) {
-    return memberRepository.findByEmail(email);
-  }
-
   @Transactional
   public Member updateMemberNickNameAndProfileImg(
       Long memberId, String nickName, MultipartFile profileImg) {
     Member member =
-        findById(memberId).orElseThrow(() -> new DataNotFound("id에 해당하는 데이터가 존재하지 않습니다."));
+        memberFindService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 데이터가 존재하지 않습니다."));
     if (!Strings.isEmpty(member.getProfileImageDownLoadUrl())) {
       s3Service.deleteFile(member.getProfileImageUrl());
     }
@@ -137,7 +127,9 @@ public class MemberService {
   @Transactional
   public Member loginByEmail(String email, String password) {
     Member member =
-        findByEmail(email).orElseThrow(() -> new DataNotFound("email에 해당하는 데이터가 존재하지 않습니다."));
+        memberFindService
+            .findByEmail(email)
+            .orElseThrow(() -> new DataNotFound("email에 해당하는 데이터가 존재하지 않습니다."));
 
     if (!member.getLoginType().equals(LoginType.EMAIL))
       throw new DataNotFound("이메일과 비밀번호를 통한 로그인은 이메일 로그인타임을 가진 회원만 가능합니다.");

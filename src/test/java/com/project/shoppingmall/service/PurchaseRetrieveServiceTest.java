@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import java.util.ArrayList;
@@ -25,13 +25,13 @@ import org.springframework.data.domain.Sort;
 class PurchaseRetrieveServiceTest {
   private PurchaseRetrieveService target;
   private PurchaseRetrieveRepository mockPurchaseRetrieveRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockPurchaseRetrieveRepository = mock(PurchaseRetrieveRepository.class);
-    mockMemberService = mock(MemberService.class);
-    target = new PurchaseRetrieveService(mockPurchaseRetrieveRepository, mockMemberService);
+    mockMemberFindService = mock(MemberFindService.class);
+    target = new PurchaseRetrieveService(mockPurchaseRetrieveRepository, mockMemberFindService);
   }
 
   @Test
@@ -42,7 +42,7 @@ class PurchaseRetrieveServiceTest {
     int givenSliceNumber = 0;
     int givenSliceSize = 5;
     Member givenMember = MemberBuilder.fullData().build();
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     Slice mockSliceResult = mock(Slice.class);
     when(mockSliceResult.getContent()).thenReturn(new ArrayList<>());
@@ -77,7 +77,7 @@ class PurchaseRetrieveServiceTest {
     Long givenMemberId = 10L;
     int givenSliceNumber = 0;
     int givenSliceSize = 5;
-    when(mockMemberService.findById(any())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.empty());
 
     // when
     assertThrows(

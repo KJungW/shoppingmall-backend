@@ -5,7 +5,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseItemRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PurchaseItemRetrieveService {
   private final PurchaseItemRetrieveRepository purchaseItemRetrieveRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ProductService productService;
 
   public Slice<PurchaseItem> retrieveAllForSeller(
       long memberId, long productId, int sliceNumber, int sliceSize) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     Product product =
@@ -45,7 +45,7 @@ public class PurchaseItemRetrieveService {
   public Slice<PurchaseItem> retrieveRefundedAllForBuyer(
       long memberId, int sliceNumber, int sliceSize) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     PageRequest pageRequest =
@@ -57,7 +57,7 @@ public class PurchaseItemRetrieveService {
   public Slice<PurchaseItem> retrieveRefundedAllForSeller(
       long sellerId, int sliceNumber, int sliceSize) {
     Member member =
-        memberService
+        memberFindService
             .findById(sellerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     PageRequest pageRequest =

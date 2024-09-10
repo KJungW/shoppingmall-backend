@@ -8,7 +8,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.refund.RefundRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
@@ -30,19 +30,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 class RefundRetrieveServiceTest {
   private RefundRetrieveService target;
   private RefundRetrieveRepository mockRefundRetrieveRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private PurchaseItemService mockPurchaseItemService;
   private static MockedStatic<JsonUtil> jsonUtil;
 
   @BeforeEach
   public void beforeEach() {
     mockRefundRetrieveRepository = mock(RefundRetrieveRepository.class);
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     jsonUtil = mockStatic(JsonUtil.class);
     target =
         new RefundRetrieveService(
-            mockRefundRetrieveRepository, mockMemberService, mockPurchaseItemService);
+            mockRefundRetrieveRepository, mockMemberFindService, mockPurchaseItemService);
   }
 
   @AfterEach
@@ -63,7 +63,7 @@ class RefundRetrieveServiceTest {
     // - memberService.findById() 세팅
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenBuyerId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenBuyer));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenBuyer));
 
     // - purchaseItemService.findById() 세팅
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
@@ -115,7 +115,7 @@ class RefundRetrieveServiceTest {
     // - memberService.findById() 세팅
     Member givenSeller = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenSeller, "id", givenSellerId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenSeller));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenSeller));
 
     // - purchaseItemService.findById() 세팅
     long givenBuyerId = 60L;
@@ -167,7 +167,7 @@ class RefundRetrieveServiceTest {
     // - memberService.findById() 세팅
     Member givenSeller = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenSeller, "id", givenWrongMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenSeller));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenSeller));
 
     // - purchaseItemService.findById() 세팅
     long givenBuyerId = 60L;

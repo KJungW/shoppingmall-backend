@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.dto.oauth2.OAuth2UserPrinciple;
 import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.entity.Member;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
@@ -28,6 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class OAuth2SuccessHandlerTest {
 
   private OAuth2SuccessHandler target;
+  private MemberFindService mockMemberFindService;
   private MemberService mockMemberService;
   private JwtUtil mockJwtUtil;
   private CookieUtil mockCookieUtil;
@@ -38,10 +40,13 @@ class OAuth2SuccessHandlerTest {
   @BeforeEach
   public void beforeEach() {
     // target 구성
+    mockMemberFindService = mock(MemberFindService.class);
     mockMemberService = mock(MemberService.class);
     mockJwtUtil = mock(JwtUtil.class);
     mockCookieUtil = mock(CookieUtil.class);
-    target = new OAuth2SuccessHandler(mockMemberService, mockJwtUtil, mockCookieUtil);
+    target =
+        new OAuth2SuccessHandler(
+            mockMemberFindService, mockMemberService, mockJwtUtil, mockCookieUtil);
 
     // 테스트할 메서드 인수 구성
     mockRequest = new MockHttpServletRequest();
@@ -64,7 +69,7 @@ class OAuth2SuccessHandlerTest {
     when(mockUserInfo.getName()).thenReturn(givenMemberName);
 
     Member givenMember = MemberBuilder.fullData().build();
-    when(mockMemberService.findByLonginTypeAndSocialId(any(), any()))
+    when(mockMemberFindService.findByLonginTypeAndSocialId(any(), any()))
         .thenReturn(Optional.of(givenMember));
 
     String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
@@ -82,7 +87,7 @@ class OAuth2SuccessHandlerTest {
     assertEquals(302, resultResponse.getStatus());
     assertEquals(givenRedirectionUrl, resultResponse.getRedirectedUrl());
     assertEquals(givenRefreshToken, resultResponse.getCookie(givenCookieKey).getValue());
-    verify(mockMemberService, times(1)).findByLonginTypeAndSocialId(any(), any());
+    verify(mockMemberFindService, times(1)).findByLonginTypeAndSocialId(any(), any());
   }
 
   @Test
@@ -102,7 +107,8 @@ class OAuth2SuccessHandlerTest {
     String givenMemberName = "testName1234";
     when(mockUserInfo.getName()).thenReturn(givenMemberName);
 
-    when(mockMemberService.findByLonginTypeAndSocialId(any(), any())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findByLonginTypeAndSocialId(any(), any()))
+        .thenReturn(Optional.empty());
 
     String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
     when(mockJwtUtil.createAccessToken(any())).thenReturn(givenRefreshToken);
@@ -119,6 +125,6 @@ class OAuth2SuccessHandlerTest {
     assertEquals(302, resultResponse.getStatus());
     assertEquals(givenRedirectionUrl, resultResponse.getRedirectedUrl());
     assertEquals(givenRefreshToken, resultResponse.getCookie(givenCookieKey).getValue());
-    verify(mockMemberService, times(1)).findByLonginTypeAndSocialId(any(), any());
+    verify(mockMemberFindService, times(1)).findByLonginTypeAndSocialId(any(), any());
   }
 }

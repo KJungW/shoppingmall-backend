@@ -11,7 +11,7 @@ import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.ContinuousReportError;
 import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -30,7 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class ReportServiceTest {
   private ReportService target;
-  private MemberService mockedMemberService;
+  private MemberFindService mockMemberFindService;
   private ProductService mockedProductService;
   private ReviewService mockedReviewService;
   private ProductReportRepository mockedProductReportRepository;
@@ -38,14 +38,14 @@ class ReportServiceTest {
 
   @BeforeEach
   public void beforeEach() {
-    mockedMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockedProductService = mock(ProductService.class);
     mockedReviewService = mock(ReviewService.class);
     mockedProductReportRepository = mock(ProductReportRepository.class);
     mockedReviewReportRepository = mock(ReviewReportRepository.class);
     target =
         new ReportService(
-            mockedMemberService,
+            mockMemberFindService,
             mockedProductService,
             mockedReviewService,
             mockedProductReportRepository,
@@ -65,7 +65,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockedMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - productService.findByIdWithSeller() 세팅
     Long givenSellerId = 50L;
@@ -109,7 +109,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockedMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - productService.findByIdWithSeller() 세팅
     Long givenSellerId = 50L;
@@ -149,7 +149,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockedMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - productService.findByIdWithSeller() 세팅
     Long givenSellerId = 50L;
@@ -197,7 +197,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
-    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();
@@ -238,7 +238,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
-    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();
@@ -274,7 +274,7 @@ class ReportServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenReporterId);
-    when(mockedMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - reviewService.findById() 세팅
     Review givenReview = ReviewBuilder.fullData().build();

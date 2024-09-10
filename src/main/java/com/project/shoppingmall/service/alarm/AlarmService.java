@@ -4,7 +4,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.AlarmRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AlarmService {
   private final AlarmRepository alarmRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ReviewService reviewService;
   private final ProductService productService;
   private final RefundFindService refundFindService;
@@ -28,7 +28,7 @@ public class AlarmService {
   @Transactional
   public Alarm makeMemberBanAlarm(long listenerId) {
     Member listener =
-        memberService
+        memberFindService
             .findById(listenerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
 
@@ -82,7 +82,7 @@ public class AlarmService {
             .findByIdWithPurchaseItemProduct(refundId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
     Member listener =
-        memberService
+        memberFindService
             .findById(refund.getPurchaseItem().getSellerId())
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
 

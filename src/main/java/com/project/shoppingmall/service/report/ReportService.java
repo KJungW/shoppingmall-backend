@@ -9,7 +9,7 @@ import com.project.shoppingmall.exception.ContinuousReportError;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportService {
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ProductService productService;
   private final ReviewService reviewService;
   private final ProductReportRepository productReportRepository;
@@ -35,7 +35,7 @@ public class ReportService {
   @Transactional
   public void saveProductReport(long memberId, long productId, String title, String description) {
     Member reporter =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Product product =
@@ -60,7 +60,7 @@ public class ReportService {
   @Transactional
   public void saveReviewReport(long memberId, long reviewId, String title, String description) {
     Member reporter =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 회원이 존재하지 않습니다."));
     Review review =

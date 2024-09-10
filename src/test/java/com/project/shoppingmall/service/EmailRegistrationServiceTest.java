@@ -11,7 +11,7 @@ import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.service.email.EmailRegistrationService;
 import com.project.shoppingmall.service.email.EmailService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.RandomNumberGenerator;
@@ -27,7 +27,7 @@ class EmailRegistrationServiceTest {
   private CacheRepository mockCacheRepository;
   private RandomNumberGenerator mockRandomNumberGenerator;
   private EmailService mockEmailService;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private Long expirationTime;
   private String domain;
 
@@ -36,10 +36,13 @@ class EmailRegistrationServiceTest {
     mockCacheRepository = mock(CacheRepository.class);
     mockRandomNumberGenerator = mock(RandomNumberGenerator.class);
     mockEmailService = mock(EmailService.class);
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     target =
         new EmailRegistrationService(
-            mockCacheRepository, mockRandomNumberGenerator, mockEmailService, mockMemberService);
+            mockCacheRepository,
+            mockRandomNumberGenerator,
+            mockEmailService,
+            mockMemberFindService);
 
     expirationTime = 180L;
     domain = "https://domain";
@@ -55,7 +58,7 @@ class EmailRegistrationServiceTest {
     String inputEmail = "test@test.com";
 
     String givenCertificationNumber = "010101";
-    when(mockMemberService.findByEmail(anyString())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findByEmail(anyString())).thenReturn(Optional.empty());
     when(mockRandomNumberGenerator.makeRandomNumber()).thenReturn(givenCertificationNumber);
 
     // when
@@ -76,8 +79,8 @@ class EmailRegistrationServiceTest {
 
     Member givenMember = setMember(inputMemberId);
     set_mockCacheRepository_getCache(inputMemberId, inputCertificationNumber);
-    set_memberService_findById(givenMember);
-    set_memberService_findByEmail();
+    set_memberFindService_findById(givenMember);
+    set_memberFindService_findByEmail();
 
     // when
     target.registerEmail(inputMemberId, inputCertificationNumber, inputEmail);
@@ -97,8 +100,8 @@ class EmailRegistrationServiceTest {
 
     Member givenMember = setMember(inputMemberId);
     set_mockCacheRepository_getCache();
-    set_memberService_findById(givenMember);
-    set_memberService_findByEmail();
+    set_memberFindService_findById(givenMember);
+    set_memberFindService_findByEmail();
 
     // when then
     assertThrows(
@@ -115,8 +118,8 @@ class EmailRegistrationServiceTest {
     String inputEmail = "test@test.com";
 
     set_mockCacheRepository_getCache(inputMemberId, inputCertificationNumber);
-    set_memberService_findById();
-    set_memberService_findByEmail();
+    set_memberFindService_findById();
+    set_memberFindService_findByEmail();
 
     // when then
     assertThrows(
@@ -135,8 +138,8 @@ class EmailRegistrationServiceTest {
     Member givenMember = setMember(inputMemberId);
     Member duplicateEmailMember = setMember(30L, inputEmail);
     set_mockCacheRepository_getCache();
-    set_memberService_findById(givenMember);
-    set_memberService_findByEmail(duplicateEmailMember);
+    set_memberFindService_findById(givenMember);
+    set_memberFindService_findByEmail(duplicateEmailMember);
 
     // when then
     assertThrows(
@@ -156,8 +159,8 @@ class EmailRegistrationServiceTest {
 
     Member givenMember = setMember(inputMemberId);
     set_mockCacheRepository_getCache(inputMemberId, otherCertificationNumber);
-    set_memberService_findById(givenMember);
-    set_memberService_findByEmail();
+    set_memberFindService_findById(givenMember);
+    set_memberFindService_findByEmail();
 
     // when then
     assertThrows(
@@ -177,20 +180,20 @@ class EmailRegistrationServiceTest {
     return givenMember;
   }
 
-  public void set_memberService_findById(Member givenMember) {
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+  public void set_memberFindService_findById(Member givenMember) {
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
   }
 
-  public void set_memberService_findById() {
-    when(mockMemberService.findById(any())).thenReturn(Optional.empty());
+  public void set_memberFindService_findById() {
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.empty());
   }
 
-  public void set_memberService_findByEmail(Member givenMember) {
-    when(mockMemberService.findByEmail(any())).thenReturn(Optional.of(givenMember));
+  public void set_memberFindService_findByEmail(Member givenMember) {
+    when(mockMemberFindService.findByEmail(any())).thenReturn(Optional.of(givenMember));
   }
 
-  public void set_memberService_findByEmail() {
-    when(mockMemberService.findByEmail(any())).thenReturn(Optional.empty());
+  public void set_memberFindService_findByEmail() {
+    when(mockMemberFindService.findByEmail(any())).thenReturn(Optional.empty());
   }
 
   public void set_mockCacheRepository_getCache(

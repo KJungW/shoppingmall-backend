@@ -5,7 +5,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.BasketItemRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BasketItemDeleteService {
   private final BasketItemRepository basketItemRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
 
   public void deleteBasketItem(BasketItem basketItem) {
     if (basketItem == null) throw new ServerLogicError("비어있는 BasketItem을 제거하려고 시도하고 있습니다.");
@@ -29,7 +29,7 @@ public class BasketItemDeleteService {
 
   public void deleteBasketItemByMember(Long memberId, List<Long> basketItemIdList) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
     List<BasketItem> findAllResult = basketItemRepository.findAllById(basketItemIdList);

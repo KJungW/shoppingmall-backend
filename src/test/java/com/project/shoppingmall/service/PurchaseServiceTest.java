@@ -12,7 +12,7 @@ import com.project.shoppingmall.exception.CannotPurchaseBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase.PurchaseService;
 import com.project.shoppingmall.service.refund.RefundService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
@@ -36,7 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class PurchaseServiceTest {
   private PurchaseService target;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private BasketItemService mockBasketItemService;
   private PurchaseRepository mockPurchaseRepository;
   private IamportClient mockIamportClient;
@@ -44,7 +44,7 @@ class PurchaseServiceTest {
 
   @BeforeEach
   public void beforeEach() {
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockBasketItemService = mock(BasketItemService.class);
     mockPurchaseRepository = mock(PurchaseRepository.class);
     mockIamportClient = mock(IamportClient.class);
@@ -52,7 +52,7 @@ class PurchaseServiceTest {
 
     target =
         new PurchaseService(
-            mockMemberService,
+            mockMemberFindService,
             mockBasketItemService,
             mockPurchaseRepository,
             mockIamportClient,
@@ -81,7 +81,7 @@ class PurchaseServiceTest {
     // - memberService.findAllById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();
@@ -157,7 +157,7 @@ class PurchaseServiceTest {
     // - memberService.findAllById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();
@@ -197,7 +197,7 @@ class PurchaseServiceTest {
     // - memberService.findAllById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();
@@ -242,7 +242,7 @@ class PurchaseServiceTest {
     // - memberService.findAllById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();
@@ -299,7 +299,7 @@ class PurchaseServiceTest {
     // - memberService.findAllById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();
@@ -357,7 +357,7 @@ class PurchaseServiceTest {
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
     ReflectionTestUtils.setField(givenMember, "isBan", true);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - basketItemService.findAllById() 세팅
     List<BasketItem> givenBasketItemList = new ArrayList<>();

@@ -10,7 +10,7 @@ import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.service.alarm.AlarmService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.refund.RefundService;
@@ -39,7 +39,7 @@ class RefundServiceTest {
   private RefundService target;
   private RefundRepository mockRefundRepository;
   private RefundFindService mockRefundFindService;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private PurchaseItemService mockPurchaseItemService;
   private IamportClient mockIamportClient;
   private AlarmService mockAlarmService;
@@ -49,7 +49,7 @@ class RefundServiceTest {
   public void beforeEach() {
     mockRefundRepository = mock(RefundRepository.class);
     mockRefundFindService = mock(RefundFindService.class);
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockIamportClient = mock(IamportClient.class);
     mockAlarmService = mock(AlarmService.class);
@@ -57,7 +57,7 @@ class RefundServiceTest {
         new RefundService(
             mockRefundRepository,
             mockRefundFindService,
-            mockMemberService,
+            mockMemberFindService,
             mockPurchaseItemService,
             mockIamportClient,
             mockAlarmService);
@@ -78,7 +78,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -146,7 +146,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -185,7 +185,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Long wrongMemberId = 50L;
@@ -225,7 +225,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -267,7 +267,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -308,7 +308,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
@@ -342,7 +342,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     long wrongMemberId = 40;
@@ -371,7 +371,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
@@ -399,7 +399,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
@@ -432,7 +432,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     long wrongMemberId = 55L;
@@ -461,7 +461,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Refund givenRefund = RefundBuilder.fullData().build();
@@ -488,7 +488,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -540,7 +540,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     long wrongMemberId = 12L;
@@ -571,7 +571,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
@@ -602,7 +602,7 @@ class RefundServiceTest {
     // - memberService.findById() 세팅
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
 
     // - refundRepository.findByIdWithPurchaseItemProduct() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();

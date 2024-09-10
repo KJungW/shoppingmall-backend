@@ -10,7 +10,7 @@ import com.project.shoppingmall.entity.MemberToken;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
 import com.project.shoppingmall.service.auth.AuthMemberTokenService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
@@ -22,14 +22,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class AuthMemberTokenServiceTest {
   private AuthMemberTokenService target;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private JwtUtil mockJwtUtil;
 
   @BeforeEach
   public void beforeEach() {
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockJwtUtil = mock(JwtUtil.class);
-    target = new AuthMemberTokenService(mockMemberService, mockJwtUtil);
+    target = new AuthMemberTokenService(mockMemberFindService, mockJwtUtil);
   }
 
   @Test
@@ -49,7 +49,7 @@ class AuthMemberTokenServiceTest {
     Member givenMember =
         MemberBuilder.fullData().token(new MemberToken(rightInputRefreshToken)).build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // - jwtUtil.createAccessToken() 세팅
     String givenReissueAccess = "testReissueAccessToken";
@@ -91,7 +91,7 @@ class AuthMemberTokenServiceTest {
     Member givenMember =
         MemberBuilder.fullData().token(new MemberToken(givenRefreshTokenInDb)).build();
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when then
     assertThrows(
@@ -110,7 +110,7 @@ class AuthMemberTokenServiceTest {
     Member givenMember =
         MemberBuilder.fullData().token(new MemberToken(givenRefreshTokenInDb)).build();
     ReflectionTestUtils.setField(givenMember, "id", rightMemberId);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     // when
     target.deleteRefreshToken(rightMemberId);
@@ -127,7 +127,7 @@ class AuthMemberTokenServiceTest {
     Long rightMemberId = 10L;
 
     // - mockMemberService.findById() 세팅
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.empty());
 
     // when
     assertThrows(DataNotFound.class, () -> target.deleteRefreshToken(rightMemberId));

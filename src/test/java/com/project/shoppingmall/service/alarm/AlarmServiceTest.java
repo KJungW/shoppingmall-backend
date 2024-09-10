@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.final_value.AlarmContentTemplate;
 import com.project.shoppingmall.repository.AlarmRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
@@ -29,7 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class AlarmServiceTest {
   private AlarmService target;
   private AlarmRepository mockAlarmRepository;
-  private MemberService mockMemberService;
+  private MemberFindService mockMemberFindService;
   private ReviewService mockReviewService;
   private ProductService mockProductService;
   private RefundFindService mockRefundFindService;
@@ -37,14 +37,14 @@ class AlarmServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockAlarmRepository = mock(AlarmRepository.class);
-    mockMemberService = mock(MemberService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockReviewService = mock(ReviewService.class);
     mockProductService = mock(ProductService.class);
     mockRefundFindService = mock(RefundFindService.class);
     target =
         new AlarmService(
             mockAlarmRepository,
-            mockMemberService,
+            mockMemberFindService,
             mockReviewService,
             mockProductService,
             mockRefundFindService);
@@ -57,7 +57,7 @@ class AlarmServiceTest {
     long inputListenerId = 10L;
 
     boolean givenIsBan = true;
-    Member givenMember = set_mockMemberService_findById(inputListenerId, givenIsBan);
+    Member givenMember = set_mockMemberFindService_findById(inputListenerId, givenIsBan);
 
     // when
     Alarm resultAlarm = target.makeMemberBanAlarm(inputListenerId);
@@ -108,7 +108,7 @@ class AlarmServiceTest {
 
     long givenSellerId = 20L;
     Refund givenRefund = set_mockRefundFindService_findByIdWithPurchaseItemProduct(30L, 20L);
-    Member givenSeller = set_mockMemberService_findById(givenSellerId, true);
+    Member givenSeller = set_mockMemberFindService_findById(givenSellerId, true);
 
     // when
     Alarm resultAlarm = target.makeRefundRequestAlarm(inputRefundId);
@@ -227,11 +227,11 @@ class AlarmServiceTest {
     assertThrows(ServerLogicError.class, () -> target.makeAllTypeUpdateAlarm(givenProducts));
   }
 
-  public Member set_mockMemberService_findById(long memberId, boolean isBan) {
+  public Member set_mockMemberFindService_findById(long memberId, boolean isBan) {
     Member givenMember = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenMember, "id", memberId);
     ReflectionTestUtils.setField(givenMember, "isBan", isBan);
-    when(mockMemberService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
     return givenMember;
   }
 

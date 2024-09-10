@@ -6,7 +6,7 @@ import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.product.ProductManageService;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BanManageService {
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
   private final ProductService productService;
   private final ProductManageService productManageService;
   private final ReviewService reviewService;
@@ -28,7 +28,7 @@ public class BanManageService {
   @Transactional
   public Member banMember(long memberId, boolean isBan) {
     Member member =
-        memberService
+        memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원 데이터가 존재하지 않습니다."));
     if (member.getIsBan().equals(isBan)) return member;

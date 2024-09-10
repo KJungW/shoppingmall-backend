@@ -7,7 +7,7 @@ import com.project.shoppingmall.exception.DuplicateMemberEmail;
 import com.project.shoppingmall.exception.EmailRegistrationCacheError;
 import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.RandomNumberGenerator;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +28,11 @@ public class EmailRegistrationService {
   private final CacheRepository cacheRepository;
   private final RandomNumberGenerator randomNumberGenerator;
   private final EmailService emailService;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
 
   @Transactional
   public void sendCertificationEmail(Long memberId, String email) {
-    if (memberService.findByEmail(email).isPresent())
+    if (memberFindService.findByEmail(email).isPresent())
       throw new DuplicateMemberEmail("중복된 이메일로 회원가입이 불가능합니다.");
 
     String certificationNumber = randomNumberGenerator.makeRandomNumber();
@@ -57,9 +57,9 @@ public class EmailRegistrationService {
             .getCache(cacheKey)
             .orElseThrow(() -> new EmailRegistrationCacheError("캐시가 존재하지 않거나 유효하지 않습니다."));
     Member member =
-        memberService.findById(memberId).orElseThrow(() -> new DataNotFound("존재하지 않는 회원입니다."));
+        memberFindService.findById(memberId).orElseThrow(() -> new DataNotFound("존재하지 않는 회원입니다."));
 
-    if (memberService.findByEmail(email).isPresent())
+    if (memberFindService.findByEmail(email).isPresent())
       throw new DuplicateMemberEmail("중복된 이메일로 회원가입이 불가능합니다.");
 
     EmailRegistrationCache cache =

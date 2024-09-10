@@ -4,7 +4,7 @@ import com.project.shoppingmall.entity.Alarm;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.AlarmRepository;
-import com.project.shoppingmall.service.member.MemberService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AlarmDeleteService {
   private final AlarmRepository alarmRepository;
-  private final MemberService memberService;
+  private final MemberFindService memberFindService;
 
   public void deleteAlarm(long alarmId) {
     alarmRepository.deleteById(alarmId);
@@ -27,7 +27,7 @@ public class AlarmDeleteService {
 
   public void deleteAlarmByListener(long listenerId, long alarmId) {
     Member listener =
-        memberService
+        memberFindService
             .findById(listenerId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     Alarm alarm =

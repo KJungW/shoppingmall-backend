@@ -15,6 +15,7 @@ import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.repository.MemberRepository;
 import com.project.shoppingmall.service.email.EmailService;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.MemberBuilder;
@@ -38,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 class MemberServiceTest {
   private MemberService target;
   private MemberRepository mockMemberRepository;
+  private MemberFindService mockMemberFindService;
   private CacheRepository mockCacheRepository;
   private S3Service mockS3Service;
   private EmailService mockEmailService;
@@ -51,6 +53,7 @@ class MemberServiceTest {
     mockDomain = "http://localhost:8080";
 
     mockMemberRepository = mock(MemberRepository.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockCacheRepository = mock(CacheRepository.class);
     mockS3Service = mock(S3Service.class);
     mockEmailService = mock(EmailService.class);
@@ -59,6 +62,7 @@ class MemberServiceTest {
     target =
         new MemberService(
             mockMemberRepository,
+            mockMemberFindService,
             mockCacheRepository,
             mockS3Service,
             mockEmailService,
@@ -78,7 +82,7 @@ class MemberServiceTest {
     MemberEmailSignupDto inputDto =
         new MemberEmailSignupDto("example@temp.com", "ckkqkes1231254", "tempNickName");
 
-    set_memberRepository_findByEmail();
+    set_memberFindRepository_findByEmail();
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when
@@ -103,7 +107,7 @@ class MemberServiceTest {
 
     Member duplicateEmailMember = MemberBuilder.fullData().email(inputDto.getEmail()).build();
 
-    set_memberRepository_findByEmail(duplicateEmailMember);
+    set_memberFindRepository_findByEmail(duplicateEmailMember);
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when then
@@ -126,7 +130,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberRepository_findByEmail();
+    set_memberFindRepository_findByEmail();
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when
@@ -169,7 +173,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberRepository_findByEmail();
+    set_memberFindRepository_findByEmail();
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when then
@@ -193,7 +197,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberRepository_findByEmail(otherMember);
+    set_memberFindRepository_findByEmail(otherMember);
 
     // when then
     assertThrows(
@@ -213,7 +217,7 @@ class MemberServiceTest {
     String givenServerUri = "testServerUri";
     String givenDownloadUrl = "testDownLoadUrl";
 
-    set_memberRepository_findById(givenMember);
+    set_mockMemberFindService_findById(givenMember);
     set_s3Service_uploadFile(givenServerUri, givenDownloadUrl);
 
     // when
@@ -243,7 +247,7 @@ class MemberServiceTest {
         MemberBuilder.makeMemberWithProfileImage(
             inputMemberId, LoginType.NAVER, originServerUri, originDownloadUrl);
 
-    set_memberRepository_findById(givenMember);
+    set_mockMemberFindService_findById(givenMember);
     set_s3Service_uploadFile(newServerUri, newDownloadUrl);
 
     // when
@@ -267,7 +271,7 @@ class MemberServiceTest {
     String givenRefreshTokenValue = "givenRefreshTokenValue";
     MemberToken givenMemberToken = setMemberToken(givenMember, givenRefreshTokenValue).getToken();
 
-    set_memberRepository_findByEmail(givenMember);
+    set_memberFindRepository_findByEmail(givenMember);
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when
@@ -285,7 +289,7 @@ class MemberServiceTest {
     String inputEmail = "test@test.com";
     String inputPassword = "gdfg123!@#";
 
-    set_memberRepository_findByEmail();
+    set_memberFindRepository_findByEmail();
 
     // when then
     assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
@@ -301,7 +305,7 @@ class MemberServiceTest {
     String otherPassword = "dsafkjwelr";
     Member givenMember = MemberBuilder.makeMember(10L, LoginType.EMAIL, inputEmail, otherPassword);
 
-    set_memberRepository_findByEmail(givenMember);
+    set_memberFindRepository_findByEmail(givenMember);
 
     // when then
     assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
@@ -341,12 +345,12 @@ class MemberServiceTest {
     assertEquals(expectedMemberToken.getRefresh(), realMemberToken.getRefresh());
   }
 
-  public void set_memberRepository_findByEmail() {
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+  public void set_memberFindRepository_findByEmail() {
+    when(mockMemberFindService.findByEmail(anyString())).thenReturn(Optional.empty());
   }
 
-  public void set_memberRepository_findByEmail(Member givenMember) {
-    when(mockMemberRepository.findByEmail(anyString())).thenReturn(Optional.of(givenMember));
+  public void set_memberFindRepository_findByEmail(Member givenMember) {
+    when(mockMemberFindService.findByEmail(anyString())).thenReturn(Optional.of(givenMember));
   }
 
   public void set_jwtUtil_createRefreshToken(String givenRefreshToken) {
@@ -361,8 +365,8 @@ class MemberServiceTest {
     when(mockCacheRepository.getCache(anyString())).thenReturn(Optional.of(givenCacheJson));
   }
 
-  public void set_memberRepository_findById(Member givenMember) {
-    when(mockMemberRepository.findById(any())).thenReturn(Optional.of(givenMember));
+  public void set_mockMemberFindService_findById(Member givenMember) {
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
   }
 
   public void set_s3Service_uploadFile(String givenServerUri, String givenDownloadUrl) {
