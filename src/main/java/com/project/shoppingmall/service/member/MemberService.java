@@ -134,6 +134,7 @@ public class MemberService {
     return member;
   }
 
+  @Transactional
   public Member loginByEmail(String email, String password) {
     Member member =
         findByEmail(email).orElseThrow(() -> new DataNotFound("email에 해당하는 데이터가 존재하지 않습니다."));
