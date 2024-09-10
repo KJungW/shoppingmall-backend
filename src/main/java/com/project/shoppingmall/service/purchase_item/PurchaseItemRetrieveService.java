@@ -6,7 +6,7 @@ import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseItemRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PurchaseItemRetrieveService {
   private final PurchaseItemRetrieveRepository purchaseItemRetrieveRepository;
   private final MemberFindService memberFindService;
-  private final ProductService productService;
+  private final ProductFindService productFindService;
 
   public Slice<PurchaseItem> retrieveAllForSeller(
       long memberId, long productId, int sliceNumber, int sliceSize) {
@@ -29,7 +29,7 @@ public class PurchaseItemRetrieveService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     Product product =
-        productService
+        productFindService
             .findById(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 

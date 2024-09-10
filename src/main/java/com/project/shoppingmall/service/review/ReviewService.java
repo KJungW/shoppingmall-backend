@@ -10,7 +10,7 @@ import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.s3.S3Service;
 import java.util.List;
@@ -26,7 +26,7 @@ public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final ReviewBulkRepository reviewBulkRepository;
   private final PurchaseItemService purchaseItemService;
-  private final ProductService productService;
+  private final ProductFindService productFindService;
   private final S3Service s3Service;
 
   @Transactional
@@ -36,7 +36,7 @@ public class ReviewService {
             .findById(makeData.getPurchaseItemId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 구매아이템이 존재하지 않습니다."));
     Product product =
-        productService
+        productFindService
             .findById(purchaseItem.getProductId())
             .orElseThrow(() -> new AlreadyDeletedProduct("이미 삭제된 상품입니다."));
     Member buyer = purchaseItem.getPurchase().getBuyer();

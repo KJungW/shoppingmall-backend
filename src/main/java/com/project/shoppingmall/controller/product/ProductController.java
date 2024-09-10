@@ -8,6 +8,7 @@ import com.project.shoppingmall.dto.product.ProductMakeData;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.product.ProductDeleteService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -22,12 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ProductController {
   private final ProductService productService;
+  private final ProductFindService productFindService;
   private final ProductDeleteService productDeleteService;
 
   @GetMapping("/{productId}")
   public OutputGetProduct getProduct(@PathVariable("productId") Long productId) {
     Product product =
-        productService
+        productFindService
             .findByIdWithAll(productId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품을 찾을 수 없습니다."));
     return new OutputGetProduct(product);

@@ -14,7 +14,7 @@ import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -36,7 +36,7 @@ class ReviewServiceTest {
   private ReviewRepository mockReviewRepository;
   private ReviewBulkRepository mockReviewBulkRepository;
   private PurchaseItemService mockPurchaseItemService;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
   private S3Service mockS3Service;
 
   @BeforeEach
@@ -44,14 +44,14 @@ class ReviewServiceTest {
     mockReviewRepository = mock(ReviewRepository.class);
     mockReviewBulkRepository = mock(ReviewBulkRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     mockS3Service = mock(S3Service.class);
     target =
         new ReviewService(
             mockReviewRepository,
             mockReviewBulkRepository,
             mockPurchaseItemService,
-            mockProductService,
+            mockProductFindService,
             mockS3Service);
   }
 
@@ -98,7 +98,7 @@ class ReviewServiceTest {
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // - s3Service.uploadFile() 세팅
     String givenImageUrl = "test image url";
@@ -187,7 +187,7 @@ class ReviewServiceTest {
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // - reviewRepository.calcReviewScoresInProduct() 세팅
     ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(5L, 3.0);
@@ -258,7 +258,7 @@ class ReviewServiceTest {
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when then
     assertThrows(DataNotFound.class, () -> target.saveReview(givenReviewMakeData));
@@ -304,7 +304,7 @@ class ReviewServiceTest {
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when then
     assertThrows(AlreadyExistReview.class, () -> target.saveReview(givenReviewMakeData));
@@ -347,7 +347,7 @@ class ReviewServiceTest {
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.empty());
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.empty());
 
     // when then
     assertThrows(AlreadyDeletedProduct.class, () -> target.saveReview(givenReviewMakeData));

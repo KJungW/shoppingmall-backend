@@ -12,7 +12,7 @@ import com.project.shoppingmall.exception.ContinuousReportError;
 import com.project.shoppingmall.repository.ProductReportRepository;
 import com.project.shoppingmall.repository.ReviewReportRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.testdata.*;
@@ -31,7 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class ReportServiceTest {
   private ReportService target;
   private MemberFindService mockMemberFindService;
-  private ProductService mockedProductService;
+  private ProductFindService mockProductFindService;
   private ReviewService mockedReviewService;
   private ProductReportRepository mockedProductReportRepository;
   private ReviewReportRepository mockedReviewReportRepository;
@@ -39,14 +39,14 @@ class ReportServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockMemberFindService = mock(MemberFindService.class);
-    mockedProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     mockedReviewService = mock(ReviewService.class);
     mockedProductReportRepository = mock(ProductReportRepository.class);
     mockedReviewReportRepository = mock(ReviewReportRepository.class);
     target =
         new ReportService(
             mockMemberFindService,
-            mockedProductService,
+            mockProductFindService,
             mockedReviewService,
             mockedProductReportRepository,
             mockedReviewReportRepository);
@@ -73,7 +73,7 @@ class ReportServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
     Slice mockedSlice = mock(Slice.class);
@@ -117,7 +117,7 @@ class ReportServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
     ProductReport givenLatestReport = ProductReportBuilder.fullData().build();
@@ -157,7 +157,7 @@ class ReportServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockedProductService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
     ProductReport givenLatestReport = ProductReportBuilder.fullData().build();

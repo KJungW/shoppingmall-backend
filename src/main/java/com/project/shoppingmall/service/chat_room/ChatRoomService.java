@@ -9,7 +9,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ChatRoomRepository;
 import com.project.shoppingmall.service.chat_read_record.ChatReadRecordService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChatRoomService {
   private final ChatRoomRepository chatRoomRepository;
   private final MemberFindService memberFindService;
-  private final ProductService productService;
+  private final ProductFindService productFindService;
   private final ChatReadRecordService chatReadRecordService;
   private final ChatRoomFindService chatRoomFindService;
 
@@ -31,7 +31,7 @@ public class ChatRoomService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
     Product product =
-        productService
+        productFindService
             .findById(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 

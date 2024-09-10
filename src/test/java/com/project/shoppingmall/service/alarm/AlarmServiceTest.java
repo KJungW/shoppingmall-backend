@@ -8,7 +8,7 @@ import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.final_value.AlarmContentTemplate;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.testdata.MemberBuilder;
@@ -31,7 +31,7 @@ class AlarmServiceTest {
   private AlarmRepository mockAlarmRepository;
   private MemberFindService mockMemberFindService;
   private ReviewService mockReviewService;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
   private RefundFindService mockRefundFindService;
 
   @BeforeEach
@@ -39,14 +39,14 @@ class AlarmServiceTest {
     mockAlarmRepository = mock(AlarmRepository.class);
     mockMemberFindService = mock(MemberFindService.class);
     mockReviewService = mock(ReviewService.class);
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     mockRefundFindService = mock(RefundFindService.class);
     target =
         new AlarmService(
             mockAlarmRepository,
             mockMemberFindService,
             mockReviewService,
-            mockProductService,
+            mockProductFindService,
             mockRefundFindService);
   }
 
@@ -74,7 +74,7 @@ class AlarmServiceTest {
 
     long givenWriterId = 10L;
     boolean givenIsBan = true;
-    Review givenReview = set_mockReviewService_findByIdWithWriter(givenWriterId, givenIsBan);
+    Review givenReview = set_reviewService_findByIdWithWriter(givenWriterId, givenIsBan);
 
     // when
     Alarm resultAlarm = target.makeReviewBanAlarm(inputReviewId);
@@ -91,7 +91,7 @@ class AlarmServiceTest {
     boolean givenIsBan = true;
     long givenSellerId = 10L;
     Product givenProduct =
-        set_mockProductService_findByIdWithSeller(inputProductId, givenSellerId, givenIsBan);
+        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, givenIsBan);
 
     // when
     Alarm resultAlarm = target.makeProductBanAlarm(inputProductId);
@@ -107,7 +107,7 @@ class AlarmServiceTest {
     long inputRefundId = 30L;
 
     long givenSellerId = 20L;
-    Refund givenRefund = set_mockRefundFindService_findByIdWithPurchaseItemProduct(30L, 20L);
+    Refund givenRefund = set_refundFindService_findByIdWithPurchaseItemProduct(30L, 20L);
     Member givenSeller = set_mockMemberFindService_findById(givenSellerId, true);
 
     // when
@@ -125,7 +125,7 @@ class AlarmServiceTest {
 
     long givenSellerId = 20L;
     Product givenProduct =
-        set_mockProductService_findByIdWithSeller(inputProductId, givenSellerId, true);
+        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, true);
 
     // when
     Alarm resultAlarm = target.makeTypeDeleteAlarm(inputProductId);
@@ -180,7 +180,7 @@ class AlarmServiceTest {
 
     long givenSellerId = 20L;
     Product givenProduct =
-        set_mockProductService_findByIdWithSeller(inputProductId, givenSellerId, true);
+        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, true);
 
     // when
     Alarm resultAlarm = target.makeTypeUpdateAlarm(inputProductId);
@@ -235,7 +235,7 @@ class AlarmServiceTest {
     return givenMember;
   }
 
-  public Review set_mockReviewService_findByIdWithWriter(long writerId, boolean isBan)
+  public Review set_reviewService_findByIdWithWriter(long writerId, boolean isBan)
       throws IOException {
     Review givenReview = ReviewBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReview, "isBan", isBan);
@@ -244,18 +244,19 @@ class AlarmServiceTest {
     return givenReview;
   }
 
-  public Product set_mockProductService_findByIdWithSeller(
+  public Product set_productFindService_findByIdWithSeller(
       long productId, long sellerId, boolean isBan) throws IOException {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", productId);
     ReflectionTestUtils.setField(givenProduct, "isBan", isBan);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", sellerId);
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(anyLong()))
+        .thenReturn(Optional.of(givenProduct));
     return givenProduct;
   }
 
-  public Refund set_mockRefundFindService_findByIdWithPurchaseItemProduct(
-      long refundId, long sellerId) throws IOException {
+  public Refund set_refundFindService_findByIdWithPurchaseItemProduct(long refundId, long sellerId)
+      throws IOException {
     Refund givenRefund = RefundBuilder.makeRefundWithPurchaseItem();
     ReflectionTestUtils.setField(givenRefund, "id", refundId);
     ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", sellerId);

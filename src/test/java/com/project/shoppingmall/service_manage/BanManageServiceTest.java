@@ -10,7 +10,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service_manage.ban.BanManageService;
 import com.project.shoppingmall.service_manage.product.ProductManageService;
@@ -29,7 +29,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 class BanManageServiceTest {
   private BanManageService target;
   private MemberFindService mockMemberFindService;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
   private ProductManageService mockProductManageService;
   private ReviewService mockReviewService;
   private AlarmService mockAlarmService;
@@ -38,7 +38,7 @@ class BanManageServiceTest {
   @BeforeEach
   public void beforeEach() {
     mockMemberFindService = mock(MemberFindService.class);
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     mockProductManageService = mock(ProductManageService.class);
     mockReviewService = mock(ReviewService.class);
     mockAlarmService = mock(AlarmService.class);
@@ -46,7 +46,7 @@ class BanManageServiceTest {
     target =
         new BanManageService(
             mockMemberFindService,
-            mockProductService,
+            mockProductFindService,
             mockProductManageService,
             mockReviewService,
             mockAlarmService,
@@ -136,7 +136,8 @@ class BanManageServiceTest {
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct, "isBan", !givenIsBan);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(anyLong()))
+        .thenReturn(Optional.of(givenProduct));
 
     // when
     target.banProduct(givenProductId, givenIsBan);
@@ -156,7 +157,7 @@ class BanManageServiceTest {
     long givenProductId = 20L;
     boolean givenIsBan = true;
 
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.empty());
+    when(mockProductFindService.findByIdWithSeller(anyLong())).thenReturn(Optional.empty());
 
     // when then
     assertThrows(DataNotFound.class, () -> target.banProduct(givenProductId, givenIsBan));

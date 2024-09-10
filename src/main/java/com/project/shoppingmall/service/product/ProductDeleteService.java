@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class ProductDeleteService {
-  private final ProductService productService;
+  private final ProductFindService productFindService;
   private final ProductRepository productRepository;
   private final BasketItemFindService basketItemFindService;
   private final BasketItemDeleteService basketItemDeleteService;
@@ -61,7 +61,7 @@ public class ProductDeleteService {
 
   public void deleteProductBySeller(long sellerId, long productId) {
     Product product =
-        productService
+        productFindService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 Prdocut가 존재하지 않습니다."));
     if (!product.getSeller().getId().equals(sellerId))

@@ -16,7 +16,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.testdata.*;
 import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -32,15 +32,16 @@ class BasketItemServiceTest {
   private BasketItemService target;
   private BasketItemRepository mockBasketItemRepository;
   private MemberFindService mockMemberFindService;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockBasketItemRepository = mock(BasketItemRepository.class);
     mockMemberFindService = mock(MemberFindService.class);
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     target =
-        new BasketItemService(mockBasketItemRepository, mockMemberFindService, mockProductService);
+        new BasketItemService(
+            mockBasketItemRepository, mockMemberFindService, mockProductFindService);
   }
 
   @Test
@@ -89,7 +90,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     BasketItem result = target.saveBasketItem(givenMakeData);
@@ -126,7 +127,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     assertThrows(
@@ -154,7 +155,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     assertThrows(AddBannedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
@@ -181,7 +182,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     assertThrows(AddDiscontinuedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
@@ -207,7 +208,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     BasketItem result = target.saveBasketItem(givenMakeData);
@@ -244,7 +245,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     assertThrows(DataNotFound.class, () -> target.saveBasketItem(givenMakeData));
   }
@@ -275,7 +276,7 @@ class BasketItemServiceTest {
             .build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     assertThrows(DataNotFound.class, () -> target.saveBasketItem(givenMakeData));
   }

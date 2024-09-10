@@ -19,7 +19,6 @@ import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +31,7 @@ public class ProductService {
   private final MemberFindService memberFindService;
   private final ProductTypeService productTypeService;
   private final ProductRepository productRepository;
+  private final ProductFindService productFindService;
   private final S3Service s3Service;
 
   @Transactional
@@ -79,7 +79,7 @@ public class ProductService {
   @Transactional
   public void update(Long memberId, Long productId, ProductMakeData productData) {
     Product product =
-        productRepository
+        productFindService
             .findById(productId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 멤버가 존재하지 않습니다."));
     ProductType productType =
@@ -114,25 +114,30 @@ public class ProductService {
     product.updateContents(productContents);
   }
 
-  public Optional<Product> findById(Long productId) {
-    return productRepository.findById(productId);
-  }
-
-  public Optional<Product> findByIdWithSeller(Long productId) {
-    return productRepository.findByIdWithSeller(productId);
-  }
-
-  public Optional<Product> findByIdWithAll(Long productId) {
-    Optional<Product> result = productRepository.findByIdWithAll(productId);
-    if (result.isPresent()) {
-      Product product = result.get();
-      int productImageSize = product.getProductImages().size();
-      int singleOptionSize = product.getSingleOptions().size();
-      int multiOptionSize = product.getMultipleOptions().size();
-      return Optional.of(product);
-    } else {
-      return Optional.empty();
+  @Transactional
+  public Product changeProductToOnSale(long memberId, long productId) {
+    Product product =
+        productFindService
+            .findByIdWithSeller(productId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
+    if (!product.getSeller().getId().equals(memberId)) {
+      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
     }
+    product.changeSalesStateToOnSale();
+    return product;
+  }
+
+  @Transactional
+  public Product changeProductToDiscontinued(long memberId, long productId) {
+    Product product =
+        productFindService
+            .findByIdWithSeller(productId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
+    if (!product.getSeller().getId().equals(memberId)) {
+      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
+    }
+    product.changeSalesStateToDiscontinued();
+    return product;
   }
 
   private boolean validateMemberIsProductSeller(Product product, Long memberId) {
@@ -236,29 +241,5 @@ public class ProductService {
       productMultipleOptions.add(newProductMultipleOption);
     }
     return productMultipleOptions;
-  }
-
-  @Transactional
-  public Product changeProductToOnSale(long memberId, long productId) {
-    Product product =
-        findByIdWithSeller(productId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
-    if (!product.getSeller().getId().equals(memberId)) {
-      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
-    }
-    product.changeSalesStateToOnSale();
-    return product;
-  }
-
-  @Transactional
-  public Product changeProductToDiscontinued(long memberId, long productId) {
-    Product product =
-        findByIdWithSeller(productId)
-            .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
-    if (!product.getSeller().getId().equals(memberId)) {
-      throw new DataNotFound("다른 회원이 판매하는 제품의 판매상태를 변경하려고 시도하고있습니다.");
-    }
-    product.changeSalesStateToDiscontinued();
-    return product;
   }
 }

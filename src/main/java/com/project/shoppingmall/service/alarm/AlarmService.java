@@ -5,7 +5,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.type.AlarmType;
@@ -22,7 +22,7 @@ public class AlarmService {
   private final AlarmRepository alarmRepository;
   private final MemberFindService memberFindService;
   private final ReviewService reviewService;
-  private final ProductService productService;
+  private final ProductFindService productFindService;
   private final RefundFindService refundFindService;
 
   @Transactional
@@ -60,7 +60,7 @@ public class AlarmService {
   @Transactional
   public Alarm makeProductBanAlarm(long productId) {
     Product product =
-        productService
+        productFindService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 
@@ -100,7 +100,7 @@ public class AlarmService {
   @Transactional
   public Alarm makeTypeDeleteAlarm(long productId) {
     Product product =
-        productService
+        productFindService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 
@@ -140,7 +140,7 @@ public class AlarmService {
   @Transactional
   public Alarm makeTypeUpdateAlarm(long productId) {
     Product product =
-        productService
+        productFindService
             .findByIdWithSeller(productId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 제품이 존재하지 않습니다."));
 

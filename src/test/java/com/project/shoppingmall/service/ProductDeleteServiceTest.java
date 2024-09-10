@@ -13,7 +13,7 @@ import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.product.ProductDeleteService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportService;
@@ -33,7 +33,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class ProductDeleteServiceTest {
   private ProductDeleteService target;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
   private ProductRepository mockProductRepository;
   private BasketItemFindService mockBasketItemFindService;
   private BasketItemDeleteService mockBasketItemDeleteService;
@@ -47,7 +47,7 @@ class ProductDeleteServiceTest {
 
   @BeforeEach
   public void beforeEach() {
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     mockProductRepository = mock(ProductRepository.class);
     mockBasketItemFindService = mock(BasketItemFindService.class);
     mockBasketItemDeleteService = mock(BasketItemDeleteService.class);
@@ -61,7 +61,7 @@ class ProductDeleteServiceTest {
 
     target =
         new ProductDeleteService(
-            mockProductService,
+            mockProductFindService,
             mockProductRepository,
             mockBasketItemFindService,
             mockBasketItemDeleteService,
@@ -88,7 +88,8 @@ class ProductDeleteServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(anyLong()))
+        .thenReturn(Optional.of(givenProduct));
 
     // - purchaseItemService.findLatestByProduct() 세팅
     when(mockPurchaseItemService.findLatestByProduct(anyLong(), anyInt()))
@@ -174,7 +175,8 @@ class ProductDeleteServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenOtherMemberId);
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(anyLong()))
+        .thenReturn(Optional.of(givenProduct));
 
     // when
     assertThrows(
@@ -193,7 +195,8 @@ class ProductDeleteServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
-    when(mockProductService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findByIdWithSeller(anyLong()))
+        .thenReturn(Optional.of(givenProduct));
 
     // - purchaseItemService.findLatestByProduct() 세팅
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();

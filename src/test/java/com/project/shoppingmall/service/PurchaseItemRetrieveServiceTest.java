@@ -8,7 +8,7 @@ import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseItemRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
@@ -26,16 +26,16 @@ class PurchaseItemRetrieveServiceTest {
   private PurchaseItemRetrieveService target;
   private PurchaseItemRetrieveRepository mockPurchaseItemRetrieveRepository;
   private MemberFindService mockMemberFindService;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
 
   @BeforeEach
   public void beforeEach() {
     mockPurchaseItemRetrieveRepository = mock(PurchaseItemRetrieveRepository.class);
     mockMemberFindService = mock(MemberFindService.class);
-    mockProductService = mock(ProductService.class);
+    mockProductFindService = mock(ProductFindService.class);
     target =
         new PurchaseItemRetrieveService(
-            mockPurchaseItemRetrieveRepository, mockMemberFindService, mockProductService);
+            mockPurchaseItemRetrieveRepository, mockMemberFindService, mockProductFindService);
   }
 
   @Test
@@ -53,7 +53,7 @@ class PurchaseItemRetrieveServiceTest {
 
     Product givenProduct = ProductBuilder.fullData().seller(givenMember).build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     // when
     target.retrieveAllForSeller(givenMemberId, givenProductId, givenSliceNumber, givenSliceSize);
@@ -93,7 +93,7 @@ class PurchaseItemRetrieveServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", wrongMemberId);
-    when(mockProductService.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     System.out.println("givenMember.getId() = " + givenMember.getId());
     System.out.println("givenProduct.getSeller().getId() = " + givenProduct.getSeller().getId());

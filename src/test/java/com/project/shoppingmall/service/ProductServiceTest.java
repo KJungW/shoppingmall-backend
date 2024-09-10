@@ -13,6 +13,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.product.ProductService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -22,7 +23,6 @@ import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.*;
@@ -34,6 +34,7 @@ class ProductServiceTest {
   private MemberFindService mockMemberFindService;
   private ProductTypeService productTypeService;
   private ProductRepository productRepository;
+  private ProductFindService productFindService;
   private S3Service s3Service;
   private static MockedStatic<JsonUtil> jsonUtil;
 
@@ -42,10 +43,16 @@ class ProductServiceTest {
     mockMemberFindService = mock(MemberFindService.class);
     productTypeService = mock(ProductTypeService.class);
     productRepository = mock(ProductRepository.class);
+    productFindService = mock(ProductFindService.class);
     s3Service = mock(S3Service.class);
     jsonUtil = mockStatic(JsonUtil.class);
     productService =
-        new ProductService(mockMemberFindService, productTypeService, productRepository, s3Service);
+        new ProductService(
+            mockMemberFindService,
+            productTypeService,
+            productRepository,
+            productFindService,
+            s3Service);
   }
 
   @AfterEach
@@ -244,7 +251,7 @@ class ProductServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
-    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(productFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
@@ -295,7 +302,7 @@ class ProductServiceTest {
     Long givenProductSellerId = 30L;
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenProductSellerId);
-    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(productFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
@@ -329,7 +336,7 @@ class ProductServiceTest {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
-    when(productRepository.findById(any())).thenReturn(Optional.of(givenProduct));
+    when(productFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
     ProductType givenProductType = new ProductType("test$detail");
     ReflectionTestUtils.setField(givenProductType, "id", 5L);
@@ -349,27 +356,6 @@ class ProductServiceTest {
   }
 
   @Test
-  @DisplayName("findByIdWithAll() : 정상흐름")
-  public void findByIdWithAll_ok() throws IOException {
-    // given
-    Long givenProductId = 30L;
-    Product givenProduct = mock(Product.class);
-    when(productRepository.findByIdWithAll(any())).thenReturn(Optional.of(givenProduct));
-    when(givenProduct.getProductImages()).thenReturn(new ArrayList<>());
-    when(givenProduct.getSingleOptions()).thenReturn(new ArrayList<>());
-    when(givenProduct.getMultipleOptions()).thenReturn(new ArrayList<>());
-
-    // when
-    Optional<Product> result = productService.findByIdWithAll(givenProductId);
-
-    // then
-    assertTrue(result.isPresent());
-    verify(givenProduct, times(1)).getProductImages();
-    verify(givenProduct, times(1)).getSingleOptions();
-    verify(givenProduct, times(1)).getMultipleOptions();
-  }
-
-  @Test
   @DisplayName("changeProductToOnSale() : 정상흐름")
   public void changeProductToOnSale_ok() throws IOException {
     // given
@@ -380,7 +366,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.DISCONTINUED);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
-    when(productService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(productFindService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when
     Product product = productService.changeProductToOnSale(givenMemberId, givenProductId);
@@ -402,7 +388,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.ON_SALE);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenMemberId);
-    when(productService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(productFindService.findByIdWithSeller(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when
     Product product = productService.changeProductToDiscontinued(givenMemberId, givenProductId);

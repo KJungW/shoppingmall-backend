@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.repository.ReviewRetrieveRepository;
-import com.project.shoppingmall.service.product.ProductService;
+import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.review.ReviewRetrieveService;
 import com.project.shoppingmall.testdata.ProductBuilder;
 import java.io.IOException;
@@ -21,13 +21,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class ReviewRetrieveServiceTest {
   private ReviewRetrieveService target;
   private ReviewRetrieveRepository mockReviewRetrieveRepository;
-  private ProductService mockProductService;
+  private ProductFindService mockProductFindService;
 
   @BeforeEach
   public void beforeEach() {
     this.mockReviewRetrieveRepository = mock(ReviewRetrieveRepository.class);
-    this.mockProductService = mock(ProductService.class);
-    target = new ReviewRetrieveService(mockReviewRetrieveRepository, mockProductService);
+    this.mockProductFindService = mock(ProductFindService.class);
+    target = new ReviewRetrieveService(mockReviewRetrieveRepository, mockProductFindService);
   }
 
   @Test
@@ -40,7 +40,7 @@ class ReviewRetrieveServiceTest {
 
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
-    when(mockProductService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
 
     // when
     target.retrieveByProduct(givenProductId, givenSliceNum, givenSliceSize);
