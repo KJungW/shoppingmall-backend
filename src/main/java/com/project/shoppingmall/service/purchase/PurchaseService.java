@@ -19,7 +19,6 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +33,7 @@ public class PurchaseService {
   private final BasketItemService basketItemService;
   private final BasketItemFindService basketItemFindService;
   private final PurchaseRepository purchaseRepository;
+  private final PurchaseFindService purchaseFindService;
   private final IamportClient iamportClient;
   private final RefundService refundService;
 
@@ -77,7 +77,8 @@ public class PurchaseService {
   public PaymentResultType completePurchase(String purchaseUid, String paymentUid) {
 
     Purchase purchase =
-        findByPurchaseUid(purchaseUid)
+        purchaseFindService
+            .findByPurchaseUid(purchaseUid)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 구매데이터가 존재하지 않습니다."));
     if (purchase.getState() != PurchaseStateType.READY) {
       return PaymentResultType.ALREADY_PROCESSED;
@@ -104,10 +105,6 @@ public class PurchaseService {
 
     purchase.convertStateToComplete(paymentUid);
     return PaymentResultType.COMPLETE;
-  }
-
-  public Optional<Purchase> findByPurchaseUid(String purchaseUid) {
-    return purchaseRepository.findByPurchaseUid(purchaseUid);
   }
 
   private PurchaseItem makePurchaseItem(

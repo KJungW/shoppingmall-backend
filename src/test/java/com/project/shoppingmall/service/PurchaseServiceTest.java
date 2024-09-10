@@ -14,6 +14,7 @@ import com.project.shoppingmall.repository.PurchaseRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.member.MemberFindService;
+import com.project.shoppingmall.service.purchase.PurchaseFindService;
 import com.project.shoppingmall.service.purchase.PurchaseService;
 import com.project.shoppingmall.service.refund.RefundService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
@@ -41,6 +42,7 @@ class PurchaseServiceTest {
   private BasketItemService mockBasketItemService;
   private BasketItemFindService mockBasketItemFindService;
   private PurchaseRepository mockPurchaseRepository;
+  private PurchaseFindService mockPurchaseFindService;
   private IamportClient mockIamportClient;
   private RefundService mockrefundService;
 
@@ -50,6 +52,7 @@ class PurchaseServiceTest {
     mockBasketItemService = mock(BasketItemService.class);
     mockBasketItemFindService = mock(BasketItemFindService.class);
     mockPurchaseRepository = mock(PurchaseRepository.class);
+    mockPurchaseFindService = mock(PurchaseFindService.class);
     mockIamportClient = mock(IamportClient.class);
     mockrefundService = mock(RefundService.class);
 
@@ -59,6 +62,7 @@ class PurchaseServiceTest {
             mockBasketItemService,
             mockBasketItemFindService,
             mockPurchaseRepository,
+            mockPurchaseFindService,
             mockIamportClient,
             mockrefundService);
   }
@@ -398,7 +402,7 @@ class PurchaseServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
     ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
 
     // - iamportClient.paymentByImpUid() 세팅
     IamportResponse mockPaymentResponse = mock(IamportResponse.class);
@@ -427,7 +431,7 @@ class PurchaseServiceTest {
     String givenPaymentUid = "imp-12301519243012";
 
     // when
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.empty());
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.empty());
 
     // when
     assertThrows(
@@ -446,7 +450,7 @@ class PurchaseServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
     ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
 
     // when
     PaymentResultType paymentResult = target.completePurchase(givenPurchaseUid, givenPaymentUid);
@@ -467,7 +471,7 @@ class PurchaseServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
     ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
 
     // - iamportClient.paymentByImpUid() 세팅
     IamportResponse mockPaymentResponse = mock(IamportResponse.class);
@@ -501,7 +505,7 @@ class PurchaseServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
     ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
 
     // - iamportClient.paymentByImpUid() 세팅
     IamportResponse mockPaymentResponse = mock(IamportResponse.class);
@@ -534,7 +538,7 @@ class PurchaseServiceTest {
     Purchase givenPurchase = PurchaseBuilder.fullData().totalPrice(givenPrice).build();
     ReflectionTestUtils.setField(givenPurchase, "purchaseUid", givenPurchaseUid);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.READY);
-    when(mockPurchaseRepository.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
+    when(mockPurchaseFindService.findByPurchaseUid(any())).thenReturn(Optional.of(givenPurchase));
 
     // - iamportClient.paymentByImpUid() 세팅
     when(mockIamportClient.paymentByImpUid(any())).thenReturn(null);
