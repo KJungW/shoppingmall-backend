@@ -12,7 +12,7 @@ import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ public class ProductDeleteService {
   private final BasketItemDeleteService basketItemDeleteService;
   private final ReviewFindService reviewFindService;
   private final ReviewDeleteService reviewDeleteService;
-  private final ReportService reportService;
+  private final ReportFindService reportFindService;
   private final ReportDeleteService reportDeleteService;
   private final PurchaseItemService purchaseItemService;
   private final AlarmFindService alarmFindService;
@@ -50,7 +50,7 @@ public class ProductDeleteService {
     List<Review> reviewList = reviewFindService.findByProduct(product.getId());
     reviewDeleteService.deleteReviewList(reviewList);
 
-    List<ProductReport> productReportList = reportService.findAllByProduct(product.getId());
+    List<ProductReport> productReportList = reportFindService.findAllByProduct(product.getId());
     reportDeleteService.deleteProductReportList(productReportList);
 
     List<Alarm> alarmsList = alarmFindService.findByTargetProduct(product.getId());

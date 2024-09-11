@@ -17,7 +17,7 @@ import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -37,7 +37,7 @@ class ReviewDeleteServiceTest {
   private ReviewService mockReviewService;
   private ReviewRepository mockReviewRepository;
   private PurchaseItemService mockPurchaseItemService;
-  private ReportService mockReportService;
+  private ReportFindService mockReportFindService;
   private ReportDeleteService mockReportDeleteService;
   private AlarmFindService mockAlarmFindService;
   private AlarmDeleteService mockAlarmDeleteService;
@@ -48,7 +48,7 @@ class ReviewDeleteServiceTest {
     mockReviewService = mock(ReviewService.class);
     mockReviewRepository = mock(ReviewRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
-    mockReportService = mock(ReportService.class);
+    mockReportFindService = mock(ReportFindService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
     mockAlarmFindService = mock(AlarmFindService.class);
     mockAlarmDeleteService = mock(AlarmDeleteService.class);
@@ -58,7 +58,7 @@ class ReviewDeleteServiceTest {
             mockReviewService,
             mockReviewRepository,
             mockPurchaseItemService,
-            mockReportService,
+            mockReportFindService,
             mockReportDeleteService,
             mockAlarmFindService,
             mockAlarmDeleteService,
@@ -96,7 +96,7 @@ class ReviewDeleteServiceTest {
                 ReviewReportBuilder.fullData().build(),
                 ReviewReportBuilder.fullData().build(),
                 ReviewReportBuilder.fullData().build()));
-    when(mockReportService.findAllByReview(anyLong())).thenReturn(givenReviewReport);
+    when(mockReportFindService.findAllByReview(anyLong())).thenReturn(givenReviewReport);
 
     // - alarmFindService.findByTargetProduct() 세팅
     List<Alarm> givenAlarms =

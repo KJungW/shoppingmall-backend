@@ -4,7 +4,7 @@ import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.AlreadyProcessedReport;
 import com.project.shoppingmall.exception.DataNotFound;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.type.ReportResultType;
 import com.project.shoppingmall.type.ReportResultTypeForApi;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportProcessManageService {
-  private final ReportService reportService;
+  private final ReportFindService reportFindService;
 
   @Transactional
   public ProductReport processProductReport(
       long productReportId, ReportResultTypeForApi resultType) {
     ProductReport productReport =
-        reportService
+        reportFindService
             .finaProductReportById(productReportId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 제품 신고 데이터가 없습니다."));
     if (!productReport.getReportResult().equals(ReportResultType.WAITING_PROCESSED))
@@ -34,7 +34,7 @@ public class ReportProcessManageService {
   @Transactional
   public ReviewReport processReviewReport(long reviewReportId, ReportResultTypeForApi resultType) {
     ReviewReport reviewReport =
-        reportService
+        reportFindService
             .findReviewReportById(reviewReportId)
             .orElseThrow(() -> new DataNotFound("ID에 해당하는 리뷰 신고 데이터가 없습니다."));
     if (!reviewReport.getReportResult().equals(ReportResultType.WAITING_PROCESSED))

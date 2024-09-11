@@ -16,7 +16,7 @@ import com.project.shoppingmall.service.product.ProductDeleteService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.testdata.*;
@@ -39,7 +39,7 @@ class ProductDeleteServiceTest {
   private BasketItemDeleteService mockBasketItemDeleteService;
   private ReviewFindService mockReviewFindService;
   private ReviewDeleteService mockReviewDeleteService;
-  private ReportService mockReportService;
+  private ReportFindService mockReportFindService;
   private ReportDeleteService mockReportDeleteService;
   private PurchaseItemService mockPurchaseItemService;
   private AlarmFindService mockAlarmFindService;
@@ -53,7 +53,7 @@ class ProductDeleteServiceTest {
     mockBasketItemDeleteService = mock(BasketItemDeleteService.class);
     mockReviewFindService = mock(ReviewFindService.class);
     mockReviewDeleteService = mock(ReviewDeleteService.class);
-    mockReportService = mock(ReportService.class);
+    mockReportFindService = mock(ReportFindService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockAlarmFindService = mock(AlarmFindService.class);
@@ -67,7 +67,7 @@ class ProductDeleteServiceTest {
             mockBasketItemDeleteService,
             mockReviewFindService,
             mockReviewDeleteService,
-            mockReportService,
+            mockReportFindService,
             mockReportDeleteService,
             mockPurchaseItemService,
             mockAlarmFindService,
@@ -119,7 +119,7 @@ class ProductDeleteServiceTest {
         new ArrayList<>(
             List.of(
                 ProductReportBuilder.fullData().build(), ProductReportBuilder.fullData().build()));
-    when(mockReportService.findAllByProduct(anyLong())).thenReturn(givenProductReports);
+    when(mockReportFindService.findAllByProduct(anyLong())).thenReturn(givenProductReports);
 
     // - alarmFindService.findByTargetProduct() 세팅
     List<Alarm> givenAlarms =

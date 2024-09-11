@@ -13,7 +13,7 @@ import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.s3.S3Service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ReviewDeleteService {
   private final ReviewService reviewService;
   private final ReviewRepository reviewRepository;
   private final PurchaseItemService purchaseItemService;
-  private final ReportService reportService;
+  private final ReportFindService reportFindService;
   private final ReportDeleteService reportDeleteService;
   private final AlarmFindService alarmFindService;
   private final AlarmDeleteService alarmDeleteService;
@@ -36,7 +36,7 @@ public class ReviewDeleteService {
   public void deleteReview(Review review) {
     if (review == null) throw new ServerLogicError("비어있는 Review을 제거하려고 시도하고 있습니다.");
 
-    List<ReviewReport> reviewReportList = reportService.findAllByReview(review.getId());
+    List<ReviewReport> reviewReportList = reportFindService.findAllByReview(review.getId());
     reportDeleteService.deleteReviewReportList(reviewReportList);
 
     List<Alarm> alarmList = alarmFindService.findByTargetReview(review.getId());

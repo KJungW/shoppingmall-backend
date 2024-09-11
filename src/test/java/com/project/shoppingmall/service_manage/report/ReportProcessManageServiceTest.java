@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.AlreadyProcessedReport;
-import com.project.shoppingmall.service.report.ReportService;
+import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.testdata.ProductReportBuilder;
 import com.project.shoppingmall.testdata.ReviewReportBuilder;
 import com.project.shoppingmall.type.ReportResultType;
@@ -22,12 +22,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class ReportProcessManageServiceTest {
   private ReportProcessManageService target;
-  private ReportService mockReportService;
+  private ReportFindService mockReportFindService;
 
   @BeforeEach
   public void beforeEach() {
-    mockReportService = mock(ReportService.class);
-    target = new ReportProcessManageService(mockReportService);
+    mockReportFindService = mock(ReportFindService.class);
+    target = new ReportProcessManageService(mockReportFindService);
   }
 
   @Test
@@ -42,7 +42,7 @@ class ReportProcessManageServiceTest {
     ReflectionTestUtils.setField(givenProductReport, "id", inputProductReportId);
     ReflectionTestUtils.setField(
         givenProductReport, "reportResult", ReportResultType.WAITING_PROCESSED);
-    when(mockReportService.finaProductReportById(anyLong()))
+    when(mockReportFindService.finaProductReportById(anyLong()))
         .thenReturn(Optional.of(givenProductReport));
 
     // when
@@ -63,7 +63,7 @@ class ReportProcessManageServiceTest {
     ProductReport givenProductReport = ProductReportBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProductReport, "id", inputProductReportId);
     ReflectionTestUtils.setField(givenProductReport, "reportResult", ReportResultType.MEMBER_BAN);
-    when(mockReportService.finaProductReportById(anyLong()))
+    when(mockReportFindService.finaProductReportById(anyLong()))
         .thenReturn(Optional.of(givenProductReport));
 
     // when
@@ -83,7 +83,7 @@ class ReportProcessManageServiceTest {
     ReflectionTestUtils.setField(givenReviewReport, "id", inputReviewReportId);
     ReflectionTestUtils.setField(
         givenReviewReport, "reportResult", ReportResultType.WAITING_PROCESSED);
-    when(mockReportService.findReviewReportById(anyLong()))
+    when(mockReportFindService.findReviewReportById(anyLong()))
         .thenReturn(Optional.of(givenReviewReport));
 
     // when
@@ -104,7 +104,7 @@ class ReportProcessManageServiceTest {
     ReviewReport givenReviewReport = ReviewReportBuilder.fullData().build();
     ReflectionTestUtils.setField(givenReviewReport, "id", inputReviewReportId);
     ReflectionTestUtils.setField(givenReviewReport, "reportResult", ReportResultType.MEMBER_BAN);
-    when(mockReportService.findReviewReportById(anyLong()))
+    when(mockReportFindService.findReviewReportById(anyLong()))
         .thenReturn(Optional.of(givenReviewReport));
 
     // when

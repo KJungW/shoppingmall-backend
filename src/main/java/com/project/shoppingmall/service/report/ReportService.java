@@ -13,8 +13,6 @@ import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -102,21 +100,5 @@ public class ReportService {
       return latestReport.getCreateDate().isAfter(LocalDateTime.now().minusDays(1));
     }
     return false;
-  }
-
-  public Optional<ProductReport> finaProductReportById(long productReviewId) {
-    return productReportRepository.findById(productReviewId);
-  }
-
-  public Optional<ReviewReport> findReviewReportById(long reviewReportId) {
-    return reviewReportRepository.findById(reviewReportId);
-  }
-
-  public List<ProductReport> findAllByProduct(long productId) {
-    return productReportRepository.findAllByProduct(productId);
-  }
-
-  public List<ReviewReport> findAllByReview(long reviewId) {
-    return reviewReportRepository.findAllByReview(reviewId);
   }
 }
