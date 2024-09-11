@@ -10,6 +10,7 @@ import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -26,6 +27,7 @@ public class ReviewService {
   private final ReviewBulkRepository reviewBulkRepository;
   private final PurchaseItemService purchaseItemService;
   private final ProductFindService productFindService;
+  private final MemberFindService memberFindService;
   private final S3Service s3Service;
 
   @Transactional
@@ -38,7 +40,10 @@ public class ReviewService {
         productFindService
             .findById(purchaseItem.getProductId())
             .orElseThrow(() -> new AlreadyDeletedProduct("이미 삭제된 상품입니다."));
-    Member buyer = purchaseItem.getPurchase().getBuyer();
+    Member buyer =
+        memberFindService
+            .findById(purchaseItem.getPurchase().getBuyerId())
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
 
     if (!buyer.getId().equals(makeData.getWriterId())) {
       throw new DataNotFound("다른 회원의 구매아이템에 대해 리뷰작성을 시도하고 있습니다.");
@@ -52,7 +57,6 @@ public class ReviewService {
       reviewImageUploadResult =
           s3Service.uploadFile(makeData.getReviewImage(), "review/" + product.getId() + "/");
     }
-    ;
 
     Review newReview =
         Review.builder()

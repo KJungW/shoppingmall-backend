@@ -155,7 +155,7 @@ public class ProductDeleteIntegrationTest {
           new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
       Purchase purchase =
           Purchase.builder()
-              .buyer(buyer)
+              .buyerId(buyer.getId())
               .purchaseItems(purchaseItems)
               .purchaseUid(i + "test-complete-PurchaseUid")
               .purchaseTitle("임시구매" + i)

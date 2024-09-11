@@ -3,8 +3,10 @@ package com.project.shoppingmall.dto.refund;
 import com.project.shoppingmall.dto.delivery.DeliveryDto;
 import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.entity.PurchaseItem;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.RefundStateTypeForPurchaseItem;
 import com.project.shoppingmall.util.JsonUtil;
 import java.time.LocalDateTime;
@@ -39,8 +41,37 @@ public class RefundPurchaseItemForSeller {
   public RefundPurchaseItemForSeller(PurchaseItem item) {
     Purchase purchase = item.getPurchase();
     this.purchaseId = purchase.getId();
-    this.buyerId = purchase.getBuyer().getId();
-    this.buyerName = purchase.getBuyer().getNickName();
+    this.buyerId = purchase.getBuyerId();
+    this.buyerName = null;
+    this.deliveryInfo = new DeliveryDto(purchase.getDeliveryInfo());
+    this.purchaseDateTime = purchase.getCreateDate();
+
+    ProductDataForPurchase productData =
+        JsonUtil.convertJsonToObject(item.getProductData(), ProductDataForPurchase.class);
+    this.purchaseItemId = item.getId();
+    this.productId = productData.getProductId();
+    this.sellerId = productData.getSellerId();
+    this.sellerName = productData.getSellerName();
+    this.productName = productData.getProductName();
+    this.productTypeName = productData.getProductTypeName();
+    this.selectedSingleOption = productData.getSingleOption();
+    this.selectedMultiOptions = productData.getMultiOptions();
+    this.price = productData.getPrice();
+    this.discountAmount = productData.getDiscountAmount();
+    this.discountRate = productData.getDiscountRate();
+    this.finalPrice = item.getFinalPrice();
+    this.isRefund = item.getIsRefund();
+    this.refundState = item.getFinalRefundState();
+  }
+
+  public RefundPurchaseItemForSeller(PurchaseItem item, Member buyer) {
+    if (!item.getPurchase().getBuyerId().equals(buyer.getId()))
+      throw new ServerLogicError("purchaseItem과 매칭되지 않는 buyer가 입력되었습니다.");
+
+    Purchase purchase = item.getPurchase();
+    this.purchaseId = purchase.getId();
+    this.buyerId = purchase.getBuyerId();
+    this.buyerName = buyer.getNickName();
     this.deliveryInfo = new DeliveryDto(purchase.getDeliveryInfo());
     this.purchaseDateTime = purchase.getCreateDate();
 

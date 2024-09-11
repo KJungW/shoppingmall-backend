@@ -112,7 +112,7 @@ class PurchaseItemRetrieveRepositoryTest {
           new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
       Purchase purchase =
           Purchase.builder()
-              .buyer(buyer)
+              .buyerId(buyer.getId())
               .purchaseItems(purchaseItems)
               .purchaseUid(i + "test-fail-PurchaseUid")
               .purchaseTitle("임시구매" + i)
@@ -150,7 +150,7 @@ class PurchaseItemRetrieveRepositoryTest {
           new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
       Purchase purchase =
           Purchase.builder()
-              .buyer(buyer)
+              .buyerId(buyer.getId())
               .purchaseItems(purchaseItems)
               .purchaseUid(i + "test-complete-PurchaseUid")
               .purchaseTitle("임시구매" + i)
@@ -255,7 +255,7 @@ class PurchaseItemRetrieveRepositoryTest {
     List<PurchaseItem> purchaseItems = sliceData.getContent();
     purchaseItems.forEach(
         item -> {
-          assertEquals(givenBuyerId, item.getPurchase().getBuyer().getId());
+          assertEquals(givenBuyerId, item.getPurchase().getBuyerId());
         });
 
     // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증
@@ -290,7 +290,7 @@ class PurchaseItemRetrieveRepositoryTest {
     List<PurchaseItem> purchaseItems = sliceData.getContent();
     purchaseItems.forEach(
         item -> {
-          assertEquals(givenBuyerId, item.getPurchase().getBuyer().getId());
+          assertEquals(givenBuyerId, item.getPurchase().getBuyerId());
         });
 
     // - 조회된 PurchaseItem의 구매상태가 Complete인지 검증

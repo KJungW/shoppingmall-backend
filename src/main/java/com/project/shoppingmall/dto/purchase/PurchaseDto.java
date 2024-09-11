@@ -22,7 +22,7 @@ public class PurchaseDto {
 
   public PurchaseDto(Purchase purchase) {
     this.purchaseId = purchase.getId();
-    this.buyerId = purchase.getBuyer().getId();
+    this.buyerId = purchase.getBuyerId();
     this.state = purchase.getState();
     this.purchaseTitle = purchase.getPurchaseTitle();
     this.deliveryInfo = new DeliveryDto(purchase.getDeliveryInfo());

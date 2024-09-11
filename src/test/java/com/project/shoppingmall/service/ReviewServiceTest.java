@@ -14,6 +14,7 @@ import com.project.shoppingmall.exception.AlreadyExistReview;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
+import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.review.ReviewFindService;
@@ -39,6 +40,7 @@ class ReviewServiceTest {
   private ReviewBulkRepository mockReviewBulkRepository;
   private PurchaseItemService mockPurchaseItemService;
   private ProductFindService mockProductFindService;
+  private MemberFindService mockMemberFindService;
   private S3Service mockS3Service;
 
   @BeforeEach
@@ -48,6 +50,7 @@ class ReviewServiceTest {
     mockReviewBulkRepository = mock(ReviewBulkRepository.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockProductFindService = mock(ProductFindService.class);
+    mockMemberFindService = mock(MemberFindService.class);
     mockS3Service = mock(S3Service.class);
     target =
         new ReviewService(
@@ -56,6 +59,7 @@ class ReviewServiceTest {
             mockReviewBulkRepository,
             mockPurchaseItemService,
             mockProductFindService,
+            mockMemberFindService,
             mockS3Service);
   }
 
@@ -88,7 +92,7 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
 
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", givenBuyer.getId());
 
     long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
@@ -103,6 +107,9 @@ class ReviewServiceTest {
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // - memberFindService.findById() 세팅
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenBuyer));
 
     // - s3Service.uploadFile() 세팅
     String givenImageUrl = "test image url";
@@ -176,8 +183,7 @@ class ReviewServiceTest {
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
 
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyerId(givenBuyer.getId()).build();
 
     long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
@@ -192,6 +198,9 @@ class ReviewServiceTest {
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // - memberFindService.findById() 세팅
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenBuyer));
 
     // - reviewRepository.calcReviewScoresInProduct() 세팅
     ReviewScoresCalcResult givenScoreCalcResult = new ReviewScoresCalcResult(5L, 3.0);
@@ -247,8 +256,7 @@ class ReviewServiceTest {
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", otherMemberId);
 
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyerId(givenBuyer.getId()).build();
 
     long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
@@ -293,8 +301,7 @@ class ReviewServiceTest {
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
 
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyerId(givenBuyer.getId()).build();
 
     long givenProductId = 10L;
     Product givenProduct = ProductBuilder.fullData().build();
@@ -309,6 +316,9 @@ class ReviewServiceTest {
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+
+    // - memberFindService.findById() 세팅
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenBuyer));
 
     // when then
     assertThrows(AlreadyExistReview.class, () -> target.saveReview(givenReviewMakeData));
@@ -339,8 +349,7 @@ class ReviewServiceTest {
     Member givenBuyer = MemberBuilder.fullData().build();
     ReflectionTestUtils.setField(givenBuyer, "id", givenWriterId);
 
-    Purchase givenPurchase = PurchaseBuilder.fullData().buyer(givenBuyer).build();
-    ReflectionTestUtils.setField(givenPurchase, "buyer", givenBuyer);
+    Purchase givenPurchase = PurchaseBuilder.fullData().buyerId(givenBuyer.getId()).build();
 
     long givenProductId = 20L;
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();

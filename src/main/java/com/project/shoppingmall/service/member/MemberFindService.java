@@ -3,6 +3,7 @@ package com.project.shoppingmall.service.member;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.MemberRepository;
 import com.project.shoppingmall.type.LoginType;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,9 @@ public class MemberFindService {
 
   public Optional<Member> findByEmail(String email) {
     return memberRepository.findByEmail(email);
+  }
+
+  public List<Member> findAllByIds(List<Long> memberIds) {
+    return memberRepository.findAllById(memberIds);
   }
 }

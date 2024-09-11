@@ -43,7 +43,7 @@ public class RefundRetrieveService {
   private void validateRetrieveRefundPermission(Member member, PurchaseItem purchaseItem) {
     ProductDataForPurchase productData =
         JsonUtil.convertJsonToObject(purchaseItem.getProductData(), ProductDataForPurchase.class);
-    if (!member.getId().equals(purchaseItem.getPurchase().getBuyer().getId())
+    if (!member.getId().equals(purchaseItem.getPurchase().getBuyerId())
         && !member.getId().equals(productData.getSellerId())) {
       throw new DataNotFound("해당 환불데이터를 조회할 권한이 없는 회원입니다.");
     }

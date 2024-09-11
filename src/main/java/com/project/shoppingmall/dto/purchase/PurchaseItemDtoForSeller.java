@@ -30,7 +30,7 @@ public class PurchaseItemDtoForSeller {
     Purchase targetPurchase = purchaseItem.getPurchase();
     ProductDataForPurchase productData =
         JsonUtil.convertJsonToObject(purchaseItem.getProductData(), ProductDataForPurchase.class);
-    this.buyerId = targetPurchase.getBuyer().getId();
+    this.buyerId = targetPurchase.getBuyerId();
     this.deliveryInfo = new DeliveryDto(targetPurchase.getDeliveryInfo());
     this.dateTime = targetPurchase.getCreateDate();
     this.purchaseItemId = purchaseItem.getId();

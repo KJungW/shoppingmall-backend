@@ -45,7 +45,7 @@ public class RefundService {
             .findByIdWithPurchaseAndRefund(purchaseItemId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 구매아이템이 존재하지 않습니다."));
 
-    if (!purchaseItem.getPurchase().getBuyer().getId().equals(member.getId())) {
+    if (!purchaseItem.getPurchase().getBuyerId().equals(member.getId())) {
       throw new DataNotFound("현재 회원의 구매 아이템이 아닙니다.");
     }
     if (!purchaseItem.getPurchase().getState().equals(PurchaseStateType.COMPLETE)) {

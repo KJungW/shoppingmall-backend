@@ -8,10 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PurchaseRetrieveRepository extends JpaRepository<Purchase, Long> {
-  @Query(
-      "select p from Purchase p "
-          + "left join fetch p.buyer b "
-          + "where b.id = :buyerId "
-          + "and p.state != 'FAIL'")
+  @Query("select p from Purchase p " + "where p.buyerId = :buyerId " + "and p.state != 'FAIL'")
   Slice<Purchase> findAllByBuyer(@Param("buyerId") Long buyerId, Pageable pageable);
 }

@@ -19,9 +19,7 @@ public class Purchase extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "BUYER_ID")
-  private Member buyer;
+  private Long buyerId;
 
   @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
   List<PurchaseItem> purchaseItems = new ArrayList<>();
@@ -40,13 +38,13 @@ public class Purchase extends BaseEntity {
 
   @Builder
   public Purchase(
-      Member buyer,
+      Long buyerId,
       List<PurchaseItem> purchaseItems,
       String purchaseUid,
       String purchaseTitle,
       DeliveryInfo deliveryInfo,
       int totalPrice) {
-    if (buyer == null
+    if (buyerId == null
         || purchaseItems.isEmpty()
         || purchaseUid.isEmpty()
         || purchaseTitle.isEmpty()
@@ -54,7 +52,7 @@ public class Purchase extends BaseEntity {
         || totalPrice <= 0) {
       throw new ServerLogicError("Purchase를 빌더로 생성할때 필수값을 넣어주지 않았습니다.");
     }
-    this.buyer = buyer;
+    this.buyerId = buyerId;
     updatePurchaseItems(purchaseItems);
     this.purchaseUid = purchaseUid;
     this.state = PurchaseStateType.READY;

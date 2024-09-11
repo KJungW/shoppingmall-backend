@@ -13,7 +13,6 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
   @Query(
       "select pi from PurchaseItem  pi "
           + "left join fetch pi.purchase pu "
-          + "left join fetch pu.buyer "
           + "where pi.productId = :productId "
           + "and pu.state = 'COMPLETE' ")
   Slice<PurchaseItem> findAllForSeller(@Param("productId") long productId, Pageable pageable);
@@ -23,8 +22,7 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
           + "from PurchaseItem pi "
           + "join pi.refunds r "
           + "left join fetch pi.purchase pu "
-          + "left join fetch pu.buyer b "
-          + "where b.id = :buyerId "
+          + "where pu.buyerId = :buyerId "
           + "and pu.state = 'Complete'")
   Slice<PurchaseItem> findRefundedAllForBuyer(
       @Param("buyerId") Long buyerId, PageRequest pageRequest);
@@ -34,7 +32,6 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
           + "from PurchaseItem pi "
           + "join pi.refunds r "
           + "left join fetch pi.purchase pu "
-          + "left join fetch pu.buyer b "
           + "where pi.sellerId = :sellerId "
           + "and pu.state = 'Complete'")
   Slice<PurchaseItem> findRefundedAllForSeller(

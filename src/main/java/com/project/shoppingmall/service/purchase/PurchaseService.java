@@ -61,7 +61,7 @@ public class PurchaseService {
 
     Purchase newPurchase =
         Purchase.builder()
-            .buyer(buyer)
+            .buyerId(buyer.getId())
             .purchaseItems(purchaseItems)
             .purchaseUid(purchaseUid)
             .purchaseTitle(purchaseTitle)

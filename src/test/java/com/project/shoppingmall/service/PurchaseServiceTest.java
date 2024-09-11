@@ -126,7 +126,7 @@ class PurchaseServiceTest {
         target.readyPurchase(givenMemberId, givenPurchaseItemMakeData, givenDeliveryDto);
 
     // then
-    assertEquals(givenMemberId, purchase.getBuyer().getId());
+    assertEquals(givenMemberId, purchase.getBuyerId());
     assertNotNull(purchase.getPurchaseUid());
     assertNull(purchase.getPaymentUid());
     for (PurchaseItem item : purchase.getPurchaseItems()) {

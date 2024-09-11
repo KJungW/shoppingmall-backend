@@ -69,9 +69,7 @@ class RefundRetrieveServiceTest {
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenPurchaseItem.getPurchase(), "buyer", MemberBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase().getBuyer(), "id", givenBuyerId);
+    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅
@@ -122,9 +120,7 @@ class RefundRetrieveServiceTest {
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenPurchaseItem.getPurchase(), "buyer", MemberBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase().getBuyer(), "id", givenBuyerId);
+    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅
@@ -174,9 +170,7 @@ class RefundRetrieveServiceTest {
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(
-        givenPurchaseItem.getPurchase(), "buyer", MemberBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase().getBuyer(), "id", givenBuyerId);
+    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
     when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅

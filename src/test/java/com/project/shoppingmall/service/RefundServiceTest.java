@@ -82,7 +82,7 @@ class RefundServiceTest {
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", givenMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
 
     int givenFinalPrice = 100000;
@@ -150,7 +150,7 @@ class RefundServiceTest {
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", givenMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.FAIL);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
@@ -190,7 +190,7 @@ class RefundServiceTest {
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Long wrongMemberId = 50L;
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", wrongMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", wrongMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
@@ -229,7 +229,7 @@ class RefundServiceTest {
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", givenMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
@@ -271,7 +271,7 @@ class RefundServiceTest {
 
     // - purchaseItemService.findByIdWithPurchaseAndRefund() 세팅
     Purchase givenPurchase = PurchaseBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchase.getBuyer(), "id", givenMemberId);
+    ReflectionTestUtils.setField(givenPurchase, "buyerId", givenMemberId);
     ReflectionTestUtils.setField(givenPurchase, "state", PurchaseStateType.COMPLETE);
     int givenFinalPrice = 100000;
     PurchaseItem givenPurchaseItem =
