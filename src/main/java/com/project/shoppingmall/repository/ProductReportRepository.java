@@ -18,4 +18,7 @@ public interface ProductReportRepository extends JpaRepository<ProductReport, Lo
 
   @Query("select pr from ProductReport pr where pr.product.id = :productId")
   List<ProductReport> findAllByProduct(@Param("productId") long productId);
+
+  @Query("select pr from ProductReport pr where pr.reporter.id = :reporterId")
+  List<ProductReport> findAllByReporter(@Param("reporterId") long reporterId);
 }

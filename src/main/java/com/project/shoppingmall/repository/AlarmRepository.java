@@ -13,4 +13,7 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
   @Query("select a from Alarm a " + "left join a.targetReview r " + "where r.id = :reviewId ")
   List<Alarm> findAlarmByTargetReview(@Param("reviewId") long reviewId);
+
+  @Query("select a from Alarm a " + "left join a.listener l " + "where l.id = :listenerId ")
+  List<Alarm> findAllByListener(@Param("listenerId") long listenerId);
 }

@@ -1,5 +1,6 @@
 package com.project.shoppingmall.controller.member;
 
+import com.project.shoppingmall.controller.member.input.InputDeleteMember;
 import com.project.shoppingmall.controller.member.input.InputLoginByEmail;
 import com.project.shoppingmall.controller.member.input.InputRequestSignup;
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
@@ -11,6 +12,7 @@ import com.project.shoppingmall.dto.member.MemberEmailSignupDto;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.service.member.MemberDeleteService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.util.CookieUtil;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
   private final MemberService memberService;
   private final MemberFindService memberFindService;
+  private final MemberDeleteService memberDeleteService;
   private final CookieUtil cookieUtil;
   private final JwtUtil jwtUtil;
 
@@ -110,5 +113,13 @@ public class MemberController {
         memberService.updateMemberNickNameAndProfileImg(
             userDetail.getId(), memberInfo.getNickName(), memberInfo.getProfileImg());
     return new OutputUpdateMemberInfo(member);
+  }
+
+  @DeleteMapping
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void deleteMember(@Valid @RequestBody InputDeleteMember input) {
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    memberDeleteService.deleteMemberInController(userDetail.getId(), input.getPassword());
   }
 }

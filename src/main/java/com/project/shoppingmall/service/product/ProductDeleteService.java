@@ -59,6 +59,10 @@ public class ProductDeleteService {
     productRepository.delete(product);
   }
 
+  public void deleteProductList(List<Product> productList) {
+    productList.forEach(this::deleteProduct);
+  }
+
   public void deleteProductBySeller(long sellerId, long productId) {
     Product product =
         productFindService

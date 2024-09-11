@@ -25,4 +25,8 @@ public class ReviewFindService {
   public List<Review> findByProduct(long productId) {
     return reviewRepository.findAllByProduct(productId);
   }
+
+  public List<Review> findAllByWriter(long writerId) {
+    return reviewRepository.findAllByWriter(writerId);
+  }
 }

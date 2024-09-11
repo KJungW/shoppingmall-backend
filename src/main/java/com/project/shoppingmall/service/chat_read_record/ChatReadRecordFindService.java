@@ -21,4 +21,8 @@ public class ChatReadRecordFindService {
   public List<ChatReadRecord> findAllByChatRoomAndMember(List<Long> chatRoomIds, long memberId) {
     return chatReadRecordRepository.findAllByChatRoomAndMember(chatRoomIds, memberId);
   }
+
+  public List<ChatReadRecord> findAllByChatRoom(long chatRoomId) {
+    return chatReadRecordRepository.findAllByChatRoom(chatRoomId);
+  }
 }

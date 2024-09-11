@@ -221,4 +221,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult MemberSignupByEmailCacheErrorHandler(MemberSignupByEmailCacheError e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "회원가입 인증 이메일의 유효기간이 지났습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotDeleteMemberByPassword.class)
+  public ErrorResult CannotDeleteMemberByPasswordHandler(CannotDeleteMemberByPassword e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "비밀번호가 맞지 않아 회원탈퇴를 진행할 수 없습니다.");
+  }
 }

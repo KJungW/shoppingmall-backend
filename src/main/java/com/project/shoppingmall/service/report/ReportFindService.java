@@ -32,4 +32,12 @@ public class ReportFindService {
   public List<ReviewReport> findAllByReview(long reviewId) {
     return reviewReportRepository.findAllByReview(reviewId);
   }
+
+  public List<ProductReport> findAllProductReportByReporter(long reporterId) {
+    return productReportRepository.findAllByReporter(reporterId);
+  }
+
+  public List<ReviewReport> findAllReviewReportByReporter(long reporterId) {
+    return reviewReportRepository.findAllByReporter(reporterId);
+  }
 }

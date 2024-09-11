@@ -26,4 +26,10 @@ public interface ChatReadRecordRepository extends JpaRepository<ChatReadRecord, 
           + "and m.id = :memberId ")
   List<ChatReadRecord> findAllByChatRoomAndMember(
       @Param("chatRoomIds") List<Long> chatRoomIds, @Param("memberId") long memberId);
+
+  @Query(
+      "select crr from ChatReadRecord crr "
+          + "left join fetch crr.chatRoom c "
+          + "where c.id = :chatRoomId ")
+  List<ChatReadRecord> findAllByChatRoom(@Param("chatRoomId") long chatRoomId);
 }

@@ -20,4 +20,8 @@ public class AlarmFindService {
   public List<Alarm> findByTargetReview(long reviewId) {
     return alarmRepository.findAlarmByTargetReview(reviewId);
   }
+
+  public List<Alarm> findAllByListener(long listenerId) {
+    return alarmRepository.findAllByListener(listenerId);
+  }
 }

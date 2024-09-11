@@ -20,4 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
   @Query("select r from Review r " + "left join fetch r.writer w " + "where r.id = :reviewId ")
   Optional<Review> findByIdWithWriter(@Param("reviewId") long reviewId);
+
+  @Query("select r from Review r " + "left join fetch r.writer w " + "where w.id = :writerId ")
+  List<Review> findAllByWriter(@Param("writerId") long writerId);
 }

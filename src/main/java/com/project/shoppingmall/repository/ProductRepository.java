@@ -1,6 +1,7 @@
 package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.Product;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -25,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   @Query("select p from Product p " + "left join p.productType t " + "where t.id = :typeId ")
   Slice<Product> findProductsByTypeInBatch(@Param("typeId") Long typeId, Pageable pageable);
+
+  @Query("select p from Product p where p.seller.id = :sellerId ")
+  List<Product> findAllBySeller(@Param("sellerId") Long sellerId);
 }

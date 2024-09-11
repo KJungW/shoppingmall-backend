@@ -2,6 +2,7 @@ package com.project.shoppingmall.service.product;
 
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.repository.ProductRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,5 +33,9 @@ public class ProductFindService {
     } else {
       return Optional.empty();
     }
+  }
+
+  public List<Product> findAllBySeller(long sellerId) {
+    return productRepository.findAllBySeller(sellerId);
   }
 }

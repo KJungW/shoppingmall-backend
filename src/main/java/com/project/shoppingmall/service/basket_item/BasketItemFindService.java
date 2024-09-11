@@ -20,4 +20,8 @@ public class BasketItemFindService {
   public List<BasketItem> findAllByProduct(long productId) {
     return basketItemRepository.findAllByProduct(productId);
   }
+
+  public List<BasketItem> findAllByMember(long memberId) {
+    return basketItemRepository.findAllByMember(memberId);
+  }
 }
