@@ -5,6 +5,7 @@ import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberFindService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
@@ -26,6 +27,7 @@ public class RefundService {
   private final RefundRepository refundRepository;
   private final RefundFindService refundFindService;
   private final MemberFindService memberFindService;
+  private final PurchaseItemFindService purchaseItemFindService;
   private final PurchaseItemService purchaseItemService;
   private final IamportClient iamportClient;
   private final AlarmService alarmService;
@@ -41,7 +43,7 @@ public class RefundService {
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 회원이 존재하지 않습니다."));
     PurchaseItem purchaseItem =
-        purchaseItemService
+        purchaseItemFindService
             .findByIdWithPurchaseAndRefund(purchaseItemId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 구매아이템이 존재하지 않습니다."));
 

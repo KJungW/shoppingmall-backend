@@ -10,7 +10,7 @@ import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
 import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
@@ -34,7 +34,7 @@ public class ProductDeleteService {
   private final ReviewDeleteService reviewDeleteService;
   private final ReportFindService reportFindService;
   private final ReportDeleteService reportDeleteService;
-  private final PurchaseItemService purchaseItemService;
+  private final PurchaseItemFindService purchaseItemFindService;
   private final AlarmFindService alarmFindService;
   private final AlarmDeleteService alarmDeleteService;
 
@@ -72,7 +72,7 @@ public class ProductDeleteService {
       throw new DataNotFound("다른 회원의 Product를 제거하려고 하고 있습니다.");
 
     List<PurchaseItem> latestPurchaseList =
-        purchaseItemService.findLatestByProduct(product.getId(), 1);
+        purchaseItemFindService.findLatestByProduct(product.getId(), 1);
     if (latestPurchaseList != null && !latestPurchaseList.isEmpty()) {
       PurchaseItem lastestPurchaseItem = latestPurchaseList.get(0);
       if (lastestPurchaseItem

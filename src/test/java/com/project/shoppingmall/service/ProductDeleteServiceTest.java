@@ -14,7 +14,7 @@ import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemFindService;
 import com.project.shoppingmall.service.product.ProductDeleteService;
 import com.project.shoppingmall.service.product.ProductFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
@@ -41,7 +41,7 @@ class ProductDeleteServiceTest {
   private ReviewDeleteService mockReviewDeleteService;
   private ReportFindService mockReportFindService;
   private ReportDeleteService mockReportDeleteService;
-  private PurchaseItemService mockPurchaseItemService;
+  private PurchaseItemFindService mockPurchaseItemFindService;
   private AlarmFindService mockAlarmFindService;
   private AlarmDeleteService mockAlarmDeleteService;
 
@@ -55,7 +55,7 @@ class ProductDeleteServiceTest {
     mockReviewDeleteService = mock(ReviewDeleteService.class);
     mockReportFindService = mock(ReportFindService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
-    mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     mockAlarmFindService = mock(AlarmFindService.class);
     mockAlarmDeleteService = mock(AlarmDeleteService.class);
 
@@ -69,7 +69,7 @@ class ProductDeleteServiceTest {
             mockReviewDeleteService,
             mockReportFindService,
             mockReportDeleteService,
-            mockPurchaseItemService,
+            mockPurchaseItemFindService,
             mockAlarmFindService,
             mockAlarmDeleteService);
 
@@ -92,7 +92,7 @@ class ProductDeleteServiceTest {
         .thenReturn(Optional.of(givenProduct));
 
     // - purchaseItemService.findLatestByProduct() 세팅
-    when(mockPurchaseItemService.findLatestByProduct(anyLong(), anyInt()))
+    when(mockPurchaseItemFindService.findLatestByProduct(anyLong(), anyInt()))
         .thenReturn(new ArrayList<>());
 
     // - basketItemService.findAllByProduct() 세팅
@@ -203,7 +203,7 @@ class ProductDeleteServiceTest {
     ReflectionTestUtils.setField(
         givenPurchaseItem, "createDate", LocalDateTime.now().minusDays(10));
     List<PurchaseItem> givenPurchaseItemList = new ArrayList<>(List.of(givenPurchaseItem));
-    when(mockPurchaseItemService.findLatestByProduct(anyLong(), anyInt()))
+    when(mockPurchaseItemFindService.findLatestByProduct(anyLong(), anyInt()))
         .thenReturn(givenPurchaseItemList);
 
     // when

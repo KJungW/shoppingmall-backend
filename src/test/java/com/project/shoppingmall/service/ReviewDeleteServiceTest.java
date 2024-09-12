@@ -15,7 +15,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
@@ -36,7 +36,7 @@ class ReviewDeleteServiceTest {
   private ReviewDeleteService target;
   private ReviewService mockReviewService;
   private ReviewRepository mockReviewRepository;
-  private PurchaseItemService mockPurchaseItemService;
+  private PurchaseItemFindService mockPurchaseItemFindService;
   private ReportFindService mockReportFindService;
   private ReportDeleteService mockReportDeleteService;
   private AlarmFindService mockAlarmFindService;
@@ -47,7 +47,7 @@ class ReviewDeleteServiceTest {
   public void beforeEach() {
     mockReviewService = mock(ReviewService.class);
     mockReviewRepository = mock(ReviewRepository.class);
-    mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     mockReportFindService = mock(ReportFindService.class);
     mockReportDeleteService = mock(ReportDeleteService.class);
     mockAlarmFindService = mock(AlarmFindService.class);
@@ -57,7 +57,7 @@ class ReviewDeleteServiceTest {
         new ReviewDeleteService(
             mockReviewService,
             mockReviewRepository,
-            mockPurchaseItemService,
+            mockPurchaseItemFindService,
             mockReportFindService,
             mockReportDeleteService,
             mockAlarmFindService,
@@ -86,7 +86,7 @@ class ReviewDeleteServiceTest {
 
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "review", givenReview);
-    when(mockPurchaseItemService.findByReviewId(anyLong()))
+    when(mockPurchaseItemFindService.findByReviewId(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // - reportService.findAllByReview() 세팅
@@ -158,7 +158,7 @@ class ReviewDeleteServiceTest {
 
     PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
     ReflectionTestUtils.setField(givenPurchaseItem, "review", givenReview);
-    when(mockPurchaseItemService.findByReviewId(anyLong()))
+    when(mockPurchaseItemFindService.findByReviewId(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // when

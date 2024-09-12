@@ -11,7 +11,7 @@ import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.alarm.AlarmDeleteService;
 import com.project.shoppingmall.service.alarm.AlarmFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReviewDeleteService {
   private final ReviewService reviewService;
   private final ReviewRepository reviewRepository;
-  private final PurchaseItemService purchaseItemService;
+  private final PurchaseItemFindService purchaseItemFindService;
   private final ReportFindService reportFindService;
   private final ReportDeleteService reportDeleteService;
   private final AlarmFindService alarmFindService;
@@ -43,7 +43,7 @@ public class ReviewDeleteService {
     alarmDeleteService.deleteAlarmList(alarmList);
 
     PurchaseItem purchaseItem =
-        purchaseItemService
+        purchaseItemFindService
             .findByReviewId(review.getId())
             .orElseThrow(() -> new ServerLogicError("PurchaseItem과 연결되지 않은 Review가 발견되었습니다."));
     purchaseItem.deleteReview();
@@ -66,7 +66,7 @@ public class ReviewDeleteService {
 
   public void deleteReviewByWriter(Long writerId, Long reviewId) {
     PurchaseItem purchaseItem =
-        purchaseItemService
+        purchaseItemFindService
             .findByReviewId(reviewId)
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 리뷰가 존재하지 않습니다."));
     Review review = purchaseItem.getReview();

@@ -9,7 +9,7 @@ import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.refund.RefundRetrieveService;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.PurchaseBuilder;
@@ -31,18 +31,18 @@ class RefundRetrieveServiceTest {
   private RefundRetrieveService target;
   private RefundRetrieveRepository mockRefundRetrieveRepository;
   private MemberFindService mockMemberFindService;
-  private PurchaseItemService mockPurchaseItemService;
+  private PurchaseItemFindService mockPurchaseItemFindService;
   private static MockedStatic<JsonUtil> jsonUtil;
 
   @BeforeEach
   public void beforeEach() {
     mockRefundRetrieveRepository = mock(RefundRetrieveRepository.class);
     mockMemberFindService = mock(MemberFindService.class);
-    mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     jsonUtil = mockStatic(JsonUtil.class);
     target =
         new RefundRetrieveService(
-            mockRefundRetrieveRepository, mockMemberFindService, mockPurchaseItemService);
+            mockRefundRetrieveRepository, mockMemberFindService, mockPurchaseItemFindService);
   }
 
   @AfterEach
@@ -70,7 +70,8 @@ class RefundRetrieveServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
     ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅
     long givenSellerId = 40L;
@@ -121,7 +122,8 @@ class RefundRetrieveServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
     ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅
     ProductDataForPurchase mockProductData = mock(ProductDataForPurchase.class);
@@ -171,7 +173,8 @@ class RefundRetrieveServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
     ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
     ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - JsonUtil.convertJsonToObject() 세팅
     long givenSellerId = 70L;

@@ -16,7 +16,7 @@ import com.project.shoppingmall.repository.ReviewBulkRepository;
 import com.project.shoppingmall.repository.ReviewRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
-import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
@@ -38,7 +38,7 @@ class ReviewServiceTest {
   private ReviewRepository mockReviewRepository;
   private ReviewFindService mockReviewFindService;
   private ReviewBulkRepository mockReviewBulkRepository;
-  private PurchaseItemService mockPurchaseItemService;
+  private PurchaseItemFindService mockPurchaseItemFindService;
   private ProductFindService mockProductFindService;
   private MemberFindService mockMemberFindService;
   private S3Service mockS3Service;
@@ -48,7 +48,7 @@ class ReviewServiceTest {
     mockReviewRepository = mock(ReviewRepository.class);
     mockReviewFindService = mock(ReviewFindService.class);
     mockReviewBulkRepository = mock(ReviewBulkRepository.class);
-    mockPurchaseItemService = mock(PurchaseItemService.class);
+    mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     mockProductFindService = mock(ProductFindService.class);
     mockMemberFindService = mock(MemberFindService.class);
     mockS3Service = mock(S3Service.class);
@@ -57,7 +57,7 @@ class ReviewServiceTest {
             mockReviewRepository,
             mockReviewFindService,
             mockReviewBulkRepository,
-            mockPurchaseItemService,
+            mockPurchaseItemFindService,
             mockProductFindService,
             mockMemberFindService,
             mockS3Service);
@@ -103,7 +103,8 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
@@ -194,7 +195,8 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
@@ -267,7 +269,8 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
@@ -312,7 +315,8 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", ReviewBuilder.fullData().build());
 
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
@@ -357,7 +361,8 @@ class ReviewServiceTest {
     ReflectionTestUtils.setField(givenPurchaseItem, "productId", givenProductId);
     ReflectionTestUtils.setField(givenPurchaseItem, "review", null);
 
-    when(mockPurchaseItemService.findById(anyLong())).thenReturn(Optional.of(givenPurchaseItem));
+    when(mockPurchaseItemFindService.findById(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
 
     // - productService.findById() 세팅
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.empty());

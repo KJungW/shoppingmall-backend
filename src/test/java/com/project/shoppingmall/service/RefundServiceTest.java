@@ -11,6 +11,7 @@ import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.RefundRepository;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.member.MemberFindService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.refund.RefundService;
@@ -40,6 +41,7 @@ class RefundServiceTest {
   private RefundRepository mockRefundRepository;
   private RefundFindService mockRefundFindService;
   private MemberFindService mockMemberFindService;
+  private PurchaseItemFindService mockPurchaseItemFindService;
   private PurchaseItemService mockPurchaseItemService;
   private IamportClient mockIamportClient;
   private AlarmService mockAlarmService;
@@ -50,6 +52,7 @@ class RefundServiceTest {
     mockRefundRepository = mock(RefundRepository.class);
     mockRefundFindService = mock(RefundFindService.class);
     mockMemberFindService = mock(MemberFindService.class);
+    mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     mockPurchaseItemService = mock(PurchaseItemService.class);
     mockIamportClient = mock(IamportClient.class);
     mockAlarmService = mock(AlarmService.class);
@@ -58,6 +61,7 @@ class RefundServiceTest {
             mockRefundRepository,
             mockRefundFindService,
             mockMemberFindService,
+            mockPurchaseItemFindService,
             mockPurchaseItemService,
             mockIamportClient,
             mockAlarmService);
@@ -96,7 +100,7 @@ class RefundServiceTest {
         givenPurchaseItem,
         "createDate",
         LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
-    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+    when(mockPurchaseItemFindService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // - purchaseItemService.refundIsPossible() 세팅
@@ -161,7 +165,7 @@ class RefundServiceTest {
         givenPurchaseItem,
         "createDate",
         LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
-    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+    when(mockPurchaseItemFindService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // when
@@ -201,7 +205,7 @@ class RefundServiceTest {
         givenPurchaseItem,
         "createDate",
         LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
-    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+    when(mockPurchaseItemFindService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // when
@@ -240,7 +244,7 @@ class RefundServiceTest {
         givenPurchaseItem,
         "createDate",
         LocalDateTime.now().minusDays(givenRefundPossibleDate - 1));
-    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+    when(mockPurchaseItemFindService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // - purchaseItemService.refundIsPossible() 세팅
@@ -282,7 +286,7 @@ class RefundServiceTest {
         givenPurchaseItem,
         "createDate",
         LocalDateTime.now().minusDays(givenRefundPossibleDate + 1));
-    when(mockPurchaseItemService.findByIdWithPurchaseAndRefund(any()))
+    when(mockPurchaseItemFindService.findByIdWithPurchaseAndRefund(any()))
         .thenReturn(Optional.of(givenPurchaseItem));
 
     // - purchaseItemService.refundIsPossible() 세팅
