@@ -33,4 +33,12 @@ public class PurchaseItemFindService {
         PageRequest.of(0, queryPurchaseItemCount, Sort.by(Sort.Direction.DESC, "createDate"));
     return purchaseItemRepository.findLatestByProduct(productId, pageRequest).getContent();
   }
+
+  public Optional<PurchaseItem> findLatestBySeller(long sellerId) {
+    PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createDate"));
+    List<PurchaseItem> sliceResult =
+        purchaseItemRepository.findLatestBySeller(sellerId, pageRequest).getContent();
+    if (sliceResult.isEmpty()) return Optional.empty();
+    else return Optional.of(sliceResult.get(0));
+  }
 }

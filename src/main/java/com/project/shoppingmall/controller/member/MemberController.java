@@ -1,6 +1,5 @@
 package com.project.shoppingmall.controller.member;
 
-import com.project.shoppingmall.controller.member.input.InputDeleteMember;
 import com.project.shoppingmall.controller.member.input.InputLoginByEmail;
 import com.project.shoppingmall.controller.member.input.InputRequestSignup;
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
@@ -117,9 +116,9 @@ public class MemberController {
 
   @DeleteMapping
   @PreAuthorize("hasRole('ROLE_MEMBER')")
-  public void deleteMember(@Valid @RequestBody InputDeleteMember input) {
+  public void deleteMember() {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    memberDeleteService.deleteMemberInController(userDetail.getId(), input.getPassword());
+    memberDeleteService.deleteMemberInController(userDetail.getId());
   }
 }

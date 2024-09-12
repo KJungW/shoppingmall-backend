@@ -17,8 +17,11 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
 
   @Query(
       "select p from PurchaseItem p " + "left join fetch p.review r " + "where r.id = :reviewId ")
-  Optional<PurchaseItem> findByReviewId(long reviewId);
+  Optional<PurchaseItem> findByReviewId(@Param("reviewId") long reviewId);
 
   @Query("select pi from PurchaseItem pi where pi.productId = :productId")
-  Slice<PurchaseItem> findLatestByProduct(long productId, Pageable pageable);
+  Slice<PurchaseItem> findLatestByProduct(@Param("productId") long productId, Pageable pageable);
+
+  @Query("select pi from PurchaseItem pi where pi.sellerId = :sellerId")
+  Slice<PurchaseItem> findLatestBySeller(@Param("sellerId") long sellerId, Pageable pageable);
 }

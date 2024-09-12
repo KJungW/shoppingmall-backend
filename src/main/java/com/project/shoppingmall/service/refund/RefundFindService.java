@@ -2,6 +2,7 @@ package com.project.shoppingmall.service.refund;
 
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.repository.RefundRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,5 +16,9 @@ public class RefundFindService {
 
   public Optional<Refund> findByIdWithPurchaseItemProduct(long refundId) {
     return refundRepository.findByIdWithPurchaseItemProduct(refundId);
+  }
+
+  public List<Refund> findAllProcessingStateRefundBySeller(long sellerID) {
+    return refundRepository.findAllProcessingStateRefundBySeller(sellerID);
   }
 }

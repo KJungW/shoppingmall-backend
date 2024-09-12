@@ -3,7 +3,8 @@ package com.project.shoppingmall.service.member;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.exception.CannotDeleteMemberByPassword;
+import com.project.shoppingmall.exception.CannotDeleteMemberByRefund;
+import com.project.shoppingmall.exception.CannotDeleteMemberBySellingRecord;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.MemberRepository;
 import com.project.shoppingmall.service.alarm.AlarmDeleteService;
@@ -14,13 +15,17 @@ import com.project.shoppingmall.service.chat_room.ChatRoomDeleteService;
 import com.project.shoppingmall.service.chat_room.ChatRoomFindService;
 import com.project.shoppingmall.service.product.ProductDeleteService;
 import com.project.shoppingmall.service.product.ProductFindService;
+import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
+import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
-import com.project.shoppingmall.util.PasswordEncoderUtil;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +47,11 @@ public class MemberDeleteService {
   private final ReviewDeleteService reviewDeleteService;
   private final ChatRoomFindService chatRoomFindService;
   private final ChatRoomDeleteService chatRoomDeleteService;
+  private final PurchaseItemFindService purchaseItemFindService;
+  private final RefundFindService refundFindService;
+
+  @Value("${project_role.refund.create_possible_day}")
+  public Integer refundPossibleDay;
 
   public void deleteMember(Member member) {
     // 해당 회원의 신고 삭제
@@ -78,13 +88,27 @@ public class MemberDeleteService {
     memberRepository.delete(member);
   }
 
-  public void deleteMemberInController(long memberId, String password) {
+  public void deleteMemberInController(long memberId) {
     Member member =
         memberFindService
             .findById(memberId)
             .orElseThrow(() -> new DataNotFound("id에 해당하는 회원이 존재하지 않습니다."));
-    if (!PasswordEncoderUtil.checkPassword(password, member.getPassword()))
-      throw new CannotDeleteMemberByPassword("회원의 비밀번호가 맞지 않습니다.");
+
+    Optional<PurchaseItem> latestPurchaseItem =
+        purchaseItemFindService.findLatestBySeller(member.getId());
+    if (latestPurchaseItem.isPresent())
+      if (latestPurchaseItem
+          .get()
+          .getCreateDate()
+          .isAfter(LocalDateTime.now().minusDays(refundPossibleDay)))
+        throw new CannotDeleteMemberBySellingRecord(
+            refundPossibleDay + "일 이내에 판매기록이 존재하기 때문에 회원을 삭제할 수 없습니다.");
+
+    List<Refund> processingRefundState =
+        refundFindService.findAllProcessingStateRefundBySeller(member.getId());
+    if (!processingRefundState.isEmpty())
+      throw new CannotDeleteMemberByRefund("아직 처리가 진행중인 환불요청이 존재하기 때문에 회원을 삭제할 수 없습니다.");
+
     deleteMember(member);
   }
 }

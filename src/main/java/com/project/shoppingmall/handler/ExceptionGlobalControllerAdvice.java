@@ -227,4 +227,16 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotDeleteMemberByPasswordHandler(CannotDeleteMemberByPassword e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "비밀번호가 맞지 않아 회원탈퇴를 진행할 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotDeleteMemberBySellingRecord.class)
+  public ErrorResult CannotDeleteMemberBySellingRecordHandler(CannotDeleteMemberBySellingRecord e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "환불요청 기간이 남은 판매기록이 존재하기 때문에 회원탈퇴를 진행할 수 없습니다.");
+  }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotDeleteMemberByRefund.class)
+  public ErrorResult CannotDeleteMemberByRefundHandler(CannotDeleteMemberByRefund e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "아직 처리되지 않은 환불요청이 존재하기 때문에 회원탈퇴를 진행할 수 없습니다.");
+  }
 }
