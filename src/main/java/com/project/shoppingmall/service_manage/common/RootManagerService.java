@@ -4,6 +4,8 @@ import com.project.shoppingmall.dto.manager.MakeManagerResult;
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.final_value.CacheTemplate;
+import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.repository.ManagerRepository;
 import com.project.shoppingmall.type.ManagerRoleType;
 import java.util.Optional;
@@ -17,15 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RootManagerService {
   private final ManagerRepository managerRepository;
+  private final CacheRepository cacheRepository;
 
   @Transactional
   public MakeManagerResult makeManager(long rootManagerId) {
     Manager rootManager =
         findRootManager().orElseThrow(() -> new ServerLogicError("현재 서버에 루트 관리자 계정이 존재하지 않습니다."));
-
     if (rootManager.getRole() != ManagerRoleType.ROLE_ROOT_MANAGER)
       throw new ServerLogicError("루트 관리자 계정이 아닌 일반 관리자 계정이 조회되었습니다.");
-
     if (!rootManager.getId().equals(rootManagerId)) {
       throw new DataNotFound("올바르지 않은 루트 관리자계정 ID가 입력되었습니다.");
     }
@@ -46,5 +47,19 @@ public class RootManagerService {
 
   public Optional<Manager> findRootManager() {
     return managerRepository.findRootManger();
+  }
+
+  public void onOffManagerMode(long rootManagerId, boolean isOn) {
+    Manager rootManager =
+        findRootManager().orElseThrow(() -> new ServerLogicError("현재 서버에 루트 관리자 계정이 존재하지 않습니다."));
+    if (rootManager.getRole() != ManagerRoleType.ROLE_ROOT_MANAGER)
+      throw new ServerLogicError("루트 관리자 계정이 아닌 일반 관리자 계정이 조회되었습니다.");
+    if (!rootManager.getId().equals(rootManagerId)) {
+      throw new DataNotFound("올바르지 않은 루트 관리자계정 ID가 입력되었습니다.");
+    }
+
+    if (isOn)
+      cacheRepository.saveCache(CacheTemplate.makeManagerModeStatusCacheKey(), "on", 259200L);
+    else cacheRepository.removeCache(CacheTemplate.makeManagerModeStatusCacheKey());
   }
 }

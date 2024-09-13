@@ -1,6 +1,7 @@
 package com.project.shoppingmall.config;
 
 import com.project.shoppingmall.filter.JwtFilter;
+import com.project.shoppingmall.filter.ManagerModeFilter;
 import com.project.shoppingmall.handler.auth.AuthorizationFailureHandler;
 import com.project.shoppingmall.handler.oauth2.OAuth2FailureHandler;
 import com.project.shoppingmall.handler.oauth2.OAuth2SuccessHandler;
@@ -30,6 +31,7 @@ public class SecurityConfig {
   private final AuthenticationEntryPoint authenticationFailureHandler;
   private final AuthorizationFailureHandler authorizationFailureHandler;
   private final JwtFilter jwtFilter;
+  private final ManagerModeFilter managerModeFilter;
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,6 +42,7 @@ public class SecurityConfig {
     http.httpBasic(AbstractHttpConfigurer::disable);
 
     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(managerModeFilter, JwtFilter.class);
 
     http.oauth2Login(
         (oauth2) ->

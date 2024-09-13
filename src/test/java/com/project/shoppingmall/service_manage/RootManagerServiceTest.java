@@ -7,6 +7,7 @@ import com.project.shoppingmall.dto.manager.MakeManagerResult;
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.ServerLogicError;
+import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.repository.ManagerRepository;
 import com.project.shoppingmall.service_manage.common.RootManagerService;
 import com.project.shoppingmall.testdata.ManagerBuilder;
@@ -21,11 +22,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 class RootManagerServiceTest {
   private RootManagerService target;
   private ManagerRepository mockManagerRepository;
+  private CacheRepository mockCacheRepository;
 
   @BeforeEach
   public void beforeEach() {
     this.mockManagerRepository = mock(ManagerRepository.class);
-    this.target = new RootManagerService(mockManagerRepository);
+    this.mockCacheRepository = mock(CacheRepository.class);
+    this.target = new RootManagerService(mockManagerRepository, mockCacheRepository);
   }
 
   @Test
