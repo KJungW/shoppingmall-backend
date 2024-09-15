@@ -28,6 +28,15 @@ public class ChatMessagingPreProcessInterceptor implements ChannelInterceptor {
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
     StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
+    boolean isManagerModeOn =
+        cacheRepository.getCache(CacheTemplate.makeManagerModeStatusCacheKey()).isPresent();
+    if (isManagerModeOn) {
+      ErrorResult errorResult =
+          new ErrorResult(ErrorCode.BAD_INPUT, "현재 서버는 점검중입니다. 잠시후 다시 이용해주세요.");
+      String errorResultJson = JsonUtil.convertObjectToJson(errorResult);
+      throw new IncorrectChatDataInput(errorResultJson);
+    }
+
     try {
       switch (accessor.getMessageType()) {
         case SUBSCRIBE -> {
