@@ -2,10 +2,7 @@ package com.project.shoppingmall.service.basket_item;
 
 import com.project.shoppingmall.dto.basket.*;
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.exception.AddBannedProductInBasket;
-import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
-import com.project.shoppingmall.exception.CannotSaveBasketItemBecauseMemberBan;
-import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
@@ -43,6 +40,8 @@ public class BasketItemService {
     if (product.getIsBan()) throw new AddBannedProductInBasket("벤처리된 제품을 장바구니에 넣으려고 시도하고 있습니다.");
     if (product.getSaleState().equals(ProductSaleType.DISCONTINUED))
       throw new AddDiscontinuedProductInBasket("판매중단된 제품을 장바구니에 넣으려고 시도하고 있습니다.");
+    if (product.getSeller().getId().equals(member.getId()))
+      throw new CannotSaveBasketItemByOwnProduct("자신이 등록한 제품을 장바구니에 넣을 수 없습니다.");
     validateSingleOption(basketItemMakeData.getSingleOptionId(), product);
     validateMultiOption(basketItemMakeData.getMultipleOptionId(), product);
 

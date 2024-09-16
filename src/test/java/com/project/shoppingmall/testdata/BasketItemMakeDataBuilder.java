@@ -20,4 +20,18 @@ public class BasketItemMakeDataBuilder {
         .singleOptionId(givenSingleOption)
         .multipleOptionId(givenMultipleOptionId);
   }
+
+  public static BasketItemMakeData makeBasketItem(
+      long givenOwnerId, long givenProductId, long singleOptionId, List<Long> multiOptionIds) {
+    return BasketItemMakeData.builder()
+        .memberId(givenOwnerId)
+        .productId(givenProductId)
+        .singleOptionId(singleOptionId)
+        .multipleOptionId(multiOptionIds)
+        .build();
+  }
+
+  public static BasketItemMakeData makeBasketItem(long givenOwnerId, long givenProductId) {
+    return BasketItemMakeData.builder().memberId(givenOwnerId).productId(givenProductId).build();
+  }
 }

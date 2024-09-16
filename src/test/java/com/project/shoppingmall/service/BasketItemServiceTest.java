@@ -9,15 +9,13 @@ import com.project.shoppingmall.dto.basket.BasketItemPriceCalcResult;
 import com.project.shoppingmall.dto.basket.ProductOptionObjForBasket;
 import com.project.shoppingmall.dto.product.ProductOptionDto;
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.exception.AddBannedProductInBasket;
-import com.project.shoppingmall.exception.AddDiscontinuedProductInBasket;
-import com.project.shoppingmall.exception.CannotSaveBasketItemBecauseMemberBan;
-import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.*;
 import com.project.shoppingmall.repository.BasketItemRepository;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
@@ -46,640 +44,538 @@ class BasketItemServiceTest {
 
   @Test
   @DisplayName("saveBasketItem() : 정상흐름")
-  public void saveBasketItem_ok() throws IOException {
+  public void saveBasketItem_ok() {
     // given
-    Long givenMemberId = 62L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(15L, 25L));
 
-    ArrayList<ProductSingleOption> givenSingleOption =
-        new ArrayList<>(
-            Arrays.asList(
-                ProductSingleOptionBuilder.fullData().build(),
-                ProductSingleOptionBuilder.fullData().build()));
-    ArrayList<ProductMultipleOption> givenMultiOption =
-        new ArrayList<>(
-            Arrays.asList(
-                ProductMultiOptionBuilder.fullData().build(),
-                ProductMultiOptionBuilder.fullData().build(),
-                ProductMultiOptionBuilder.fullData().build()));
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .singleOptions(givenSingleOption)
-            .multipleOptions(givenMultiOption)
-            .build();
-    Long givenProductId = 30L;
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
-    Long givenSingleOptionId = 3L;
-    ReflectionTestUtils.setField(givenProduct.getSingleOptions().get(0), "id", givenSingleOptionId);
-    ReflectionTestUtils.setField(givenProduct.getSingleOptions().get(1), "id", 4L);
-    List<Long> givenMultiOptionId = new ArrayList<>(Arrays.asList(10L, 20L, 30L));
-    ReflectionTestUtils.setField(
-        givenProduct.getMultipleOptions().get(0), "id", givenMultiOptionId.get(0));
-    ReflectionTestUtils.setField(
-        givenProduct.getMultipleOptions().get(1), "id", givenMultiOptionId.get(1));
-    ReflectionTestUtils.setField(
-        givenProduct.getMultipleOptions().get(2), "id", givenMultiOptionId.get(2));
+        setProduct(
+            inputMakeData.getProductId(), 50L, List.of(10L, 20L, 30L), List.of(15L, 25L, 35L));
 
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(givenMemberId)
-            .productId(givenProductId)
-            .singleOptionId(givenSingleOptionId)
-            .multipleOptionId(givenMultiOptionId)
-            .build();
-
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
     // when
-    BasketItem result = target.saveBasketItem(givenMakeData);
+    BasketItem resultBasketItem = target.saveBasketItem(inputMakeData);
 
     // then
-    assertEquals(givenMakeData.getMemberId(), result.getMember().getId());
-    assertEquals(givenMakeData.getProductId(), result.getProduct().getId());
-    ProductOptionObjForBasket optionInResult =
-        JsonUtil.convertJsonToObject(result.getOptions(), ProductOptionObjForBasket.class);
-    assertEquals(givenMakeData.getSingleOptionId(), optionInResult.getSingleOptionId());
-    assertArrayEquals(
-        givenMakeData.getMultipleOptionId().toArray(),
-        optionInResult.getMultipleOptionId().toArray());
+    check_basketItem(inputMakeData, resultBasketItem);
   }
 
   @Test
-  @DisplayName("saveBasketItem() : 벤처리된 제품을 장바구니에 넣으려고 시도")
-  public void saveBasketItem_BannedMember() throws IOException {
+  @DisplayName("saveBasketItem() : 벤처리된 회원이 장바구니 아이템을 생성하려고 시도")
+  public void saveBasketItem_bannedMember() {
     // given
-    Long givenMemberId = 62L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    ReflectionTestUtils.setField(givenMember, "isBan", true);
-    Long givenProductId = 30L;
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(15L, 25L));
 
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(givenMemberId)
-            .productId(givenProductId)
-            .singleOptionId(null)
-            .multipleOptionId(null)
-            .build();
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    ReflectionTestUtils.setField(givenMember, "isBan", true);
+    Product givenProduct = setProduct(inputMakeData.getProductId(), 50L);
+
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
-    // when
+    // when then
     assertThrows(
-        CannotSaveBasketItemBecauseMemberBan.class, () -> target.saveBasketItem(givenMakeData));
+        CannotSaveBasketItemBecauseMemberBan.class, () -> target.saveBasketItem(inputMakeData));
   }
 
   @Test
   @DisplayName("saveBasketItem() : 벤처리된 제품을 장바구니에 넣으려고 시도")
-  public void saveBasketItem_BannedProduct() throws IOException {
+  public void saveBasketItem_bannedProduct() {
     // given
-    Long givenMemberId = 62L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    Long givenProductId = 30L;
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(15L, 25L));
+
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct = setProduct(inputMakeData.getProductId(), 50L);
     ReflectionTestUtils.setField(givenProduct, "isBan", true);
 
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(givenMemberId)
-            .productId(givenProductId)
-            .singleOptionId(null)
-            .multipleOptionId(null)
-            .build();
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
 
-    // when
-    assertThrows(AddBannedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
+    // when then
+    assertThrows(AddBannedProductInBasket.class, () -> target.saveBasketItem(inputMakeData));
   }
 
   @Test
   @DisplayName("saveBasketItem() : 판매중단된 제품을 장바구니에 넣으려고 시도")
-  public void saveBasketItem_DiscontinuedProduct() throws IOException {
+  public void saveBasketItem_discontinuedProduct() {
     // given
-    Long givenMemberId = 62L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    Long givenProductId = 30L;
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(15L, 25L));
+
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct =
+        setProduct(
+            inputMakeData.getProductId(), 50L, List.of(10L, 20L, 30L), List.of(15L, 25L, 35L));
     ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.DISCONTINUED);
 
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(givenMemberId)
-            .productId(givenProductId)
-            .singleOptionId(null)
-            .multipleOptionId(null)
-            .build();
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
-
-    // when
-    assertThrows(AddDiscontinuedProductInBasket.class, () -> target.saveBasketItem(givenMakeData));
+    // when then
+    assertThrows(AddDiscontinuedProductInBasket.class, () -> target.saveBasketItem(inputMakeData));
   }
 
   @Test
   @DisplayName("saveBasketItem() : 제품에 대한 옵션 선택을 하지 않았을 경우")
-  public void saveBasketItem_NoOption() throws IOException {
+  public void saveBasketItem_noOption() {
     // given
-    Long givenMemberId = 62L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-    Long givenProductId = 30L;
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L);
 
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(givenMemberId)
-            .productId(givenProductId)
-            .singleOptionId(null)
-            .multipleOptionId(null)
-            .build();
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct =
+        setProduct(
+            inputMakeData.getProductId(), 50L, List.of(10L, 20L, 30L), List.of(15L, 25L, 35L));
 
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
     // when
-    BasketItem result = target.saveBasketItem(givenMakeData);
+    BasketItem resultBasketItem = target.saveBasketItem(inputMakeData);
 
     // then
-    assertEquals(givenMakeData.getMemberId(), result.getMember().getId());
-    assertEquals(givenMakeData.getProductId(), result.getProduct().getId());
-    ProductOptionObjForBasket optionInResult =
-        JsonUtil.convertJsonToObject(result.getOptions(), ProductOptionObjForBasket.class);
-    assertNull(optionInResult.getSingleOptionId());
-    assertEquals(0, optionInResult.getMultipleOptionId().size());
+    check_basketItem_noOption(inputMakeData, resultBasketItem);
   }
 
   @Test
   @DisplayName("saveBasketItem() : 제품에 대한 단일옵션이 유효하지 않은 경우")
-  public void saveBasketItem_InvalidSingleOption() throws IOException {
-    Member givenMember = MemberBuilder.fullData().build();
-    ArrayList<ProductSingleOption> givenSingleOption =
-        new ArrayList<>(
-            Arrays.asList(
-                ProductSingleOptionBuilder.fullData().build(),
-                ProductSingleOptionBuilder.fullData().build()));
-    Product givenProduct = ProductBuilder.fullData().singleOptions(givenSingleOption).build();
-    ReflectionTestUtils.setField(givenProduct.getSingleOptions().get(0), "id", 1L);
-    ReflectionTestUtils.setField(givenProduct.getSingleOptions().get(1), "id", 2L);
+  public void saveBasketItem_incorrectSingleOption() {
+    // given
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 1000L, List.of(15L));
 
-    Long givenWrongSingleOptionId = 10L;
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(1L)
-            .productId(2L)
-            .singleOptionId(givenWrongSingleOptionId)
-            .multipleOptionId(new ArrayList<>(Arrays.asList(1L, 2L)))
-            .build();
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct =
+        setProduct(
+            inputMakeData.getProductId(), 50L, List.of(10L, 20L, 30L), List.of(15L, 25L, 35L));
 
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
-    assertThrows(DataNotFound.class, () -> target.saveBasketItem(givenMakeData));
+    // when then
+    assertThrows(DataNotFound.class, () -> target.saveBasketItem(inputMakeData));
   }
 
   @Test
   @DisplayName("saveBasketItem() : 제품에 대한 다중 옵션이 유효하지 않은 경우")
-  public void saveBasketItem_InvalidMultiOption() throws IOException {
-    Member givenMember = MemberBuilder.fullData().build();
-    ArrayList<ProductMultipleOption> givenMultiOption =
-        new ArrayList<>(
-            Arrays.asList(
-                ProductMultiOptionBuilder.fullData().build(),
-                ProductMultiOptionBuilder.fullData().build(),
-                ProductMultiOptionBuilder.fullData().build()));
-    Product givenProduct = ProductBuilder.fullData().multipleOptions(givenMultiOption).build();
-    ReflectionTestUtils.setField(givenProduct.getSingleOptions().get(0), "id", 1L);
-    ReflectionTestUtils.setField(givenProduct.getMultipleOptions().get(0), "id", 1L);
-    ReflectionTestUtils.setField(givenProduct.getMultipleOptions().get(1), "id", 2L);
-    ReflectionTestUtils.setField(givenProduct.getMultipleOptions().get(2), "id", 3L);
+  public void saveBasketItem_incorrectMultiOption() {
+    // given
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(1000L));
 
-    List<Long> givenWrongMultiOptionId = new ArrayList<>(Arrays.asList(10L, 20L));
-    BasketItemMakeData givenMakeData =
-        BasketItemMakeDataBuilder.fullData()
-            .memberId(1L)
-            .productId(2L)
-            .singleOptionId(1L)
-            .multipleOptionId(givenWrongMultiOptionId)
-            .build();
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct =
+        setProduct(
+            inputMakeData.getProductId(), 50L, List.of(10L, 20L, 30L), List.of(15L, 25L, 35L));
 
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
-    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
 
-    assertThrows(DataNotFound.class, () -> target.saveBasketItem(givenMakeData));
+    // when then
+    assertThrows(DataNotFound.class, () -> target.saveBasketItem(inputMakeData));
+  }
+
+  @Test
+  @DisplayName("saveBasketItem() : 자기자신의 제품을 장바구니 아이템을 넣으려는 경우")
+  public void saveBasketItem_byProductSeller() {
+    // given
+    BasketItemMakeData inputMakeData = setBasketItemMakeData(20L, 40L, 10L, List.of(1000L));
+
+    Member givenMember = MemberBuilder.makeMember(inputMakeData.getMemberId(), LoginType.NAVER);
+    Product givenProduct =
+        setProduct(
+            inputMakeData.getProductId(),
+            inputMakeData.getMemberId(),
+            List.of(10L, 20L, 30L),
+            List.of(15L, 25L, 35L));
+
+    set_memberFindService_findById(givenMember);
+    set_productFindService_findById(givenProduct);
+
+    // when then
+    assertThrows(
+        CannotSaveBasketItemByOwnProduct.class, () -> target.saveBasketItem(inputMakeData));
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 단일옵션과 다중옵션이 모두 유효할때")
-  public void calculateBasketItemPrice_ok() throws IOException {
+  public void calculateBasketItemPrice_ok() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    Long rightSingleOptionId = 10L;
-    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(rightSingleOptionId, rightMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10L, List.of(15L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
-            + givenOptionPrice
-            + (rightMultiOptionIdList.size() * givenOptionPrice);
-    assertEquals(expectedPrice, result.getPrice());
-    assertTrue(result.isOptionAvailable());
-    assertEquals(rightSingleOptionId, result.getSingleOption().getOptionId());
-    List<Long> resultMultiOptionIdList =
-        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
-    assertArrayEquals(rightMultiOptionIdList.toArray(), resultMultiOptionIdList.toArray());
+    check_basketItemPriceCalcResult(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 단일옵션과 다중옵션이 모두 비어있을때")
   public void calculateBasketItemPrice_BlankSingleAndMulti() throws IOException {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(Arrays.asList(10L, 20L, 30L), 1000);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(Arrays.asList(10L, 20L, 30L), 1000);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    String blankOptionJson = JsonUtil.convertObjectToJson(new ProductOptionObjForBasket());
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(blankOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem = BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct);
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductPrice, givenDiscountAmount, givenDiscountRate);
-    assertEquals(expectedPrice, result.getPrice());
-    assertTrue(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_noOption(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 단일옵션은 비어있고, 다중옵션은 유효할때")
-  public void calculateBasketItemPrice_blankSingle() throws IOException {
+  public void calculateBasketItemPrice_blankSingle() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(new ProductOptionObjForBasket(null, rightMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, List.of(15L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
-            + (rightMultiOptionIdList.size() * givenOptionPrice);
-    assertEquals(expectedPrice, result.getPrice());
-    assertTrue(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    List<Long> resultMultiOptionIdList =
-        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
-    assertArrayEquals(rightMultiOptionIdList.toArray(), resultMultiOptionIdList.toArray());
+    check_basketItemPriceCalcResult_noSingleOption(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 단일옵션이 유효하고, 다중옵션이 비어있을때")
-  public void calculateBasketItemPrice_blankMulti() throws IOException {
+  public void calculateBasketItemPrice_blankMulti() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    Long rightSingleOptionId = 10L;
-    List<Long> blankMultiOptionIdList = new ArrayList<>();
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(rightSingleOptionId, blankMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10L);
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(givenProductPrice, givenDiscountAmount, givenDiscountRate)
-            + givenOptionPrice;
-    assertEquals(expectedPrice, result.getPrice());
-    assertTrue(result.isOptionAvailable());
-    assertEquals(rightSingleOptionId, result.getSingleOption().getOptionId());
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_noMultiOptions(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 단일옵션이 유효하지 않을때")
-  public void calculateBasketItemPrice_IncorrectSingle() throws IOException {
+  public void calculateBasketItemPrice_IncorrectSingle() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    Long wrongSingleOptionId = 100L;
-    List<Long> rightMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 20L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(wrongSingleOptionId, rightMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10000L, List.of(15L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductPrice, givenDiscountAmount, givenDiscountRate);
-    assertEquals(expectedPrice, result.getPrice());
-    assertFalse(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    List<Long> resultMultiOptionIdList =
-        result.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_incorrectOption(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 다중옵션이 유효하지 않을때")
-  public void calculateBasketItemPrice_IncorrectMulti() throws IOException {
+  public void calculateBasketItemPrice_IncorrectMulti() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .build();
-
-    // - basketItem인자 세팅
-    Long rightSingleOptionId = 10L;
-    List<Long> wrongMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 100L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(rightSingleOptionId, wrongMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10L, List.of(10000L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductPrice, givenDiscountAmount, givenDiscountRate);
-    assertEquals(expectedPrice, result.getPrice());
-    assertFalse(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_incorrectOption(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 장바구니 아이템의 타겟 제품이 밴처리 되었을 경우")
-  public void calculateBasketItemPrice_bannedProduct() throws IOException {
+  public void calculateBasketItemPrice_bannedProduct() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .isBan(true)
-            .build();
-
-    // - basketItem인자 세팅
-    Long rightSingleOptionId = 10L;
-    List<Long> wrongMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 100L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(rightSingleOptionId, wrongMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    ReflectionTestUtils.setField(givenProduct, "isBan", true);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10L, List.of(15L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductPrice, givenDiscountAmount, givenDiscountRate);
-    assertEquals(expectedPrice, result.getPrice());
-    assertFalse(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_incorrectOption(inputBasketItem, calcResult);
   }
 
   @Test
   @DisplayName("calculateBasketItemPrice() : 장바구니 아이템의 타겟 제품이 판매중단 되었을 경우")
-  public void calculateBasketItemPrice_discontinuedProduct() throws IOException {
+  public void calculateBasketItemPrice_discontinuedProduct() {
     // given
-    // - basketItem인자.product.singleOptions / multipleOptions 세팅
-    List<Long> givenOptionIdList = Arrays.asList(10L, 20L, 30L);
-    int givenOptionPrice = 1000;
-    ArrayList<ProductSingleOption> givenSingleOptions =
-        makeProductSingleMockData(givenOptionIdList, givenOptionPrice);
-    ArrayList<ProductMultipleOption> givenMultipleOptions =
-        makeProductMultiMockData(givenOptionIdList, givenOptionPrice);
-
-    // - basketItem인자.product 세팅
-    int givenProductPrice = 10000;
-    int givenDiscountAmount = 1000;
-    double givenDiscountRate = 20d;
+    Member givenOwner = MemberBuilder.makeMember(30L, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOptions =
+        setProductSingleOptions(List.of(10L, 20L, 30L), 1000);
+    List<ProductMultipleOption> givenMultipleOptions =
+        setProductMultiOptions(List.of(15L, 25L, 35L), 1000);
     Product givenProduct =
-        ProductBuilder.fullData()
-            .price(givenProductPrice)
-            .singleOptions(givenSingleOptions)
-            .multipleOptions(givenMultipleOptions)
-            .discountAmount(givenDiscountAmount)
-            .discountRate(givenDiscountRate)
-            .isBan(false)
-            .build();
-    givenProduct.changeSalesStateToDiscontinued();
-
-    // - basketItem인자 세팅
-    Long rightSingleOptionId = 10L;
-    List<Long> wrongMultiOptionIdList = new ArrayList<>(Arrays.asList(10L, 100L));
-    String rightOptionJson =
-        JsonUtil.convertObjectToJson(
-            new ProductOptionObjForBasket(rightSingleOptionId, wrongMultiOptionIdList));
-    BasketItem givenBasketItem =
-        BasketItemBuilder.fullData().product(givenProduct).options(rightOptionJson).build();
+        setProduct(10L, 20L, 5000, 1000, 20d, givenSingleOptions, givenMultipleOptions);
+    ReflectionTestUtils.setField(givenProduct, "saleState", ProductSaleType.DISCONTINUED);
+    BasketItem inputBasketItem =
+        BasketItemBuilder.makeBasketItem(16L, givenOwner, givenProduct, 10L, List.of(15L, 25L));
 
     // when
-    BasketItemPriceCalcResult result = target.calculateBasketItemPrice(givenBasketItem);
+    BasketItemPriceCalcResult calcResult = target.calculateBasketItemPrice(inputBasketItem);
 
     // then
-    int expectedPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductPrice, givenDiscountAmount, givenDiscountRate);
-    assertEquals(expectedPrice, result.getPrice());
-    assertFalse(result.isOptionAvailable());
-    assertNull(result.getSingleOption());
-    assertEquals(0, result.getMultipleOptions().size());
+    check_basketItemPriceCalcResult_incorrectOption(inputBasketItem, calcResult);
   }
 
-  public ArrayList<ProductSingleOption> makeProductSingleMockData(
-      List<Long> idList, int optionPrice) {
-    ArrayList<ProductSingleOption> givenSingleOptions = new ArrayList<>();
-    for (Long id : idList) {
-      ProductSingleOption makedOption =
-          ProductSingleOptionBuilder.fullData().priceChangeAmount(optionPrice).build();
-      ReflectionTestUtils.setField(makedOption, "id", id);
-      givenSingleOptions.add(makedOption);
-    }
-    return givenSingleOptions;
+  private List<ProductSingleOption> setProductSingleOptions(List<Long> idList) {
+    return idList.stream().map(ProductSingleOptionBuilder::makeProductSingleOption).toList();
   }
 
-  public ArrayList<ProductMultipleOption> makeProductMultiMockData(
-      List<Long> idList, int optionPrice) {
-    ArrayList<ProductMultipleOption> givenMultiOptions = new ArrayList<>();
-    for (Long id : idList) {
-      ProductMultipleOption makedOption =
-          ProductMultiOptionBuilder.fullData().priceChangeAmount(optionPrice).build();
-      ReflectionTestUtils.setField(makedOption, "id", id);
-      givenMultiOptions.add(makedOption);
+  private List<ProductSingleOption> setProductSingleOptions(
+      List<Long> idList, int givenPriceChangeAmount) {
+    return idList.stream()
+        .map(id -> ProductSingleOptionBuilder.makeProductSingleOption(id, givenPriceChangeAmount))
+        .toList();
+  }
+
+  private List<ProductMultipleOption> setProductMultiOptions(List<Long> idList) {
+    return idList.stream().map(ProductMultiOptionBuilder::makeProductMultiOption).toList();
+  }
+
+  private List<ProductMultipleOption> setProductMultiOptions(
+      List<Long> idList, int givenPriceChangeAmount) {
+    return idList.stream()
+        .map(id -> ProductMultiOptionBuilder.makeProductMultiOption(id, givenPriceChangeAmount))
+        .toList();
+  }
+
+  private Product setProduct(long givenProductId, long givenProductSellerId) {
+    Member givenSeller = MemberBuilder.makeMember(givenProductSellerId, LoginType.NAVER);
+    return ProductBuilder.makeProduct(givenProductId, givenSeller);
+  }
+
+  private Product setProduct(
+      long givenProductId,
+      long givenProductSellerId,
+      List<Long> singleOptionIds,
+      List<Long> multiOptionIds) {
+    Member givenSeller = MemberBuilder.makeMember(givenProductSellerId, LoginType.NAVER);
+    List<ProductSingleOption> givenSingleOption = setProductSingleOptions(singleOptionIds);
+    List<ProductMultipleOption> givenMultiOption = setProductMultiOptions(multiOptionIds);
+    return ProductBuilder.makeProduct(
+        givenProductId, givenSeller, givenSingleOption, givenMultiOption);
+  }
+
+  private Product setProduct(
+      long givenProductId,
+      long givenProductSellerId,
+      int givenProductPrice,
+      int givenDiscountAmount,
+      double givenDiscountRate,
+      List<ProductSingleOption> givenSingleOption,
+      List<ProductMultipleOption> givenMultiOption) {
+    Member givenSeller = MemberBuilder.makeMember(givenProductSellerId, LoginType.NAVER);
+    return ProductBuilder.makeProduct(
+        givenProductId,
+        givenSeller,
+        givenProductPrice,
+        givenDiscountAmount,
+        givenDiscountRate,
+        givenSingleOption,
+        givenMultiOption);
+  }
+
+  private BasketItemMakeData setBasketItemMakeData(
+      long givenOwnerId, long givenProductId, long singleOptionId, List<Long> multiOptionIds) {
+    return BasketItemMakeDataBuilder.makeBasketItem(
+        givenOwnerId, givenProductId, singleOptionId, multiOptionIds);
+  }
+
+  private BasketItemMakeData setBasketItemMakeData(long givenOwnerId, long givenProductId) {
+    return BasketItemMakeDataBuilder.makeBasketItem(givenOwnerId, givenProductId);
+  }
+
+  private void check_basketItem(BasketItemMakeData givenMakeData, BasketItem targetBasketItem) {
+    assertEquals(givenMakeData.getMemberId(), targetBasketItem.getMember().getId());
+    assertEquals(givenMakeData.getProductId(), targetBasketItem.getProduct().getId());
+    ProductOptionObjForBasket optionInResult =
+        JsonUtil.convertJsonToObject(
+            targetBasketItem.getOptions(), ProductOptionObjForBasket.class);
+    assertEquals(givenMakeData.getSingleOptionId(), optionInResult.getSingleOptionId());
+    assertArrayEquals(
+        givenMakeData.getMultipleOptionId().toArray(),
+        optionInResult.getMultipleOptionId().toArray());
+  }
+
+  private void check_basketItem_noOption(
+      BasketItemMakeData givenMakeData, BasketItem targetBasketItem) {
+    assertEquals(givenMakeData.getMemberId(), targetBasketItem.getMember().getId());
+    assertEquals(givenMakeData.getProductId(), targetBasketItem.getProduct().getId());
+    ProductOptionObjForBasket optionInResult =
+        JsonUtil.convertJsonToObject(
+            targetBasketItem.getOptions(), ProductOptionObjForBasket.class);
+    assertNull(optionInResult.getSingleOptionId());
+    assertTrue(optionInResult.getMultipleOptionId().isEmpty());
+  }
+
+  private void check_basketItemPriceCalcResult(
+      BasketItem givenBasketItem, BasketItemPriceCalcResult calcResult) {
+    ProductOptionObjForBasket givenOptionInBasketItem =
+        JsonUtil.convertJsonToObject(givenBasketItem.getOptions(), ProductOptionObjForBasket.class);
+    int expectedCalcPrice = calcBasketItemPrice(givenBasketItem);
+    int realCalcPrice = calcResult.getPrice();
+    assertEquals(expectedCalcPrice, realCalcPrice);
+    assertTrue(calcResult.isOptionAvailable());
+    assertEquals(
+        givenOptionInBasketItem.getSingleOptionId(), calcResult.getSingleOption().getOptionId());
+    List<Long> expectedMultiOptionIds = givenOptionInBasketItem.getMultipleOptionId();
+    List<Long> realMultiOptionIds =
+        calcResult.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
+    assertArrayEquals(expectedMultiOptionIds.toArray(), realMultiOptionIds.toArray());
+  }
+
+  private void check_basketItemPriceCalcResult_noOption(
+      BasketItem givenBasketItem, BasketItemPriceCalcResult calcResult) {
+    int expectedCalcPrice = calcBasketItemPrice(givenBasketItem);
+    int realCalcPrice = calcResult.getPrice();
+    assertEquals(expectedCalcPrice, realCalcPrice);
+    assertTrue(calcResult.isOptionAvailable());
+    assertNull(calcResult.getSingleOption());
+    assertTrue(calcResult.getMultipleOptions().isEmpty());
+  }
+
+  private void check_basketItemPriceCalcResult_noSingleOption(
+      BasketItem givenBasketItem, BasketItemPriceCalcResult calcResult) {
+    ProductOptionObjForBasket givenOptionInBasketItem =
+        JsonUtil.convertJsonToObject(givenBasketItem.getOptions(), ProductOptionObjForBasket.class);
+    int expectedCalcPrice = calcBasketItemPrice(givenBasketItem);
+    int realCalcPrice = calcResult.getPrice();
+    assertEquals(expectedCalcPrice, realCalcPrice);
+    assertTrue(calcResult.isOptionAvailable());
+    assertNull(calcResult.getSingleOption());
+    List<Long> expectedMultiOptionIds = givenOptionInBasketItem.getMultipleOptionId();
+    List<Long> realMultiOptionIds =
+        calcResult.getMultipleOptions().stream().map(ProductOptionDto::getOptionId).toList();
+    assertArrayEquals(expectedMultiOptionIds.toArray(), realMultiOptionIds.toArray());
+  }
+
+  private void check_basketItemPriceCalcResult_noMultiOptions(
+      BasketItem givenBasketItem, BasketItemPriceCalcResult calcResult) {
+    ProductOptionObjForBasket givenOptionInBasketItem =
+        JsonUtil.convertJsonToObject(givenBasketItem.getOptions(), ProductOptionObjForBasket.class);
+    int expectedCalcPrice = calcBasketItemPrice(givenBasketItem);
+    int realCalcPrice = calcResult.getPrice();
+    assertEquals(expectedCalcPrice, realCalcPrice);
+    assertTrue(calcResult.isOptionAvailable());
+    assertEquals(
+        givenOptionInBasketItem.getSingleOptionId(), calcResult.getSingleOption().getOptionId());
+    assertTrue(calcResult.getMultipleOptions().isEmpty());
+  }
+
+  private void check_basketItemPriceCalcResult_incorrectOption(
+      BasketItem givenBasketItem, BasketItemPriceCalcResult calcResult) {
+    int expectedCalcPrice = calcBasketItemNoOptionPrice(givenBasketItem);
+    int realCalcPrice = calcResult.getPrice();
+    assertEquals(expectedCalcPrice, realCalcPrice);
+    assertFalse(calcResult.isOptionAvailable());
+    assertNull(calcResult.getSingleOption());
+    assertTrue(calcResult.getMultipleOptions().isEmpty());
+  }
+
+  private int calcBasketItemNoOptionPrice(BasketItem givenBasketItem) {
+    Product targetProduct = givenBasketItem.getProduct();
+    return PriceCalculateUtil.calculatePrice(
+        targetProduct.getPrice(),
+        targetProduct.getDiscountAmount(),
+        targetProduct.getDiscountRate());
+  }
+
+  private int calcBasketItemPrice(BasketItem givenBasketItem) {
+    Product targetProduct = givenBasketItem.getProduct();
+    ProductOptionObjForBasket optionInBasketItem =
+        JsonUtil.convertJsonToObject(givenBasketItem.getOptions(), ProductOptionObjForBasket.class);
+
+    int noOptionPrice = calcBasketItemNoOptionPrice(givenBasketItem);
+
+    List<Integer> optionPriceList = new ArrayList<>();
+    if (optionInBasketItem.getSingleOptionId() != null) {
+      Integer singleOptionPrice =
+          targetProduct.getSingleOptions().stream()
+              .filter(
+                  singleOption ->
+                      singleOption.getId().equals(optionInBasketItem.getSingleOptionId()))
+              .findFirst()
+              .get()
+              .getPriceChangeAmount();
+      optionPriceList.add(singleOptionPrice);
     }
-    return givenMultiOptions;
+    if (optionInBasketItem.getMultipleOptionId() != null
+        && !optionInBasketItem.getMultipleOptionId().isEmpty()) {
+      List<Integer> multiOptionPriceList =
+          optionInBasketItem.getMultipleOptionId().stream()
+              .map(
+                  optionId ->
+                      targetProduct.getMultipleOptions().stream()
+                          .filter(multipleOption -> multipleOption.getId().equals(optionId))
+                          .findFirst()
+                          .get()
+                          .getPriceChangeAmount())
+              .toList();
+      optionPriceList.addAll(multiOptionPriceList);
+    }
+
+    return PriceCalculateUtil.addOptionPrice(noOptionPrice, optionPriceList);
+  }
+
+  private void set_productFindService_findById(Product givenProduct) {
+    when(mockProductFindService.findById(any())).thenReturn(Optional.of(givenProduct));
+  }
+
+  private void set_memberFindService_findById(Member givenMember) {
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
   }
 }

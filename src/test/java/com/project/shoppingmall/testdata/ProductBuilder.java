@@ -121,4 +121,75 @@ public class ProductBuilder {
   public static Product makeNoBannedProduct(Member seller, ProductType type) throws IOException {
     return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
   }
+
+  public static Product makeProduct(long id, Member seller) {
+    Product product =
+        Product.builder()
+            .seller(seller)
+            .productType(new ProductType("test$type"))
+            .name("testProduct" + id)
+            .price(2000)
+            .discountAmount(100)
+            .discountRate(10.5)
+            .isBan(false)
+            .scoreAvg(0.0)
+            .singleOptions(new ArrayList<>())
+            .multipleOptions(new ArrayList<>())
+            .productImages(new ArrayList<>())
+            .contents(new ArrayList<>())
+            .build();
+    ReflectionTestUtils.setField(product, "id", id);
+    return product;
+  }
+
+  public static Product makeProduct(
+      long id,
+      Member seller,
+      List<ProductSingleOption> singleOptions,
+      List<ProductMultipleOption> multiOptions) {
+    Product product =
+        Product.builder()
+            .seller(seller)
+            .productType(new ProductType("test$type"))
+            .name("testProduct" + id)
+            .price(2000)
+            .discountAmount(100)
+            .discountRate(10.5)
+            .isBan(false)
+            .scoreAvg(0.0)
+            .singleOptions(singleOptions)
+            .multipleOptions(multiOptions)
+            .productImages(new ArrayList<>())
+            .contents(new ArrayList<>())
+            .build();
+    ReflectionTestUtils.setField(product, "id", id);
+    return product;
+  }
+
+  public static Product makeProduct(
+      long id,
+      Member seller,
+      int price,
+      int discountAmount,
+      double discountRate,
+      List<ProductSingleOption> singleOptions,
+      List<ProductMultipleOption> multiOptions) {
+    Product product =
+        Product.builder()
+            .seller(seller)
+            .productType(new ProductType("test$type"))
+            .name("testProduct" + id)
+            .price(price)
+            .discountAmount(discountAmount)
+            .discountRate(discountRate)
+            .isBan(false)
+            .scoreAvg(0.0)
+            .singleOptions(singleOptions)
+            .multipleOptions(multiOptions)
+            .productImages(new ArrayList<>())
+            .contents(new ArrayList<>())
+            .build();
+    ReflectionTestUtils.setField(product, "id", id);
+    return product;
+  }
 }

@@ -239,4 +239,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotDeleteMemberByRefundHandler(CannotDeleteMemberByRefund e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "아직 처리되지 않은 환불요청이 존재하기 때문에 회원탈퇴를 진행할 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(CannotSaveBasketItemByOwnProduct.class)
+  public ErrorResult CannotDeleteMemberByRefundHandler(CannotSaveBasketItemByOwnProduct e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "자신이 등록한 제품을 장바구니에 넣을 수 없습니다.");
+  }
 }
