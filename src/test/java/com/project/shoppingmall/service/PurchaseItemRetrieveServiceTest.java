@@ -25,6 +25,7 @@ import com.project.shoppingmall.testdata.ProductBuilder;
 import com.project.shoppingmall.testdata.PurchaseBuilder;
 import com.project.shoppingmall.testdata.PurchaseItemBuilder;
 import com.project.shoppingmall.type.LoginType;
+import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.util.JsonUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -380,7 +381,8 @@ class PurchaseItemRetrieveServiceTest {
         purchaseItemIds.stream()
             .map(id -> PurchaseItemBuilder.makePurchaseItem(id, givenProduct))
             .toList();
-    Purchase givenPurchase = PurchaseBuilder.makPurchaseItem(1234L, purchaseItemList);
+    Purchase givenPurchase =
+        PurchaseBuilder.makPurchase(1234L, purchaseItemList, PurchaseStateType.COMPLETE);
     return purchaseItemList;
   }
 
@@ -390,8 +392,11 @@ class PurchaseItemRetrieveServiceTest {
     PurchaseItem givenPurchaseItem =
         PurchaseItemBuilder.makePurchaseItem(purchaseItemId, givenSeller);
     Purchase givenPurchase =
-        PurchaseBuilder.makeCompleteStatePurchase(
-            1234L, givenDeletedBuyer, new ArrayList<>(List.of(givenPurchaseItem)));
+        PurchaseBuilder.makePurchase(
+            1234L,
+            givenDeletedBuyer,
+            new ArrayList<>(List.of(givenPurchaseItem)),
+            PurchaseStateType.COMPLETE);
     return givenPurchaseItem;
   }
 
@@ -404,8 +409,11 @@ class PurchaseItemRetrieveServiceTest {
       PurchaseItem givenPurchase2 =
           PurchaseItemBuilder.makePurchaseItem((long) i * 1000, givenSeller);
       Purchase givenPurchase =
-          PurchaseBuilder.makeCompleteStatePurchase(
-              i * 1000L, givenBuyer, new ArrayList<>(List.of(givenPurchase1, givenPurchase2)));
+          PurchaseBuilder.makePurchase(
+              i * 1000L,
+              givenBuyer,
+              new ArrayList<>(List.of(givenPurchase1, givenPurchase2)),
+              PurchaseStateType.COMPLETE);
       givenPurchaseItemList.add(givenPurchase1);
       givenPurchaseItemList.add(givenPurchase2);
     }

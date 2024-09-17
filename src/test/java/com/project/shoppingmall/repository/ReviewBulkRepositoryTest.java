@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ class ReviewBulkRepositoryTest {
         em.persist(review);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
   }
@@ -94,7 +96,8 @@ class ReviewBulkRepositoryTest {
         em.persist(review);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -146,7 +149,8 @@ class ReviewBulkRepositoryTest {
         purchaseItems.add(purchaseItem);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();

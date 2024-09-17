@@ -9,7 +9,6 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,9 +183,8 @@ class PurchaseItemRetrieveRepositoryTest {
       PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(givenProduct);
       purchaseItems.add(purchaseItem);
       Purchase purchase =
-          PurchaseBuilder.makeCompleteStatePurchase(
-              givenBuyer, new ArrayList<>(List.of(purchaseItem)));
-      purchase.convertStateToComplete(UUID.randomUUID().toString());
+          PurchaseBuilder.makePurchase(
+              givenBuyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     return purchaseItems;

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
 import java.io.IOException;
@@ -73,7 +74,8 @@ class ReviewReportRetrieveRepositoryTest {
         em.persist(processedReport);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
   }
@@ -123,7 +125,8 @@ class ReviewReportRetrieveRepositoryTest {
         em.persist(processedReport);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -212,7 +215,8 @@ class ReviewReportRetrieveRepositoryTest {
         em.persist(processedReport);
       }
 
-      Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+      Purchase purchase =
+          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -300,7 +304,8 @@ class ReviewReportRetrieveRepositoryTest {
     }
 
     // 생성한 PurchaseItem으로 Purchase 생성
-    Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+    Purchase purchase =
+        PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
     em.persist(purchase);
 
     em.flush();
@@ -383,7 +388,8 @@ class ReviewReportRetrieveRepositoryTest {
     }
 
     // 생성한 PurchaseItem으로 Purchase 생성
-    Purchase purchase = PurchaseBuilder.makeCompleteStatePurchase(buyer, purchaseItems);
+    Purchase purchase =
+        PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
     em.persist(purchase);
 
     em.flush();

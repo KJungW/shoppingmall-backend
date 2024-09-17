@@ -6,6 +6,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import java.io.IOException;
@@ -151,7 +152,8 @@ class MemberDeleteServiceIntegrationTest {
   private PurchaseItem savePurchaseItem(Product product, Member buyer) throws IOException {
     PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(product);
     Purchase purchase =
-        PurchaseBuilder.makeCompleteStatePurchase(buyer, new ArrayList<>(List.of(purchaseItem)));
+        PurchaseBuilder.makePurchase(
+            buyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
     return purchaseItem;
   }

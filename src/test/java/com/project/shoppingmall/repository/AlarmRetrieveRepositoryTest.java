@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
 import java.io.IOException;
@@ -100,8 +101,8 @@ class AlarmRetrieveRepositoryTest {
     Product otherSellerProduct = makeProduct(otherSeller);
     PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(otherSellerProduct);
     Purchase purchase =
-        PurchaseBuilder.makeCompleteStatePurchase(
-            reviewWriter, new ArrayList<>(List.of(purchaseItem)));
+        PurchaseBuilder.makePurchase(
+            reviewWriter, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
     Review review = ReviewBuilder.makeReview(reviewWriter, otherSellerProduct);
     purchaseItem.registerReview(review);
@@ -113,8 +114,8 @@ class AlarmRetrieveRepositoryTest {
     Member refundRequester = makeMember();
     PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
     Purchase purchase =
-        PurchaseBuilder.makeCompleteStatePurchase(
-            refundRequester, new ArrayList<>(List.of(purchaseItem)));
+        PurchaseBuilder.makePurchase(
+            refundRequester, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
     Refund refund = RefundBuilder.makeRefund(purchaseItem);
     em.persist(refund);
