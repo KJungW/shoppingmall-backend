@@ -5,9 +5,11 @@ import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrie
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.dto.purchase.PurchaseItemDtoForSeller;
+import com.project.shoppingmall.dto.purchase.SalesRevenueInMonth;
 import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
+import com.project.shoppingmall.service.sales_statistics.SalesStatisticsService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PurchaseRetrieveController {
   private final PurchaseRetrieveService purchaseRetrieveService;
   private final PurchaseItemRetrieveService purchaseItemRetrieveService;
+  private final SalesStatisticsService salesStatisticsService;
 
   @GetMapping("/purchases")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
@@ -64,5 +67,15 @@ public class PurchaseRetrieveController {
         purchaseItemRetrieveService.retrieveAllForSellerByDate(
             userDetail.getId(), year, month, sliceNumber, sliceSize);
     return new OutputRetrieveSales(sliceResult);
+  }
+
+  @GetMapping("/seller/month/purchases/price")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public SalesRevenueInMonth retrieveSalesRevenueInMonth(
+      @RequestParam("year") Integer year,
+      @Range(min = 1, max = 12) @RequestParam("month") Integer month) {
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    return salesStatisticsService.getSalesRevenueInMonth(userDetail.getId(), year, month);
   }
 }

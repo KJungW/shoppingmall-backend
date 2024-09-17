@@ -9,6 +9,7 @@ import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemService;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
+import com.project.shoppingmall.util.DateUtil;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
@@ -150,5 +151,11 @@ public class RefundService {
         iamportClient.cancelPaymentByImpUid(
             new CancelData(paymentUid, true, new BigDecimal(refundPrice)));
     if (paymentIamportResponse.getResponse() == null) throw new FailRefundException("환불에 실패했습니다.");
+  }
+
+  public Long getRefundPriceInMonthBySeller(long sellerId, int year, int month) {
+    LocalDateTime startDate = DateUtil.makeStartDateInMonth(year, month);
+    LocalDateTime endDate = DateUtil.makeStartDateInNextMonth(year, month);
+    return refundRepository.findRefundPriceInPeriodBySeller(sellerId, startDate, endDate);
   }
 }

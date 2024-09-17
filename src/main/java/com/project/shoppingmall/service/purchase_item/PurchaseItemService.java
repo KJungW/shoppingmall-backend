@@ -4,6 +4,8 @@ import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.repository.PurchaseItemRepository;
 import com.project.shoppingmall.type.RefundStateType;
+import com.project.shoppingmall.util.DateUtil;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,5 +32,12 @@ public class PurchaseItemService {
                     || refund.getState().equals(RefundStateType.REQUEST))
         .toList()
         .isEmpty();
+  }
+
+  public Long getSalesRevenuePriceInMonthBySeller(long sellerId, int year, int month) {
+    LocalDateTime startDate = DateUtil.makeStartDateInMonth(year, month);
+    LocalDateTime endDate = DateUtil.makeStartDateInNextMonth(year, month);
+    return purchaseItemRepository.findSalesRevenuePriceInPeriodBySeller(
+        sellerId, startDate, endDate);
   }
 }

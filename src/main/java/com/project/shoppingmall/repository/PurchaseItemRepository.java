@@ -1,6 +1,7 @@
 package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.PurchaseItem;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -24,4 +25,16 @@ public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Long
 
   @Query("select pi from PurchaseItem pi where pi.sellerId = :sellerId")
   Slice<PurchaseItem> findLatestBySeller(@Param("sellerId") long sellerId, Pageable pageable);
+
+  @Query(
+      "select sum(pi.finalPrice) "
+          + "from PurchaseItem pi "
+          + "left join pi.purchase pu "
+          + "where pi.sellerId = :sellerId "
+          + "and pu.state = 'COMPLETE' "
+          + "and pu.createDate between :startDate and :endDate")
+  Long findSalesRevenuePriceInPeriodBySeller(
+      @Param("sellerId") long sellerId,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 }
