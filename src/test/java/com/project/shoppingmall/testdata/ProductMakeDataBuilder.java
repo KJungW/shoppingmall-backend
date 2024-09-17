@@ -3,6 +3,7 @@ package com.project.shoppingmall.testdata;
 import com.project.shoppingmall.controller.product.input.InputBlockData;
 import com.project.shoppingmall.controller.product.input.InputProductOption;
 import com.project.shoppingmall.dto.product.ProductMakeData;
+import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.type.BlockType;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -112,5 +113,13 @@ public class ProductMakeDataBuilder {
         .multiOptions(givenMultipleOptions)
         .blockDataList(givenBlockDataList)
         .blockImages(givenBlockImages);
+  }
+
+  public static ProductMakeData makeProduct(long id, ProductType productType) {
+    try {
+      return fullData().productTypeId(productType.getId()).build();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

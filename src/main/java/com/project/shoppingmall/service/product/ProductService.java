@@ -11,6 +11,7 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.InvalidEnumType;
+import com.project.shoppingmall.exception.MemberAccountIsNotRegistered;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
@@ -46,6 +47,8 @@ public class ProductService {
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
 
     if (seller.getIsBan()) throw new CannotSaveProductBecauseMemberBan("벤상태의 회원은 제품등록이 불가능합니다.");
+    if (seller.getAccountNumber() == null || seller.getAccountNumber().isBlank())
+      throw new MemberAccountIsNotRegistered("제품을 등록하기 전에 회원의 계좌를 등록해야합니다.");
 
     List<ProductSingleOption> productSingleOptions =
         makeProductSingleOptionList(productData.getSingleOptions());

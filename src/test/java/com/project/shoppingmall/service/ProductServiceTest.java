@@ -3,6 +3,7 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.dto.block.ContentBlock;
 import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.dto.product.ProductMakeData;
@@ -10,6 +11,7 @@ import com.project.shoppingmall.dto.product.ProductOption;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.CannotSaveProductBecauseMemberBan;
 import com.project.shoppingmall.exception.DataNotFound;
+import com.project.shoppingmall.exception.MemberAccountIsNotRegistered;
 import com.project.shoppingmall.exception.WrongPriceAndDiscount;
 import com.project.shoppingmall.repository.ProductRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
@@ -19,6 +21,7 @@ import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.*;
 import com.project.shoppingmall.type.BlockType;
+import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.ProductSaleType;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.PriceCalculateUtil;
@@ -28,6 +31,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 class ProductServiceTest {
   private ProductService productService;
@@ -62,182 +66,95 @@ class ProductServiceTest {
 
   @Test
   @DisplayName("save() : 정상흐름")
-  public void save_ok() throws IOException {
+  public void save_ok() {
     // given
-    Long givenMemberId = 1L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
-
-    Long givenProductTypeId = 2L;
-    ProductType givenProductType = new ProductType("test$detail");
-    ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
-
-    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
-
-    ProductMakeData givenProductMakeData =
-        ProductMakeDataBuilder.fullData().productTypeId(givenProductTypeId).build();
+    Long inputMemberId = 1L;
+    Member givenMember =
+        MemberBuilder.makeMemberWithAccountNumber(
+            inputMemberId, LoginType.NAVER, "123124-512412-123");
+    ProductType givenProductType = ProductTypeBuilder.makeProductType(2L, "test$detail");
+    FileUploadResult givenFileUploadResult = new FileUploadResult("severuri/test", "download/test");
+    ProductMakeData inputMakeData = ProductMakeDataBuilder.makeProduct(10L, givenProductType);
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
-    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUploadResult);
 
     // when
-    Product savedProduct = productService.save(givenMemberId, givenProductMakeData);
+    Product savedProduct = productService.save(inputMemberId, inputMakeData);
 
     // then
-    // - Product.seller 검증
-    assertEquals(1L, savedProduct.getSeller().getId());
-
-    // - Product.productType 검증
-    assertEquals(givenProductMakeData.getProductTypeId(), savedProduct.getProductType().getId());
-
-    // - Product.productImages 검증
-    int expectedProductImgCount = givenProductMakeData.getProductImages().size();
-    for (ProductImage image : savedProduct.getProductImages()) {
-      assertEquals(givenFileUpload.getFileServerUri(), image.getImageUri());
-      assertEquals(givenFileUpload.getDownLoadUrl(), image.getDownLoadUrl());
-    }
-
-    // - Product.contents 검증
-    int expectedTextBlockCount =
-        givenProductMakeData.getContentBlocks().stream()
-            .filter(block -> block.getBlockType().equals(BlockType.TEXT_TYPE))
-            .toList()
-            .size();
-    int expectedImageBlockCount =
-        givenProductMakeData.getContentBlocks().stream()
-            .filter(block -> block.getBlockType().equals(BlockType.IMAGE_TYPE))
-            .toList()
-            .size();
-    assertEquals(
-        expectedTextBlockCount + expectedImageBlockCount, savedProduct.getContents().size());
-
-    jsonUtil.verify(
-        () -> JsonUtil.convertObjectToJson(any()),
-        times(expectedTextBlockCount + expectedImageBlockCount));
-    verify(s3Service, times(expectedImageBlockCount + expectedProductImgCount))
-        .uploadFile(any(), any());
-
-    // - Product.singleOption 검증
-    List<String> expectedSingleOptionNames =
-        givenProductMakeData.getSingleOptions().stream().map(ProductOption::getOptionName).toList();
-    List<String> resultSingleOptionNames =
-        savedProduct.getSingleOptions().stream().map(ProductSingleOption::getOptionName).toList();
-    assertArrayEquals(expectedSingleOptionNames.toArray(), resultSingleOptionNames.toArray());
-    List<Integer> expectedSingleOptionPriceChange =
-        givenProductMakeData.getSingleOptions().stream()
-            .map(ProductOption::getPriceChangeAmount)
-            .toList();
-    List<Integer> resultSingleOptionPriceChange =
-        savedProduct.getSingleOptions().stream()
-            .map(ProductSingleOption::getPriceChangeAmount)
-            .toList();
-    assertArrayEquals(
-        expectedSingleOptionPriceChange.toArray(), resultSingleOptionPriceChange.toArray());
-
-    // - Product.multipleOptions 검증
-    List<String> expectedOptionNames =
-        givenProductMakeData.getMultiOptions().stream().map(ProductOption::getOptionName).toList();
-    List<String> resultOptionNames =
-        savedProduct.getMultipleOptions().stream()
-            .map(ProductMultipleOption::getOptionName)
-            .toList();
-    assertArrayEquals(expectedOptionNames.toArray(), resultOptionNames.toArray());
-    List<Integer> expectedOptionPriceChange =
-        givenProductMakeData.getMultiOptions().stream()
-            .map(ProductOption::getPriceChangeAmount)
-            .toList();
-    List<Integer> resultOptionPriceChange =
-        savedProduct.getMultipleOptions().stream()
-            .map(ProductMultipleOption::getPriceChangeAmount)
-            .toList();
-    assertArrayEquals(expectedOptionPriceChange.toArray(), resultOptionPriceChange.toArray());
-
-    // - Product.name 검증
-    assertEquals(givenProductMakeData.getName(), savedProduct.getName());
-
-    // - Product.price 검증
-    assertEquals(givenProductMakeData.getPrice(), savedProduct.getPrice());
-
-    // - Product.discountAmount 검증
-    assertEquals(givenProductMakeData.getDiscountAmount(), savedProduct.getDiscountAmount());
-
-    // - Product.discountRate 검증
-    assertEquals(givenProductMakeData.getDiscountRate(), savedProduct.getDiscountRate());
-
-    // - Product.isBan 검증
-    assertEquals(false, savedProduct.getIsBan());
-
-    // - Product.scoreAvg 검증
-    assertEquals(0d, savedProduct.getScoreAvg());
-
-    // - Product.finalPrice 검증
-    int expectedFinalPrice =
-        PriceCalculateUtil.calculatePrice(
-            givenProductMakeData.getPrice(),
-            givenProductMakeData.getDiscountAmount(),
-            givenProductMakeData.getDiscountRate());
-    assertEquals(expectedFinalPrice, savedProduct.getFinalPrice());
+    check_s3Service_uploadFile(inputMakeData);
+    checkProduct(givenMember, inputMakeData, givenFileUploadResult, savedProduct);
   }
 
   @Test
   @DisplayName("save() : 잘못된 가격과 할인")
-  public void save_wrongPriceAndDiscount() throws IOException {
+  public void save_wrongPriceAndDiscount() {
     // given
-    Long givenMemberId = 1L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long inputMemberId = 1L;
+    Member givenMember =
+        MemberBuilder.makeMemberWithAccountNumber(
+            inputMemberId, LoginType.NAVER, "123124-512412-123");
+    ProductType givenProductType = ProductTypeBuilder.makeProductType(2L, "test$detail");
+    FileUploadResult givenFileUploadResult = new FileUploadResult("severuri/test", "download/test");
+    ProductMakeData inputMakeData = ProductMakeDataBuilder.makeProduct(10L, givenProductType);
 
-    Long givenProductTypeId = 2L;
-    ProductType givenProductType = new ProductType("test$detail");
-    ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
-
-    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
-
-    ProductMakeData givenProductMakeData =
-        ProductMakeDataBuilder.fullData()
-            .productTypeId(givenProductTypeId)
-            .price(10000)
-            .discountAmount(5000)
-            .discountRate(50d)
-            .build();
+    ReflectionTestUtils.setField(inputMakeData, "price", 10000);
+    ReflectionTestUtils.setField(inputMakeData, "discountAmount", 5000);
+    ReflectionTestUtils.setField(inputMakeData, "discountRate", 50d);
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
-    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUploadResult);
 
     // when
     assertThrows(
-        WrongPriceAndDiscount.class,
-        () -> productService.save(givenMemberId, givenProductMakeData));
+        WrongPriceAndDiscount.class, () -> productService.save(inputMemberId, inputMakeData));
   }
 
   @Test
   @DisplayName("save() : 벤상태의 회원이 제품을 등록하려 시도함")
-  public void save_bannedMember() throws IOException {
+  public void save_bannedMember() {
     // given
-    Long givenMemberId = 1L;
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    Long inputMemberId = 1L;
+    Member givenMember =
+        MemberBuilder.makeMemberWithAccountNumber(
+            inputMemberId, LoginType.NAVER, "123124-512412-123");
+    ProductType givenProductType = ProductTypeBuilder.makeProductType(2L, "test$detail");
+    FileUploadResult givenFileUploadResult = new FileUploadResult("severuri/test", "download/test");
+    ProductMakeData inputMakeData = ProductMakeDataBuilder.makeProduct(10L, givenProductType);
+
     ReflectionTestUtils.setField(givenMember, "isBan", true);
-
-    Long givenProductTypeId = 2L;
-    ProductType givenProductType = new ProductType("test$detail");
-    ReflectionTestUtils.setField(givenProductType, "id", givenProductTypeId);
-
-    FileUploadResult givenFileUpload = new FileUploadResult("severuri/test", "download/test");
-
-    ProductMakeData givenProductMakeData =
-        ProductMakeDataBuilder.fullData().productTypeId(givenProductTypeId).build();
 
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
     when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
-    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUpload);
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUploadResult);
 
     // when
     assertThrows(
         CannotSaveProductBecauseMemberBan.class,
-        () -> productService.save(givenMemberId, givenProductMakeData));
+        () -> productService.save(inputMemberId, inputMakeData));
+  }
+
+  @Test
+  @DisplayName("save() : 계좌를 등록하지 않은 회원이 제품을 등록하려고 시도")
+  public void save_notRegisterAccount() {
+    // given
+    Long inputMemberId = 1L;
+    Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
+    ProductType givenProductType = ProductTypeBuilder.makeProductType(2L, "test$detail");
+    FileUploadResult givenFileUploadResult = new FileUploadResult("severuri/test", "download/test");
+    ProductMakeData inputMakeData = ProductMakeDataBuilder.makeProduct(10L, givenProductType);
+
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenMember));
+    when(productTypeService.findById(any())).thenReturn(Optional.of(givenProductType));
+    when(s3Service.uploadFile(any(), any())).thenReturn(givenFileUploadResult);
+
+    // when
+    assertThrows(
+        MemberAccountIsNotRegistered.class,
+        () -> productService.save(inputMemberId, inputMakeData));
   }
 
   @Test
@@ -397,5 +314,103 @@ class ProductServiceTest {
     assertEquals(givenProductId, product.getId());
     assertEquals(givenMemberId, product.getSeller().getId());
     assertEquals(ProductSaleType.DISCONTINUED, givenProduct.getSaleState());
+  }
+
+  public void checkProduct(
+      Member givenMember,
+      ProductMakeData givenMakeData,
+      FileUploadResult givenFileUploadResult,
+      Product targetProduct) {
+    assertEquals(givenMember.getId(), targetProduct.getSeller().getId());
+    assertEquals(givenMakeData.getProductTypeId(), targetProduct.getProductType().getId());
+    checkProductImage(
+        givenFileUploadResult, givenMakeData.getProductImages(), targetProduct.getProductImages());
+    checkProductBlock(givenMakeData.getContentBlocks(), targetProduct.getContents());
+    checkProductSingleOption(givenMakeData.getSingleOptions(), targetProduct.getSingleOptions());
+    checkProductMultiOptions(givenMakeData.getMultiOptions(), targetProduct.getMultipleOptions());
+    assertEquals(givenMakeData.getName(), targetProduct.getName());
+    assertEquals(givenMakeData.getPrice(), targetProduct.getPrice());
+    assertEquals(givenMakeData.getDiscountAmount(), targetProduct.getDiscountAmount());
+    assertEquals(givenMakeData.getDiscountRate(), targetProduct.getDiscountRate());
+    assertEquals(false, targetProduct.getIsBan());
+    assertEquals(0d, targetProduct.getScoreAvg());
+    checkProductFinalPrice(givenMakeData, targetProduct.getFinalPrice());
+  }
+
+  private void checkProductImage(
+      FileUploadResult givenFileUploadResult,
+      List<MultipartFile> givenProductImages,
+      List<ProductImage> targetProductImages) {
+    assertEquals(givenProductImages.size(), targetProductImages.size());
+    targetProductImages.forEach(
+        image -> {
+          assertEquals(givenFileUploadResult.getFileServerUri(), image.getImageUri());
+          assertEquals(givenFileUploadResult.getDownLoadUrl(), image.getDownLoadUrl());
+        });
+  }
+
+  private void checkProductBlock(
+      List<ContentBlock> givenContentBlocks, List<ProductContent> targetProductBlocks) {
+    int expectedTextBlockCount =
+        givenContentBlocks.stream()
+            .filter(block -> block.getBlockType().equals(BlockType.TEXT_TYPE))
+            .toList()
+            .size();
+    int expectedImageBlockCount =
+        givenContentBlocks.stream()
+            .filter(block -> block.getBlockType().equals(BlockType.IMAGE_TYPE))
+            .toList()
+            .size();
+    assertEquals(expectedTextBlockCount + expectedImageBlockCount, targetProductBlocks.size());
+  }
+
+  private void checkProductSingleOption(
+      List<ProductOption> givenSingleOptions, List<ProductSingleOption> targetSingleOptions) {
+    List<String> expectedSingleOptionNames =
+        givenSingleOptions.stream().map(ProductOption::getOptionName).toList();
+    List<String> resultSingleOptionNames =
+        targetSingleOptions.stream().map(ProductSingleOption::getOptionName).toList();
+    assertArrayEquals(expectedSingleOptionNames.toArray(), resultSingleOptionNames.toArray());
+
+    List<Integer> expectedSingleOptionPriceChange =
+        givenSingleOptions.stream().map(ProductOption::getPriceChangeAmount).toList();
+    List<Integer> resultSingleOptionPriceChange =
+        targetSingleOptions.stream().map(ProductSingleOption::getPriceChangeAmount).toList();
+    assertArrayEquals(
+        expectedSingleOptionPriceChange.toArray(), resultSingleOptionPriceChange.toArray());
+  }
+
+  private void checkProductMultiOptions(
+      List<ProductOption> givenMultiOptions, List<ProductMultipleOption> targetMultiOptions) {
+    // - Product.multipleOptions 검증
+    List<String> expectedOptionNames =
+        givenMultiOptions.stream().map(ProductOption::getOptionName).toList();
+    List<String> resultOptionNames =
+        targetMultiOptions.stream().map(ProductMultipleOption::getOptionName).toList();
+    assertArrayEquals(expectedOptionNames.toArray(), resultOptionNames.toArray());
+    List<Integer> expectedOptionPriceChange =
+        givenMultiOptions.stream().map(ProductOption::getPriceChangeAmount).toList();
+    List<Integer> resultOptionPriceChange =
+        targetMultiOptions.stream().map(ProductMultipleOption::getPriceChangeAmount).toList();
+    assertArrayEquals(expectedOptionPriceChange.toArray(), resultOptionPriceChange.toArray());
+  }
+
+  private void checkProductFinalPrice(ProductMakeData givenMakeData, int targetPrice) {
+    int expectedFinalPrice =
+        PriceCalculateUtil.calculatePrice(
+            givenMakeData.getPrice(),
+            givenMakeData.getDiscountAmount(),
+            givenMakeData.getDiscountRate());
+    assertEquals(expectedFinalPrice, targetPrice);
+  }
+
+  private void check_s3Service_uploadFile(ProductMakeData givenMakeData) {
+    int givenImageBlockCount =
+        givenMakeData.getContentBlocks().stream()
+            .filter(block -> block.getBlockType().equals(BlockType.IMAGE_TYPE))
+            .toList()
+            .size();
+    int expectedTimes = givenMakeData.getProductImages().size() + givenImageBlockCount;
+    verify(s3Service, times(expectedTimes)).uploadFile(any(), any());
   }
 }
