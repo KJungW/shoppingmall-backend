@@ -14,7 +14,7 @@ public class RefundBuilder {
         .requestContent("TestRefundRequestContent");
   }
 
-  public static Refund makeRefund(PurchaseItem purchaseItem) throws IOException {
+  public static Refund makeRefund(PurchaseItem purchaseItem) {
     Refund refund = RefundBuilder.fullData().build();
     purchaseItem.addRefund(refund);
     return refund;

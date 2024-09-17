@@ -1,6 +1,7 @@
 package com.project.shoppingmall.repository;
 
 import com.project.shoppingmall.entity.PurchaseItem;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -16,6 +17,18 @@ public interface PurchaseItemRetrieveRepository extends JpaRepository<PurchaseIt
           + "where pi.productId = :productId "
           + "and pu.state = 'COMPLETE' ")
   Slice<PurchaseItem> findAllForSeller(@Param("productId") long productId, Pageable pageable);
+
+  @Query(
+      "SELECT pi FROM PurchaseItem pi "
+          + "left join fetch pi.purchase pu "
+          + "where pi.sellerId = :sellerId "
+          + "and pu.state = 'COMPLETE' "
+          + "and pu.createDate between :startDate and :endDate")
+  Slice<PurchaseItem> findAllForSellerBetweenDate(
+      @Param("sellerId") long sellerId,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate,
+      Pageable pageable);
 
   @Query(
       "select distinct pi "

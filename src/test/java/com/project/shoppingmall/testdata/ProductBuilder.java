@@ -118,8 +118,12 @@ public class ProductBuilder {
         .contents(new ArrayList<>());
   }
 
-  public static Product makeNoBannedProduct(Member seller, ProductType type) throws IOException {
-    return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
+  public static Product makeNoBannedProduct(Member seller, ProductType type) {
+    try {
+      return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static Product makeProduct(long id, Member seller) {

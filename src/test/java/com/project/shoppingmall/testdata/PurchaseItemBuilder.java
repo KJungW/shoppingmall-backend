@@ -61,12 +61,25 @@ public class PurchaseItemBuilder {
     return purchaseItem;
   }
 
-  public static PurchaseItem makePurchaseItem(Product product) throws IOException {
-    ProductDataForPurchase productOptionObj =
-        ProductDataForPurchaseBuilder.fullData(product).build();
-    return PurchaseItemBuilder.fullData()
-        .productData(productOptionObj)
-        .finalPrice(product.getFinalPrice())
-        .build();
+  public static PurchaseItem makePurchaseItem(Long id, Product product) {
+    ProductDataForPurchase productData =
+        ProductDataForPurchaseBuilder.makeProductDataForPurchase(product);
+    PurchaseItem purchaseItem =
+        PurchaseItem.builder().productData(productData).finalPrice(10000).build();
+    ReflectionTestUtils.setField(purchaseItem, "id", id);
+    return purchaseItem;
+  }
+
+  public static PurchaseItem makePurchaseItem(Product product) {
+    try {
+      ProductDataForPurchase productOptionObj =
+          ProductDataForPurchaseBuilder.fullData(product).build();
+      return PurchaseItemBuilder.fullData()
+          .productData(productOptionObj)
+          .finalPrice(product.getFinalPrice())
+          .build();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }
