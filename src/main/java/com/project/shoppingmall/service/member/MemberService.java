@@ -8,6 +8,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.MemberToken;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.DuplicateMemberEmail;
+import com.project.shoppingmall.exception.MemberAccountIsNotRegistered;
 import com.project.shoppingmall.exception.MemberSignupByEmailCacheError;
 import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
@@ -143,5 +144,24 @@ public class MemberService {
     member.getToken().updateRefresh(refreshToken);
 
     return member;
+  }
+
+  @Transactional
+  public void registerAccount(Long memberId, String accountNumber) {
+    Member member =
+        memberFindService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 데이터가 존재하지 않습니다."));
+    member.registerAccount(accountNumber);
+  }
+
+  public String getAccountNumber(Long memberId) {
+    Member member =
+        memberFindService
+            .findById(memberId)
+            .orElseThrow(() -> new DataNotFound("id에 해당하는 데이터가 존재하지 않습니다."));
+    if (member.getAccountNumber() == null || member.getAccountNumber().isBlank())
+      throw new MemberAccountIsNotRegistered("회원의 계좌가 등록되지 않았습니다.");
+    return member.getAccountNumber();
   }
 }

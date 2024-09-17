@@ -245,4 +245,10 @@ public class ExceptionGlobalControllerAdvice {
   public ErrorResult CannotDeleteMemberByRefundHandler(CannotSaveBasketItemByOwnProduct e) {
     return new ErrorResult(ErrorCode.BAD_INPUT, "자신이 등록한 제품을 장바구니에 넣을 수 없습니다.");
   }
+
+  @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(MemberAccountIsNotRegistered.class)
+  public ErrorResult MemberAccountIsNotRegisteredHandler(MemberAccountIsNotRegistered e) {
+    return new ErrorResult(ErrorCode.BAD_INPUT, "회원의 계좌가 등록되지 않았습니다.");
+  }
 }

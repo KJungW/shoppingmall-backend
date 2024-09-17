@@ -43,6 +43,8 @@ public class Member extends BaseEntity {
   @JoinColumn(name = "TOKEN_ID")
   private MemberToken token;
 
+  private String accountNumber;
+
   @Builder
   public Member(
       LoginType loginType,
@@ -71,6 +73,7 @@ public class Member extends BaseEntity {
     updateRole(role);
     updateMemberBan(isBan);
     this.token = token;
+    this.accountNumber = "";
   }
 
   private void updateLoginType(LoginType loginType) {
@@ -122,5 +125,11 @@ public class Member extends BaseEntity {
 
   public void deleteRefreshToken() {
     this.token = null;
+  }
+
+  public void registerAccount(String accountNumber) {
+    if (accountNumber == null || accountNumber.isBlank())
+      throw new ServerLogicError("Member의 accountNumber필드에 빈값이 입력되었습니다.");
+    this.accountNumber = accountNumber;
   }
 }

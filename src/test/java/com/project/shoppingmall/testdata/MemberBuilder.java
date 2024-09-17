@@ -83,4 +83,20 @@ public class MemberBuilder {
     ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
     return givenMember;
   }
+
+  public static Member makeMemberWithAccountNumber(
+      long givenMemberId, LoginType loginType, String accountNumber) {
+    Member givenMember =
+        MemberBuilder.fullData()
+            .loginType(loginType)
+            .nickName("tempNicKName")
+            .email(UUID.randomUUID() + "@naver.com")
+            .password("sfwer41243!!!")
+            .role(MemberRoleType.ROLE_MEMBER)
+            .isBan(false)
+            .build();
+    ReflectionTestUtils.setField(givenMember, "id", givenMemberId);
+    givenMember.registerAccount(accountNumber);
+    return givenMember;
+  }
 }

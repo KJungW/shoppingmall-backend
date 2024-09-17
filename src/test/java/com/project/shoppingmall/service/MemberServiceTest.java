@@ -10,6 +10,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.MemberToken;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.DuplicateMemberEmail;
+import com.project.shoppingmall.exception.MemberAccountIsNotRegistered;
 import com.project.shoppingmall.exception.MemberSignupByEmailCacheError;
 import com.project.shoppingmall.final_value.CacheTemplate;
 import com.project.shoppingmall.repository.CacheRepository;
@@ -82,7 +83,7 @@ class MemberServiceTest {
     MemberEmailSignupDto inputDto =
         new MemberEmailSignupDto("example@temp.com", "ckkqkes1231254", "tempNickName");
 
-    set_memberFindRepository_findByEmail();
+    set_memberFindService_findByEmail();
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when
@@ -107,7 +108,7 @@ class MemberServiceTest {
 
     Member duplicateEmailMember = MemberBuilder.fullData().email(inputDto.getEmail()).build();
 
-    set_memberFindRepository_findByEmail(duplicateEmailMember);
+    set_memberFindService_findByEmail(duplicateEmailMember);
     when(UUID.randomUUID()).thenReturn(givenSecretNumber);
 
     // when then
@@ -130,7 +131,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberFindRepository_findByEmail();
+    set_memberFindService_findByEmail();
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when
@@ -173,7 +174,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberFindRepository_findByEmail();
+    set_memberFindService_findByEmail();
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when then
@@ -197,7 +198,7 @@ class MemberServiceTest {
     setMemberToken(givenMember, givenRefreshTokenValue);
 
     set_cacheRepository_getCache(givenCacheJson);
-    set_memberFindRepository_findByEmail(otherMember);
+    set_memberFindService_findByEmail(otherMember);
 
     // when then
     assertThrows(
@@ -271,7 +272,7 @@ class MemberServiceTest {
     String givenRefreshTokenValue = "givenRefreshTokenValue";
     MemberToken givenMemberToken = setMemberToken(givenMember, givenRefreshTokenValue).getToken();
 
-    set_memberFindRepository_findByEmail(givenMember);
+    set_memberFindService_findByEmail(givenMember);
     set_jwtUtil_createRefreshToken(givenRefreshTokenValue);
 
     // when
@@ -289,7 +290,7 @@ class MemberServiceTest {
     String inputEmail = "test@test.com";
     String inputPassword = "gdfg123!@#";
 
-    set_memberFindRepository_findByEmail();
+    set_memberFindService_findByEmail();
 
     // when then
     assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
@@ -305,10 +306,58 @@ class MemberServiceTest {
     String otherPassword = "dsafkjwelr";
     Member givenMember = MemberBuilder.makeMember(10L, LoginType.EMAIL, inputEmail, otherPassword);
 
-    set_memberFindRepository_findByEmail(givenMember);
+    set_memberFindService_findByEmail(givenMember);
 
     // when then
     assertThrows(DataNotFound.class, () -> target.loginByEmail(inputEmail, inputPassword));
+  }
+
+  @Test
+  @DisplayName("registerAccount() : 정상흐름")
+  public void registerAccount_ok() {
+    // given
+    long inputMemberId = 10L;
+    String inputAccountNumber = "12321-5124-12312";
+
+    Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
+    set_mockMemberFindService_findById(givenMember);
+
+    // when
+    target.registerAccount(inputMemberId, inputAccountNumber);
+
+    // then
+    assertEquals(inputAccountNumber, givenMember.getAccountNumber());
+  }
+
+  @Test
+  @DisplayName("getAccountNumber() : 정상흐름")
+  public void getAccountNumber_ok() {
+    // given
+    long inputMemberId = 10L;
+
+    Member givenMember =
+        MemberBuilder.makeMemberWithAccountNumber(
+            inputMemberId, LoginType.NAVER, "12321-5124-12312");
+    set_mockMemberFindService_findById(givenMember);
+
+    // when
+    String resultAccountNumber = target.getAccountNumber(inputMemberId);
+
+    // then
+    assertEquals(givenMember.getAccountNumber(), resultAccountNumber);
+  }
+
+  @Test
+  @DisplayName("getAccountNumber() : 계좌를 등록하지 않은 회원의 계좌 조회")
+  public void getAccountNumber_notRegisteredAccount() {
+    // given
+    long inputMemberId = 10L;
+
+    Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
+    set_mockMemberFindService_findById(givenMember);
+
+    // when
+    assertThrows(MemberAccountIsNotRegistered.class, () -> target.getAccountNumber(inputMemberId));
   }
 
   public Member setMemberToken(Member givenMember, String givenRefreshTokenValue) {
@@ -345,11 +394,11 @@ class MemberServiceTest {
     assertEquals(expectedMemberToken.getRefresh(), realMemberToken.getRefresh());
   }
 
-  public void set_memberFindRepository_findByEmail() {
+  public void set_memberFindService_findByEmail() {
     when(mockMemberFindService.findByEmail(anyString())).thenReturn(Optional.empty());
   }
 
-  public void set_memberFindRepository_findByEmail(Member givenMember) {
+  public void set_memberFindService_findByEmail(Member givenMember) {
     when(mockMemberFindService.findByEmail(anyString())).thenReturn(Optional.of(givenMember));
   }
 

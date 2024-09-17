@@ -1,8 +1,10 @@
 package com.project.shoppingmall.controller.member;
 
 import com.project.shoppingmall.controller.member.input.InputLoginByEmail;
+import com.project.shoppingmall.controller.member.input.InputRegisterAccount;
 import com.project.shoppingmall.controller.member.input.InputRequestSignup;
 import com.project.shoppingmall.controller.member.input.InputUpdateMemberInfo;
+import com.project.shoppingmall.controller.member.output.OutputGetAccount;
 import com.project.shoppingmall.controller.member.output.OutputGetMember;
 import com.project.shoppingmall.controller.member.output.OutputLoginByEmail;
 import com.project.shoppingmall.controller.member.output.OutputUpdateMemberInfo;
@@ -120,5 +122,22 @@ public class MemberController {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     memberDeleteService.deleteMemberInController(userDetail.getId());
+  }
+
+  @PostMapping("/account")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public void registerAccount(@Valid @RequestBody InputRegisterAccount input) {
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    memberService.registerAccount(userDetail.getId(), input.getAccountNumber());
+  }
+
+  @GetMapping("/account")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
+  public OutputGetAccount getAccount() {
+    AuthMemberDetail userDetail =
+        (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String accountNumber = memberService.getAccountNumber(userDetail.getId());
+    return new OutputGetAccount(userDetail.getId(), accountNumber);
   }
 }
