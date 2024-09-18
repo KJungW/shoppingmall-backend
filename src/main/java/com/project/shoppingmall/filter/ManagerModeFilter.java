@@ -70,7 +70,7 @@ public class ManagerModeFilter extends OncePerRequestFilter {
 
   private void makeResponseWithRequestBlockOnManagerModeOn(HttpServletResponse response)
       throws IOException {
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    response.setStatus(HttpServletResponse.SC_FOUND);
     response.setContentType("application/json; charset=UTF-8");
     ErrorResult errorResult =
         new ErrorResult(
