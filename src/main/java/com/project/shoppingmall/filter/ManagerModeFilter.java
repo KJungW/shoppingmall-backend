@@ -32,7 +32,7 @@ public class ManagerModeFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    if (request.getRequestURI().equals("/health")) {
+    if (checkPermitUrl(request)) {
       filterChain.doFilter(request, response);
       return;
     }
@@ -46,6 +46,12 @@ public class ManagerModeFilter extends OncePerRequestFilter {
       if (!request.getRequestURI().equals("/product/type")) filterChain.doFilter(request, response);
       else makeResponseWithRequestBlockOnManagerModeOff(response);
     }
+  }
+
+  private boolean checkPermitUrl(HttpServletRequest request) {
+    String uri = request.getRequestURI();
+    if (uri.equals("/health") || uri.equals("/product/types")) return true;
+    else return false;
   }
 
   private boolean checkRootManagerAccessToken(HttpServletRequest request) {
