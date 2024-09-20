@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InputCompleteRefund {
-  @NotNull private long refundId;
+  @NotNull private Long refundId;
 }

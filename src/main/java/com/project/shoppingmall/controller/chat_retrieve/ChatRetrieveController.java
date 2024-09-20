@@ -9,8 +9,11 @@ import com.project.shoppingmall.dto.chat.ChatMessageDto;
 import com.project.shoppingmall.dto.chat.ChatRoomDto;
 import com.project.shoppingmall.service.chat.ChatRetrieveService;
 import com.project.shoppingmall.service.chat_room.ChatRoomRetrieveService;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +29,8 @@ public class ChatRetrieveController {
   @GetMapping("/seller/chatrooms")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveChatRooms retrieveChatRoomsBySeller(
-      @RequestParam("sliceNumber") Integer sliceNumber,
-      @RequestParam("sliceSize") Integer sliceSize) {
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     SliceResult<ChatRoomDto> sliceResult =
@@ -39,8 +42,8 @@ public class ChatRetrieveController {
   @GetMapping("/buyer/chatrooms")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveChatRooms retrieveChatRoomsByBuyer(
-      @RequestParam("sliceNumber") Integer sliceNumber,
-      @RequestParam("sliceSize") Integer sliceSize) {
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     SliceResult<ChatRoomDto> sliceResult =
@@ -51,7 +54,8 @@ public class ChatRetrieveController {
   @GetMapping("/chat/messages/latest")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveInitChatMessage retrieveInitChatMessages(
-      @RequestParam("sliceSize") Integer sliceSize, @RequestParam("chatRoomId") Long chatRoomId) {
+      @Positive @RequestParam("sliceSize") Integer sliceSize,
+      @RequestParam("chatRoomId") Long chatRoomId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     List<ChatMessageDto> chatMessages =
@@ -62,9 +66,9 @@ public class ChatRetrieveController {
   @GetMapping("/chat/messages")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveChatMessage retrieveChatMessages(
-      @RequestParam("sliceSize") Integer sliceSize,
+      @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("chatRoomId") Integer chatRoomId,
-      @RequestParam("startChatMessageId") String startChatMessageId) {
+      @Length(min = 1, max = 50) @RequestParam("startChatMessageId") String startChatMessageId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     List<ChatMessageDto> chatMessages =

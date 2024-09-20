@@ -1,21 +1,24 @@
 package com.project.shoppingmall.controller.product.input;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @AllArgsConstructor
 public class InputSaveProduct {
   @NotNull private Long productTypeId;
-  @NotEmpty private String name;
-  private List<InputProductOption> singleOptions;
-  private List<InputProductOption> multiOptions;
-  private List<InputBlockData> blockDataList;
+
+  @NotBlank
+  @Length(min = 1, max = 50)
+  private String name;
+
+  @Valid private List<InputProductOption> singleOptions;
+  @Valid private List<InputProductOption> multiOptions;
+  @Valid private List<InputBlockData> blockDataList;
   @NotNull @Positive private Integer price;
   @NotNull @PositiveOrZero private Integer discountAmount;
   @NotNull @PositiveOrZero private Double discountRate;

@@ -32,8 +32,8 @@ public class ProductRetrieveController {
   @GetMapping("{productTypeId}/products")
   public OutputGetProductsByTypeWithFilter getProductsByTypeWithFilter(
       @PathVariable("productTypeId") Long productId,
-      @RequestParam("sliceSize") Integer sliceSize,
-      @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize,
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @RequestParam("filterType") ProductRetrieveFilterType filterType) {
     Slice<Product> sliceResult =
         productRetrieveService.retrieveByTypeWithFilter(
@@ -44,8 +44,8 @@ public class ProductRetrieveController {
   @GetMapping("/products")
   public OutputGetProductsBySearchWordWithFilter getProductsBySearchWordWithFilter(
       @RequestParam("searchWord") String searchWord,
-      @RequestParam("sliceSize") Integer sliceSize,
-      @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize,
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @RequestParam("filterType") ProductRetrieveFilterType filterType) {
     Slice<Product> sliceResult =
         productRetrieveService.retrieveBySearchWordWithFilter(

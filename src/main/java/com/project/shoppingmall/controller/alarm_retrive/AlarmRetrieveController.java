@@ -5,6 +5,8 @@ import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.alarm.AlarmDto;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
 import com.project.shoppingmall.service.alarm.AlarmRetrieveService;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,8 +20,8 @@ public class AlarmRetrieveController {
   @GetMapping("member/alarms")
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveAllByMember retrieveAllByMember(
-      @RequestParam("sliceNumber") Integer sliceNumber,
-      @RequestParam("sliceSize") Integer sliceSize) {
+      @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
+      @Positive @RequestParam("sliceSize") Integer sliceSize) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     SliceResult<AlarmDto> sliceResult =

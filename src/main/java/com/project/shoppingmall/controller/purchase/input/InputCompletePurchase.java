@@ -1,18 +1,21 @@
 package com.project.shoppingmall.controller.purchase.input;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @AllArgsConstructor
 public class InputCompletePurchase {
-  @NotEmpty
+  @NotBlank
+  @Length(min = 1, max = 100)
   @JsonProperty("imp_uid")
   private String paymentUid;
 
-  @NotEmpty
+  @NotBlank
+  @Length(min = 1, max = 100)
   @JsonProperty("merchant_uid")
   private String purchaseUid;
 

@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InputReadyPurchase {
-  @NotNull private List<InputBasketItem> basketItems;
-  @Valid private InputDeliveryInfo deliveryInfo;
+  @NotNull @Valid private List<InputBasketItem> basketItems;
+  @NotNull @Valid private InputDeliveryInfo deliveryInfo;
 }

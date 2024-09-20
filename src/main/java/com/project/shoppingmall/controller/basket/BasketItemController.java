@@ -11,6 +11,7 @@ import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.basket_item.BasketItemRetrieveService;
 import com.project.shoppingmall.service.basket_item.BasketItemService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,7 +61,7 @@ public class BasketItemController {
   @DeleteMapping
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void deleteBasketItem(
-      @Valid @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
+      @Size(min = 1) @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     basketItemDeleteService.deleteBasketItemByMember(userDetail.getId(), basketItemIdList);

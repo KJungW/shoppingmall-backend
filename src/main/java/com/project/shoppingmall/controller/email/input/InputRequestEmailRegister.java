@@ -4,9 +4,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @NoArgsConstructor
 public class InputRequestEmailRegister {
-  @NotBlank @Email private String email;
+  @Email
+  @NotBlank
+  @Length(min = 1, max = 320)
+  private String email;
 }
