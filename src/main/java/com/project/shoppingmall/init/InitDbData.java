@@ -3,6 +3,7 @@ package com.project.shoppingmall.init;
 import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.dto.block.TextBlock;
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
+import com.project.shoppingmall.dto.token.RefreshTokenData;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
@@ -15,6 +16,7 @@ import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;
+import com.project.shoppingmall.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ public class InitDbData {
   private final ReviewRepository reviewRepository;
   private final ProductReportRepository productReportRepository;
   private final ReviewReportRepository reviewReportRepository;
+  private final JwtUtil jwtUtil;
 
   @PostConstruct
   public void init() throws NoSuchFieldException, IllegalAccessException {
@@ -102,27 +105,37 @@ public class InitDbData {
     // 회원 생성
     Member seller =
         Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialId123123421aaa")
+            .loginType(LoginType.EMAIL)
             .nickName("seller")
+            .email("seller1234@test.com")
+            .password("seller1234!")
             .profileImageUrl("init/member_profile_img.png")
             .profileImageDownLoadUrl(
                 "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
             .role(MemberRoleType.ROLE_MEMBER)
             .isBan(false)
             .build();
+    String sellerRefreshToken =
+        jwtUtil.createRefreshToken(
+            new RefreshTokenData(seller.getId(), seller.getRole().toString()));
+    seller.updateRefreshToken(new MemberToken(sellerRefreshToken));
     memberRepository.save(seller);
+
     Member buyer =
         Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialIdcvv90498s0df")
+            .loginType(LoginType.EMAIL)
             .nickName("buyer")
+            .email("buyer1234@test.com")
+            .password("buyer1234!")
             .profileImageUrl("init/member_profile_img.png")
             .profileImageDownLoadUrl(
                 "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
             .role(MemberRoleType.ROLE_MEMBER)
             .isBan(false)
             .build();
+    String buyerRefreshToken =
+        jwtUtil.createRefreshToken(new RefreshTokenData(buyer.getId(), buyer.getRole().toString()));
+    buyer.updateRefreshToken(new MemberToken(buyerRefreshToken));
     memberRepository.save(buyer);
 
     // 타입별로 30개의 제품 생성
