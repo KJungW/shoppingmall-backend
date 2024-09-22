@@ -21,6 +21,7 @@ import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
+import com.project.shoppingmall.service.s3.S3Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class MemberDeleteService {
   private final ChatRoomDeleteService chatRoomDeleteService;
   private final PurchaseItemFindService purchaseItemFindService;
   private final RefundFindService refundFindService;
+  private final S3Service s3Service;
 
   @Value("${project_role.refund.create_possible_day}")
   public Integer refundPossibleDay;
@@ -83,6 +85,12 @@ public class MemberDeleteService {
     // 제품삭제
     List<Product> products = productFindService.findAllBySeller(member.getId());
     productDeleteService.deleteProductList(products);
+
+    // 프로필 이미지 삭제
+    if (member.getProfileImageUrl() != null && !member.getProfileImageUrl().isBlank()) {
+      System.out.println("member.getProfileImageUrl() 삭제 = " + member.getProfileImageUrl());
+      s3Service.deleteFile(member.getProfileImageUrl());
+    }
 
     // 회원삭제
     memberRepository.delete(member);

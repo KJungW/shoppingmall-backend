@@ -4,11 +4,10 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.type.ReportResultType;
-import java.io.IOException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class ReviewReportBuilder {
-  public static ReviewReport.ReviewReportBuilder fullData() throws IOException {
+  public static ReviewReport.ReviewReportBuilder fullData() {
     return ReviewReport.builder()
         .reporter(MemberBuilder.fullData().build())
         .title("test title")
@@ -16,15 +15,13 @@ public class ReviewReportBuilder {
         .review(ReviewBuilder.fullData().build());
   }
 
-  public static ReviewReport makeNoProcessedReviewReport(Member reporter, Review review)
-      throws IOException {
+  public static ReviewReport makeNoProcessedReviewReport(Member reporter, Review review) {
     ReviewReport report = ReviewReportBuilder.fullData().review(review).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", false);
     return report;
   }
 
-  public static ReviewReport makeProcessedReviewReport(Member reporter, Review review)
-      throws IOException {
+  public static ReviewReport makeProcessedReviewReport(Member reporter, Review review) {
     ReviewReport report = ReviewReportBuilder.fullData().review(review).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", true);
     ReflectionTestUtils.setField(report, "reportResult", ReportResultType.NO_ACTION);

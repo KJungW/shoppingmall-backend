@@ -2,7 +2,6 @@ package com.project.shoppingmall.testdata;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.type.BlockType;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -12,7 +11,7 @@ public class ProductBuilder {
   public static final Integer TEXT_BLOCK_COUNT = 1;
   public static final Integer IMAGE_BLOCK_COUNT = 3;
 
-  public static Product.ProductBuilder fullData() throws IOException {
+  public static Product.ProductBuilder fullData() {
     ProductType givenType = new ProductType("test$type");
     ReflectionTestUtils.setField(givenType, "id", 1L);
     List<ProductSingleOption> givenSingleOptions =
@@ -102,7 +101,7 @@ public class ProductBuilder {
         .contents(givenContents);
   }
 
-  public static Product.ProductBuilder lightData() throws IOException {
+  public static Product.ProductBuilder lightData() {
     return Product.builder()
         .seller(MemberBuilder.fullData().build())
         .productType(new ProductType("test$type"))
@@ -119,11 +118,7 @@ public class ProductBuilder {
   }
 
   public static Product makeNoBannedProduct(Member seller, ProductType type) {
-    try {
-      return ProductBuilder.fullData().seller(seller).productType(type).isBan(false).build();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return ProductBuilder.lightData().seller(seller).productType(type).isBan(false).build();
   }
 
   public static Product makeProduct(long id, Member seller) {

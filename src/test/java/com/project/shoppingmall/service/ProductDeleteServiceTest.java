@@ -19,6 +19,7 @@ import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
+import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -44,6 +45,7 @@ class ProductDeleteServiceTest {
   private PurchaseItemFindService mockPurchaseItemFindService;
   private AlarmFindService mockAlarmFindService;
   private AlarmDeleteService mockAlarmDeleteService;
+  private S3Service mockS3Service;
 
   @BeforeEach
   public void beforeEach() {
@@ -58,6 +60,7 @@ class ProductDeleteServiceTest {
     mockPurchaseItemFindService = mock(PurchaseItemFindService.class);
     mockAlarmFindService = mock(AlarmFindService.class);
     mockAlarmDeleteService = mock(AlarmDeleteService.class);
+    mockS3Service = mock(S3Service.class);
 
     target =
         new ProductDeleteService(
@@ -71,7 +74,8 @@ class ProductDeleteServiceTest {
             mockReportDeleteService,
             mockPurchaseItemFindService,
             mockAlarmFindService,
-            mockAlarmDeleteService);
+            mockAlarmDeleteService,
+            mockS3Service);
 
     ReflectionTestUtils.setField(target, "productDeletePossibleDate", 30);
   }
@@ -85,7 +89,7 @@ class ProductDeleteServiceTest {
     long givenProductId = 20L;
 
     // - productRepository.findByIdWithSeller() 세팅
-    Product givenProduct = ProductBuilder.fullData().build();
+    Product givenProduct = ProductBuilder.lightData().build();
     ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
     ReflectionTestUtils.setField(givenProduct.getSeller(), "id", givenSellerId);
     when(mockProductFindService.findByIdWithSeller(anyLong()))

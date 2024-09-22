@@ -6,68 +6,77 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.testdata.*;
-import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 @SpringBootTest
 @Transactional
 @Rollback
 class MemberDeleteServiceIntegrationTest {
   @Autowired private MemberDeleteService target;
-
   @Autowired private EntityManager em;
-
+  @Autowired private IntegrationTestDataMaker testDataMaker;
   @Autowired private MongoTemplate mongoTemplate;
+  @Autowired private S3Client s3Client;
+
+  @Value("${spring.cloud.aws.s3.bucket}")
+  private String bucketName;
 
   private Long givenMemberId;
 
   @BeforeEach
   public void beforeEach() throws IOException {
 
-    ProductType givenType = saveProductType("test$test");
-    Member otherMember = saveMember();
-    Product otherMemberProduct = saveProduct(otherMember, givenType);
+    ProductType givenType = testDataMaker.saveProductType("test$test");
+    Member otherMember = testDataMaker.saveMember();
+    Product otherMemberProduct = testDataMaker.saveProduct(otherMember, givenType);
 
-    Member targetMember = saveMember();
+    Member targetMember = testDataMaker.saveMember();
+    testDataMaker.saveMemberProfileImage(targetMember);
     givenMemberId = targetMember.getId();
 
-    PurchaseItem targetPurchaseItem = savePurchaseItem(otherMemberProduct, targetMember);
-    Review targetReview = saveReview(targetMember, otherMemberProduct, targetPurchaseItem);
-    BasketItem targetBasketItem = saveBasketItem(targetMember, otherMemberProduct);
-    Product targetProduct = saveProduct(targetMember, givenType);
-    Alarm targetAlarm = saveAlarm(targetMember);
+    PurchaseItem targetPurchaseItem =
+        testDataMaker.savePurchaseItem(otherMemberProduct, targetMember);
+    Review targetReview =
+        testDataMaker.saveReview(targetMember, otherMemberProduct, targetPurchaseItem);
+    BasketItem targetBasketItem = testDataMaker.saveBasketItem(targetMember, otherMemberProduct);
+    Product targetProduct = testDataMaker.saveProduct(targetMember, givenType);
+    Alarm targetAlarm = testDataMaker.saveAlarm(targetMember);
 
-    PurchaseItem otherPurchaseItem = savePurchaseItem(targetProduct, otherMember);
-    Review otherReview = saveReview(otherMember, targetProduct, otherPurchaseItem);
+    PurchaseItem otherPurchaseItem = testDataMaker.savePurchaseItem(targetProduct, otherMember);
+    Review otherReview = testDataMaker.saveReview(otherMember, targetProduct, otherPurchaseItem);
 
-    ProductReport targetProductReport = saveProductReport(targetMember, otherMemberProduct);
-    ReviewReport targetReviewReport = saveReviewReport(targetMember, otherReview);
+    ProductReport targetProductReport =
+        testDataMaker.saveProductReport(targetMember, otherMemberProduct);
+    ReviewReport targetReviewReport = testDataMaker.saveReviewReport(targetMember, otherReview);
 
-    ChatRoom targetChatBuyerRoom = saveChatRoom(targetMember, otherMemberProduct);
-    ChatRoom targetSellerChatRoom = saveChatRoom(otherMember, targetProduct);
+    ChatRoom targetChatBuyerRoom = testDataMaker.saveChatRoom(targetMember, otherMemberProduct);
+    ChatRoom targetSellerChatRoom = testDataMaker.saveChatRoom(otherMember, targetProduct);
     ChatMessage targetChatMessageInBuyerChatRoom =
-        saveChatMessage(targetChatBuyerRoom, targetMember, "test message");
+        testDataMaker.saveChatMessage(targetChatBuyerRoom, targetMember, "test message");
     ChatMessage targetChatMessageByInSellerChatRoom =
-        saveChatMessage(targetSellerChatRoom, targetMember, "test message");
+        testDataMaker.saveChatMessage(targetSellerChatRoom, targetMember, "test message");
 
-    ChatReadRecord targetReadRecordByBuyer = saveChatReadRecord(targetChatBuyerRoom, targetMember);
+    ChatReadRecord targetReadRecordByBuyer =
+        testDataMaker.saveChatReadRecord(targetChatBuyerRoom, targetMember);
     ChatReadRecord targetReadRecordBySeller =
-        saveChatReadRecord(targetSellerChatRoom, targetMember);
+        testDataMaker.saveChatReadRecord(targetSellerChatRoom, targetMember);
 
     em.flush();
     em.clear();
@@ -84,6 +93,8 @@ class MemberDeleteServiceIntegrationTest {
 
     // when
     target.deleteMember(givenMember);
+    em.flush();
+    em.clear();
 
     // then
     checkPurchaseAndPurchaseItemIsNotDelete();
@@ -96,85 +107,7 @@ class MemberDeleteServiceIntegrationTest {
     checkChatMessageIsDelete();
     checkChatReadRecordIsDelete();
     checkMemberIsDelete();
-  }
-
-  private ChatReadRecord saveChatReadRecord(ChatRoom chatRoom, Member member) {
-    ChatReadRecord chatReadRecord = ChatReadRecordBuilder.makeChatReadRecord(chatRoom, member);
-    em.persist(chatReadRecord);
-    return chatReadRecord;
-  }
-
-  private ChatMessage saveChatMessage(ChatRoom chatRoom, Member writer, String message) {
-    ChatMessage chatMessage = ChatMessageBuilder.makeChatMessage(chatRoom, writer, message);
-    mongoTemplate.insert(chatMessage);
-    return chatMessage;
-  }
-
-  private ChatRoom saveChatRoom(Member buyer, Product product) {
-    ChatRoom chatRoom = ChatRoomBuilder.makeChatRoom(buyer, product);
-    em.persist(chatRoom);
-    return chatRoom;
-  }
-
-  private ReviewReport saveReviewReport(Member reporter, Review review) throws IOException {
-    ReviewReport reviewReport = ReviewReportBuilder.makeProcessedReviewReport(reporter, review);
-    em.persist(reviewReport);
-    return reviewReport;
-  }
-
-  private ProductReport saveProductReport(Member reporter, Product product) throws IOException {
-    ProductReport productReport =
-        ProductReportBuilder.makeNoProcessedProductReport(reporter, product);
-    em.persist(productReport);
-    return productReport;
-  }
-
-  private Alarm saveAlarm(Member listener) throws IOException {
-    Alarm alarm = AlarmBuilder.makeMemberBanAlarm(listener);
-    em.persist(alarm);
-    return alarm;
-  }
-
-  private BasketItem saveBasketItem(Member member, Product product) throws IOException {
-    BasketItem basketItem = BasketItemBuilder.makeBasketItem(member, product);
-    em.persist(basketItem);
-    return basketItem;
-  }
-
-  private Review saveReview(Member reviewer, Product product, PurchaseItem purchaseItem)
-      throws IOException {
-    Review review = ReviewBuilder.makeReview(reviewer, product);
-    purchaseItem.registerReview(review);
-    em.persist(review);
-    return review;
-  }
-
-  private PurchaseItem savePurchaseItem(Product product, Member buyer) throws IOException {
-    PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(product);
-    Purchase purchase =
-        PurchaseBuilder.makePurchase(
-            buyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
-    em.persist(purchase);
-    return purchaseItem;
-  }
-
-  private Product saveProduct(Member seller, ProductType type) throws IOException {
-    Product product = ProductBuilder.makeNoBannedProduct(seller, type);
-    em.persist(product);
-    return product;
-  }
-
-  private Member saveMember() {
-    Member otherMember = MemberBuilder.fullData().build();
-    em.persist(otherMember);
-    return otherMember;
-  }
-
-  @NotNull
-  private ProductType saveProductType(String typeName) {
-    ProductType givenType = new ProductType(typeName);
-    em.persist(givenType);
-    return givenType;
+    checkMemberProfileImageDelete(givenMember.getProfileImageUrl());
   }
 
   private void checkMemberIsDelete() {
@@ -289,5 +222,15 @@ class MemberDeleteServiceIntegrationTest {
                 PurchaseItem.class)
             .setParameter("purchaseId", realPurchase.getId())
             .getSingleResult();
+  }
+
+  public void checkMemberProfileImageDelete(String givenImageUri) {
+    assertThrows(
+        NoSuchKeyException.class,
+        () -> {
+          HeadObjectRequest headObjectRequest =
+              HeadObjectRequest.builder().bucket(bucketName).key(givenImageUri).build();
+          s3Client.headObject(headObjectRequest);
+        });
   }
 }

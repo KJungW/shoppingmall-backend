@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class ProductReportBuilder {
-  public static ProductReport.ProductReportBuilder fullData() throws IOException {
+  public static ProductReport.ProductReportBuilder fullData() {
     Member givenMember = MemberBuilder.fullData().build();
     Product givenProduct = ProductBuilder.fullData().build();
     return ProductReport.builder()
@@ -18,8 +18,7 @@ public class ProductReportBuilder {
         .product(givenProduct);
   }
 
-  public static ProductReport makeNoProcessedProductReport(Member reporter, Product product)
-      throws IOException {
+  public static ProductReport makeNoProcessedProductReport(Member reporter, Product product) {
     ProductReport report =
         ProductReportBuilder.fullData().product(product).reporter(reporter).build();
     ReflectionTestUtils.setField(report, "isProcessedComplete", false);

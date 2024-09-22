@@ -5,7 +5,6 @@ import com.project.shoppingmall.entity.BasketItem;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.util.JsonUtil;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -21,7 +20,7 @@ public class BasketItemBuilder {
         .options("testOptionsJson");
   }
 
-  public static BasketItem makeBasketItem(Member owner, Product product) throws IOException {
+  public static BasketItem makeBasketItem(Member owner, Product product) {
     return BasketItem.builder().member(owner).product(product).build();
   }
 

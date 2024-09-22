@@ -1,5 +1,6 @@
 package com.project.shoppingmall.service.product;
 
+import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.exception.DataNotFound;
@@ -15,6 +16,9 @@ import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
+import com.project.shoppingmall.service.s3.S3Service;
+import com.project.shoppingmall.type.BlockType;
+import com.project.shoppingmall.util.JsonUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +41,7 @@ public class ProductDeleteService {
   private final PurchaseItemFindService purchaseItemFindService;
   private final AlarmFindService alarmFindService;
   private final AlarmDeleteService alarmDeleteService;
+  private final S3Service s3Service;
 
   @Value("${project_role.product.delete_possible_day}")
   private Integer productDeletePossibleDate;
@@ -55,6 +60,23 @@ public class ProductDeleteService {
 
     List<Alarm> alarmsList = alarmFindService.findByTargetProduct(product.getId());
     alarmDeleteService.deleteAlarmList(alarmsList);
+
+    product
+        .getProductImages()
+        .forEach(
+            image -> {
+              s3Service.deleteFile(image.getImageUri());
+            });
+    product
+        .getContents()
+        .forEach(
+            content -> {
+              if (content.getType().equals(BlockType.IMAGE_TYPE)) {
+                ImageBlock imageBlock =
+                    JsonUtil.convertJsonToObject(content.getContent(), ImageBlock.class);
+                s3Service.deleteFile(imageBlock.getImageUri());
+              }
+            });
 
     productRepository.delete(product);
   }

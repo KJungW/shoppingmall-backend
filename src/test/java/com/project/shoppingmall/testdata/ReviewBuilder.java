@@ -3,10 +3,9 @@ package com.project.shoppingmall.testdata;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.Review;
-import java.io.IOException;
 
 public class ReviewBuilder {
-  public static Review.ReviewBuilder fullData() throws IOException {
+  public static Review.ReviewBuilder fullData() {
     return Review.builder()
         .writer(MemberBuilder.fullData().build())
         .product(ProductBuilder.fullData().build())
@@ -17,7 +16,7 @@ public class ReviewBuilder {
         .description("testDescription");
   }
 
-  public static Review makeReview(Member reviewer, Product product) throws IOException {
+  public static Review makeReview(Member reviewer, Product product) {
     return ReviewBuilder.fullData().writer(reviewer).product(product).build();
   }
 }

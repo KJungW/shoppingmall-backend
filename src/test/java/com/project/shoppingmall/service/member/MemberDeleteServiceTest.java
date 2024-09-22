@@ -23,12 +23,12 @@ import com.project.shoppingmall.service.report.ReportDeleteService;
 import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
+import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.PurchaseItemBuilder;
 import com.project.shoppingmall.testdata.RefundBuilder;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.RefundStateType;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +59,7 @@ public class MemberDeleteServiceTest {
   @Mock private ChatRoomDeleteService mockChatRoomDeleteService;
   @Mock private PurchaseItemFindService mockPurchaseItemFindService;
   @Mock private RefundFindService mockRefundFindService;
+  @Mock private S3Service s3Service;
   public Integer refundPossibleDay = 30;
 
   @BeforeEach
@@ -111,7 +112,7 @@ public class MemberDeleteServiceTest {
 
   @Test
   @DisplayName("deleteMemberInController() : 처리되지 않은 환불요청이 존재")
-  public void deleteMemberInController_notProcessingRefundRequest() throws IOException {
+  public void deleteMemberInController_notProcessingRefundRequest() {
     // given
     long inputMemberId = 10L;
 

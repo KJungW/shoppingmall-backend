@@ -2,24 +2,27 @@ package com.project.shoppingmall.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
+import com.project.shoppingmall.dto.block.ImageBlock;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.entity.value.DeliveryInfo;
 import com.project.shoppingmall.service.product.ProductDeleteService;
-import com.project.shoppingmall.type.LoginType;
-import com.project.shoppingmall.type.MemberRoleType;
+import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.BlockType;
+import com.project.shoppingmall.util.JsonUtil;
 import jakarta.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 @SpringBootTest
 @Transactional
@@ -27,161 +30,67 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductDeleteIntegrationTest {
   @Autowired private ProductDeleteService target;
   @Autowired private EntityManager em;
-  private Product givenProduct;
-  private List<PurchaseItem> givenPurchaseItems = new ArrayList<>();
-  private List<Review> givenReviews = new ArrayList<>();
+  @Autowired private IntegrationTestDataMaker testDataMaker;
+  @Autowired private S3Client s3Client;
+
+  @Value("${spring.cloud.aws.s3.bucket}")
+  private String bucketName;
+
+  private long targetProductId;
 
   @BeforeEach
   public void beforeEach() {
-    // 판매자와 구매자 생성
-    Member seller =
-        Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialId123123421aaa")
-            .nickName("seller")
-            .profileImageUrl("init/member_profile_img.png")
-            .profileImageDownLoadUrl(
-                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    em.persist(seller);
-    Member buyer =
-        Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialIdcvv90498s0df")
-            .nickName("buyer")
-            .profileImageUrl("init/member_profile_img.png")
-            .profileImageDownLoadUrl(
-                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    em.persist(buyer);
+    Member seller = testDataMaker.saveMember();
+    Member buyer = testDataMaker.saveMember();
+    Member other = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    Product targetProduct = testDataMaker.saveProduct(seller, type);
+    testDataMaker.saveProductImage(targetProduct);
+    testDataMaker.saveProductContent(targetProduct);
+    targetProductId = targetProduct.getId();
+    ProductReport productReport = testDataMaker.saveProductReport(buyer, targetProduct);
+    BasketItem basketItem = testDataMaker.saveBasketItem(buyer, targetProduct);
+    PurchaseItem purchaseItem = testDataMaker.savePurchaseItem(targetProduct, buyer);
+    Review review = testDataMaker.saveReview(buyer, targetProduct, purchaseItem);
+    ReviewReport reviewReport = testDataMaker.saveReviewReport(other, review);
 
-    // 제품 타입 생성
-    ProductType type = new ProductType("test$test");
-    em.persist(type);
-
-    // 구매할 제품 생성
-    Product targetProduct =
-        Product.builder()
-            .seller(seller)
-            .productType(type)
-            .productImages(new ArrayList<>())
-            .contents(new ArrayList<>())
-            .singleOptions(new ArrayList<>())
-            .multipleOptions(new ArrayList<>())
-            .name("test입니다.")
-            .price(2000)
-            .discountAmount(100)
-            .discountRate(10.0)
-            .isBan(false)
-            .scoreAvg(0.0)
-            .build();
-    em.persist(targetProduct);
-    givenProduct = targetProduct;
-
-    // 5개의 BasketItem 생성
-    for (int i = 0; i < 5; i++) {
-      BasketItem basketItem =
-          BasketItem.builder().member(buyer).product(targetProduct).options("").build();
-      em.persist(basketItem);
-    }
-
-    // 5개의 ProductReport 생성
-    for (int i = 0; i < 5; i++) {
-      ProductReport productReport =
-          ProductReport.builder()
-              .reporter(buyer)
-              .title("테스트용 ProductReport 제목입니다.")
-              .description("테스트용 ProductReport 설명입니다.")
-              .product(targetProduct)
-              .build();
-      em.persist(productReport);
-    }
-
-    // 5개의 Purchase 생성
-    for (int i = 0; i < 5; i++) {
-      List<PurchaseItem> purchaseItems = new ArrayList<>();
-      // Purchase마다 3개의 PurchaseItem 생성
-      for (int k = 0; k < 3; k++) {
-        ProductDataForPurchase productOptionObj =
-            ProductDataForPurchase.builder()
-                .productId(targetProduct.getId())
-                .sellerId(targetProduct.getSeller().getId())
-                .sellerName(targetProduct.getSeller().getNickName())
-                .productName(targetProduct.getName())
-                .productTypeName(targetProduct.getProductType().getTypeName())
-                .price(targetProduct.getPrice())
-                .discountAmount(targetProduct.getDiscountAmount())
-                .discountRate(targetProduct.getDiscountRate())
-                .build();
-        PurchaseItem purchaseItem =
-            PurchaseItem.builder()
-                .productData(productOptionObj)
-                .finalPrice(targetProduct.getFinalPrice())
-                .build();
-        purchaseItems.add(purchaseItem);
-        givenPurchaseItems.add(purchaseItem);
-
-        // PurchaseItem마다 Review 생성
-        Review review =
-            Review.builder()
-                .writer(buyer)
-                .product(targetProduct)
-                .score(i < 5 ? 3 : 2)
-                .title("testTitle")
-                .reviewImageUri("testImageUri")
-                .reviewImageDownloadUrl("testImageUrl")
-                .description("testDescription")
-                .build();
-        purchaseItem.registerReview(review);
-        em.persist(review);
-        givenReviews.add(review);
-
-        // Review마다 ReviewReport 생성
-        ReviewReport reviewReport =
-            ReviewReport.builder()
-                .reporter(buyer)
-                .title("테스트용 ReviewReport 제목 입니다.")
-                .description("테스트용 ReviewReport 설명 입니다.")
-                .review(review)
-                .build();
-        em.persist(reviewReport);
-      }
-      int totalPrice = purchaseItems.stream().mapToInt(PurchaseItem::getFinalPrice).sum();
-      DeliveryInfo deliveryInfo =
-          new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
-      Purchase purchase =
-          Purchase.builder()
-              .buyerId(buyer.getId())
-              .purchaseItems(purchaseItems)
-              .purchaseUid(i + "test-complete-PurchaseUid")
-              .purchaseTitle("임시구매" + i)
-              .deliveryInfo(deliveryInfo)
-              .totalPrice(totalPrice)
-              .build();
-      purchase.convertStateToComplete(i + "test-complete-PaymentUid");
-      em.persist(purchase);
-    }
+    em.flush();
+    em.clear();
   }
 
   @Test
   @DisplayName("deleteProduct() : 정상흐름")
   public void deleteProduct_ok() {
+    Product givenProduct =
+        em.createQuery("select p from Product p where p.id = :targetProductId", Product.class)
+            .setParameter("targetProductId", targetProductId)
+            .getSingleResult();
+
     // when
     target.deleteProduct(givenProduct);
+    em.flush();
+    em.clear();
 
     // then
-    String checkBasketItemResultQuery =
-        "select bi From BasketItem bi where bi.product.id = :productId";
-    List<BasketItem> basketItemResult =
-        em.createQuery(checkBasketItemResultQuery, BasketItem.class)
+    checkProductReportDelete(givenProduct);
+    checkBasketItemDelete(givenProduct);
+    checkReviewDelete(givenProduct);
+    checkReviewReportDelete(givenProduct);
+    checkPurchaseItemNotDelete(givenProduct);
+    checkProductImageDelete(givenProduct);
+    checkProductContentImageDelete(givenProduct);
+  }
+
+  private void checkReviewDelete(Product givenProduct) {
+    String checkReviewResultQuery = "select r From Review r where r.product.id = :productId";
+    List<Review> reviewResult =
+        em.createQuery(checkReviewResultQuery, Review.class)
             .setParameter("productId", givenProduct.getId())
             .getResultList();
-    assertEquals(0, basketItemResult.size());
+    assertEquals(0, reviewResult.size());
+  }
 
+  private void checkProductReportDelete(Product givenProduct) {
     String checkProductReportResultQuery =
         "select pr From ProductReport pr where pr.product.id = :productId";
     List<ProductReport> productReportResult =
@@ -189,34 +98,75 @@ public class ProductDeleteIntegrationTest {
             .setParameter("productId", givenProduct.getId())
             .getResultList();
     assertEquals(0, productReportResult.size());
+  }
 
-    String checkReviewResultQuery = "select r From Review r where r.product.id = :productId";
-    List<Review> reviewResult =
-        em.createQuery(checkReviewResultQuery, Review.class)
+  private void checkBasketItemDelete(Product givenProduct) {
+    String checkBasketItemResultQuery =
+        "select bi From BasketItem bi where bi.product.id = :productId";
+    List<BasketItem> basketItemResult =
+        em.createQuery(checkBasketItemResultQuery, BasketItem.class)
             .setParameter("productId", givenProduct.getId())
             .getResultList();
-    assertEquals(0, reviewResult.size());
+    assertEquals(0, basketItemResult.size());
+  }
 
-    givenReviews.forEach(
-        review -> {
-          String checkReviewReportResultQuery =
-              "select rr From ReviewReport rr where rr.review.id = :reviewId";
-          List<ReviewReport> reviewReportResult =
-              em.createQuery(checkReviewReportResultQuery, ReviewReport.class)
-                  .setParameter("reviewId", review.getId())
-                  .getResultList();
-          assertEquals(0, reviewReportResult.size());
-        });
+  private void checkReviewReportDelete(Product givenProduct) {
+    String checkReviewReportResultQuery =
+        "select rr From ReviewReport rr where rr.review.product.id = :productId";
+    List<ReviewReport> reviewReportResult =
+        em.createQuery(checkReviewReportResultQuery, ReviewReport.class)
+            .setParameter("productId", givenProduct.getId())
+            .getResultList();
+    assertEquals(0, reviewReportResult.size());
+  }
 
-    givenPurchaseItems.forEach(
-        purchaseItem -> {
-          String checkPurchaseItemResult =
-              "select pi From PurchaseItem pi where pi.id = :purchaseItemId";
-          PurchaseItem purchaseItemResult =
-              em.createQuery(checkPurchaseItemResult, PurchaseItem.class)
-                  .setParameter("purchaseItemId", purchaseItem.getId())
-                  .getSingleResult();
-          assertNull(purchaseItemResult.getReview());
-        });
+  private void checkPurchaseItemNotDelete(Product givenProduct) {
+    String checkPurchaseItemResult =
+        "select pi From PurchaseItem pi where pi.productId = :prodcutId";
+    List<PurchaseItem> purchaseItemResult =
+        em.createQuery(checkPurchaseItemResult, PurchaseItem.class)
+            .setParameter("prodcutId", givenProduct.getId())
+            .getResultList();
+    assertEquals(1, purchaseItemResult.size());
+  }
+
+  private void checkProductImageDelete(Product givenProduct) {
+    givenProduct
+        .getProductImages()
+        .forEach(
+            productImage -> {
+              assertThrows(
+                  NoSuchKeyException.class,
+                  () -> {
+                    HeadObjectRequest headObjectRequest =
+                        HeadObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(productImage.getImageUri())
+                            .build();
+                    s3Client.headObject(headObjectRequest);
+                  });
+            });
+  }
+
+  private void checkProductContentImageDelete(Product givenProduct) {
+    givenProduct
+        .getContents()
+        .forEach(
+            content -> {
+              if (content.getType().equals(BlockType.IMAGE_TYPE)) {
+                assertThrows(
+                    NoSuchKeyException.class,
+                    () -> {
+                      ImageBlock imageBlock =
+                          JsonUtil.convertJsonToObject(content.getContent(), ImageBlock.class);
+                      HeadObjectRequest headObjectRequest =
+                          HeadObjectRequest.builder()
+                              .bucket(bucketName)
+                              .key(imageBlock.getImageUri())
+                              .build();
+                      s3Client.headObject(headObjectRequest);
+                    });
+              }
+            });
   }
 }
