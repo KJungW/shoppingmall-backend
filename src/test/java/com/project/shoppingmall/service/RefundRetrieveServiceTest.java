@@ -3,19 +3,18 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
-import com.project.shoppingmall.entity.Member;
-import com.project.shoppingmall.entity.PurchaseItem;
+import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
 import com.project.shoppingmall.service.refund.RefundRetrieveService;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.PurchaseBuilder;
-import com.project.shoppingmall.testdata.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.type.LoginType;
+import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.util.JsonUtil;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class RefundRetrieveServiceTest {
   private RefundRetrieveService target;
@@ -52,141 +51,124 @@ class RefundRetrieveServiceTest {
 
   @Test
   @DisplayName("retrieveAllByPurchaseItem() : 정상흐름 - 구매자 입장")
-  public void retrieveAllByPurchaseItem_ok_buyer() throws IOException {
+  public void retrieveAllByPurchaseItem_ok_buyer() {
     // given
-    // - 인자세팅
-    long givenBuyerId = 3L;
-    long givenPurchaseItemId = 5L;
-    int givenSliceNum = 0;
-    int givenSliceSize = 5;
+    long inputBuyerId = 3L;
+    long inputPurchaseItemId = 5L;
+    int inputSliceNum = 0;
+    int inputSliceSize = 5;
 
-    // - memberService.findById() 세팅
-    Member givenBuyer = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenBuyer, "id", givenBuyerId);
+    Member givenBuyer = MemberBuilder.makeMember(inputBuyerId, LoginType.NAVER);
+    Member givenSeller = MemberBuilder.makeMember(512L, LoginType.NAVER);
+    Product givenProduct = ProductBuilder.makeProduct(50L, givenSeller);
+    PurchaseItem givenPurchaseItem =
+        PurchaseItemBuilder.makePurchaseItem(inputPurchaseItemId, givenProduct);
+    PurchaseBuilder.makePurchase(
+        10L, givenBuyer, List.of(givenPurchaseItem), PurchaseStateType.COMPLETE);
+    List<Refund> refunds = RefundBuilder.makeRefunds(List.of(1L, 2L, 3L), givenPurchaseItem);
+    Slice<Refund> mockSliceResult =
+        MockSliceResultBuilder.setSlice(inputSliceNum, inputSliceSize, refunds);
+
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenBuyer));
-
-    // - purchaseItemService.findById() 세팅
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
     when(mockPurchaseItemFindService.findById(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
-
-    // - JsonUtil.convertJsonToObject() 세팅
-    long givenSellerId = 40L;
-    ProductDataForPurchase mockProductData = mock(ProductDataForPurchase.class);
-    when(mockProductData.getSellerId()).thenReturn(givenSellerId);
-    jsonUtil.when(() -> JsonUtil.convertJsonToObject(any(), any())).thenReturn(mockProductData);
+    when(mockRefundRetrieveRepository.findByPurchaseItem(anyLong(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveAllByPurchaseItem(
-        givenBuyerId, givenPurchaseItemId, givenSliceNum, givenSliceSize);
+        inputBuyerId, inputPurchaseItemId, inputSliceNum, inputSliceSize);
 
     // then
-    ArgumentCaptor<Long> purchaseItemIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-    verify(mockRefundRetrieveRepository, times(1))
-        .findByPurchaseItem(purchaseItemIdCaptor.capture(), pageRequestCaptor.capture());
-
-    assertEquals(givenPurchaseItemId, purchaseItemIdCaptor.getValue());
-
-    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
-    assertEquals(givenSliceNum, captoredPageRequest.getPageNumber());
-    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
-    assertEquals(
-        Sort.Direction.DESC,
-        captoredPageRequest.getSort().getOrderFor("createDate").getDirection());
-    assertEquals(
-        "createDate", captoredPageRequest.getSort().getOrderFor("createDate").getProperty());
+    check_refundRetrieveRepository_findByPurchaseItem(
+        inputPurchaseItemId, inputSliceNum, inputSliceSize, "createDate");
   }
 
   @Test
   @DisplayName("retrieveAllByPurchaseItem() : 정상흐름 - 판매자 입장")
   public void retrieveAllByPurchaseItem_ok_seller() throws IOException {
     // given
-    // - 인자세팅
-    long givenSellerId = 3L;
-    long givenPurchaseItemId = 5L;
-    int givenSliceNum = 0;
-    int givenSliceSize = 5;
+    long inputSellerId = 3L;
+    long inputPurchaseItemId = 5L;
+    int inputSliceNum = 0;
+    int inputSliceSize = 5;
 
-    // - memberService.findById() 세팅
-    Member givenSeller = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenSeller, "id", givenSellerId);
+    Member givenBuyer = MemberBuilder.makeMember(202L, LoginType.NAVER);
+    Member givenSeller = MemberBuilder.makeMember(inputSellerId, LoginType.NAVER);
+    Product givenProduct = ProductBuilder.makeProduct(50L, givenSeller);
+    PurchaseItem givenPurchaseItem =
+        PurchaseItemBuilder.makePurchaseItem(inputPurchaseItemId, givenProduct);
+    PurchaseBuilder.makePurchase(
+        10L, givenBuyer, List.of(givenPurchaseItem), PurchaseStateType.COMPLETE);
+    List<Refund> refunds = RefundBuilder.makeRefunds(List.of(1L, 2L, 3L), givenPurchaseItem);
+    Slice<Refund> mockSliceResult =
+        MockSliceResultBuilder.setSlice(inputSliceNum, inputSliceSize, refunds);
+
     when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenSeller));
-
-    // - purchaseItemService.findById() 세팅
-    long givenBuyerId = 60L;
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
     when(mockPurchaseItemFindService.findById(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
-
-    // - JsonUtil.convertJsonToObject() 세팅
-    ProductDataForPurchase mockProductData = mock(ProductDataForPurchase.class);
-    when(mockProductData.getSellerId()).thenReturn(givenSellerId);
-    jsonUtil.when(() -> JsonUtil.convertJsonToObject(any(), any())).thenReturn(mockProductData);
+    when(mockRefundRetrieveRepository.findByPurchaseItem(anyLong(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     target.retrieveAllByPurchaseItem(
-        givenBuyerId, givenPurchaseItemId, givenSliceNum, givenSliceSize);
+        inputSellerId, inputPurchaseItemId, inputSliceNum, inputSliceSize);
 
     // then
-    ArgumentCaptor<Long> purchaseItemIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-    verify(mockRefundRetrieveRepository, times(1))
-        .findByPurchaseItem(purchaseItemIdCaptor.capture(), pageRequestCaptor.capture());
-
-    assertEquals(givenPurchaseItemId, purchaseItemIdCaptor.getValue());
-
-    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
-    assertEquals(givenSliceNum, captoredPageRequest.getPageNumber());
-    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
-    assertEquals(
-        Sort.Direction.DESC,
-        captoredPageRequest.getSort().getOrderFor("createDate").getDirection());
-    assertEquals(
-        "createDate", captoredPageRequest.getSort().getOrderFor("createDate").getProperty());
+    check_refundRetrieveRepository_findByPurchaseItem(
+        inputPurchaseItemId, inputSliceNum, inputSliceSize, "createDate");
   }
 
   @Test
-  @DisplayName("retrieveAllByPurchaseItem() : ")
-  public void retrieveAllByPurchaseItem_otherMemberRefunds() throws IOException {
+  @DisplayName("retrieveAllByPurchaseItem() : 현재 회원과 상관없는 구매아이템에 대해 환불조회")
+  public void retrieveAllByPurchaseItem_otherMemberRefunds() {
     // given
     // - 인자세팅
-    long givenWrongMemberId = 3L;
-    long givenPurchaseItemId = 5L;
-    int givenSliceNum = 0;
-    int givenSliceSize = 5;
+    long inputWrongMemberId = 3L;
+    long inputPurchaseItemId = 5L;
+    int inputSliceNum = 0;
+    int inputSliceSize = 5;
 
-    // - memberService.findById() 세팅
-    Member givenSeller = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenSeller, "id", givenWrongMemberId);
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenSeller));
+    Member givenOtherMember = MemberBuilder.makeMember(inputWrongMemberId, LoginType.NAVER);
+    Member givenBuyer = MemberBuilder.makeMember(202L, LoginType.NAVER);
+    Member givenSeller = MemberBuilder.makeMember(523L, LoginType.NAVER);
+    Product givenProduct = ProductBuilder.makeProduct(50L, givenSeller);
+    PurchaseItem givenPurchaseItem =
+        PurchaseItemBuilder.makePurchaseItem(inputPurchaseItemId, givenProduct);
+    PurchaseBuilder.makePurchase(
+        10L, givenBuyer, List.of(givenPurchaseItem), PurchaseStateType.COMPLETE);
+    List<Refund> refunds = RefundBuilder.makeRefunds(List.of(1L, 2L, 3L), givenPurchaseItem);
+    Slice<Refund> mockSliceResult =
+        MockSliceResultBuilder.setSlice(inputSliceNum, inputSliceSize, refunds);
 
-    // - purchaseItemService.findById() 세팅
-    long givenBuyerId = 60L;
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenPurchaseItem, "id", givenPurchaseItemId);
-    ReflectionTestUtils.setField(givenPurchaseItem, "purchase", PurchaseBuilder.fullData().build());
-    ReflectionTestUtils.setField(givenPurchaseItem.getPurchase(), "buyerId", givenBuyerId);
+    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenOtherMember));
     when(mockPurchaseItemFindService.findById(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
-
-    // - JsonUtil.convertJsonToObject() 세팅
-    long givenSellerId = 70L;
-    ProductDataForPurchase mockProductData = mock(ProductDataForPurchase.class);
-    when(mockProductData.getSellerId()).thenReturn(givenSellerId);
-    jsonUtil.when(() -> JsonUtil.convertJsonToObject(any(), any())).thenReturn(mockProductData);
+    when(mockRefundRetrieveRepository.findByPurchaseItem(anyLong(), any()))
+        .thenReturn(mockSliceResult);
 
     // when
     assertThrows(
         DataNotFound.class,
         () ->
             target.retrieveAllByPurchaseItem(
-                givenBuyerId, givenPurchaseItemId, givenSliceNum, givenSliceSize));
+                inputWrongMemberId, inputPurchaseItemId, inputSliceNum, inputSliceSize));
+  }
+
+  public void check_refundRetrieveRepository_findByPurchaseItem(
+      long givenPurchaseItem, long givenSliceNum, long givenSliceSize, String sortField) {
+    ArgumentCaptor<Long> purchaseItemIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+    verify(mockRefundRetrieveRepository, times(1))
+        .findByPurchaseItem(purchaseItemIdCaptor.capture(), pageRequestCaptor.capture());
+
+    assertEquals(givenPurchaseItem, purchaseItemIdCaptor.getValue());
+
+    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
+    assertEquals(givenSliceNum, captoredPageRequest.getPageNumber());
+    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
+    assertEquals(
+        Sort.Direction.DESC, captoredPageRequest.getSort().getOrderFor(sortField).getDirection());
+    assertEquals(sortField, captoredPageRequest.getSort().getOrderFor(sortField).getProperty());
   }
 }

@@ -5,15 +5,14 @@ import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllA
 import com.project.shoppingmall.controller.refund_retrieve.output.OutputFindAllBySeller;
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
+import com.project.shoppingmall.dto.refund.RefundDto;
+import com.project.shoppingmall.dto.refund.RefundPurchaseItemForBuyer;
 import com.project.shoppingmall.dto.refund.RefundPurchaseItemForSeller;
-import com.project.shoppingmall.entity.PurchaseItem;
-import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
 import com.project.shoppingmall.service.refund.RefundRetrieveService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +32,7 @@ public class RefundRetrieveController {
       @Positive @RequestParam("sliceSize") int sliceSize) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Slice<PurchaseItem> sliceResult =
+    SliceResult<RefundPurchaseItemForBuyer> sliceResult =
         purchaseItemRetrieveService.retrieveRefundedAllForBuyer(
             userDetail.getId(), sliceNumber, sliceSize);
     return new OutputFinaAllByBuyer(sliceResult);
@@ -60,7 +59,7 @@ public class RefundRetrieveController {
       @RequestParam("purchaseItemId") long purchaseItemId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Slice<Refund> sliceResult =
+    SliceResult<RefundDto> sliceResult =
         refundRetrieveService.retrieveAllByPurchaseItem(
             userDetail.getId(), purchaseItemId, sliceNumber, sliceSize);
     return new OutputFindAllAboutPurchaseItem(sliceResult);

@@ -3,20 +3,27 @@ package com.project.shoppingmall.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.repository.ReviewRetrieveRepository;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.review.ReviewRetrieveService;
+import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.MockSliceResultBuilder;
 import com.project.shoppingmall.testdata.ProductBuilder;
-import java.io.IOException;
+import com.project.shoppingmall.testdata.ReviewBuilder;
+import com.project.shoppingmall.type.LoginType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class ReviewRetrieveServiceTest {
   private ReviewRetrieveService target;
@@ -32,20 +39,41 @@ class ReviewRetrieveServiceTest {
 
   @Test
   @DisplayName("retrieveByProduct() : 정상흐름")
-  public void retrieveByProduct_ok() throws IOException {
+  public void retrieveByProduct_ok() {
     // given
-    long givenProductId = 10L;
-    int givenSliceNum = 3;
-    int givenSliceSize = 20;
+    long inputProductId = 10L;
+    int inputSliceNum = 3;
+    int inputSliceSize = 20;
 
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", givenProductId);
+    Member givenReviewer = MemberBuilder.makeMember(50L, LoginType.NAVER);
+    Member givenSeller = MemberBuilder.makeMember(40L, LoginType.NAVER);
+    Product givenProduct = ProductBuilder.makeProduct(inputProductId, givenSeller);
+    List<Review> givenReviews = setReviews(List.of(10L, 20L, 30L), givenReviewer, givenProduct);
+    Slice<Review> givenSliceResult =
+        MockSliceResultBuilder.setSlice(inputSliceNum, inputSliceSize, givenReviews);
+
     when(mockProductFindService.findById(anyLong())).thenReturn(Optional.of(givenProduct));
+    when(mockReviewRetrieveRepository.findAllByProduct(anyLong(), any()))
+        .thenReturn(givenSliceResult);
 
     // when
-    target.retrieveByProduct(givenProductId, givenSliceNum, givenSliceSize);
+    target.retrieveByProduct(inputProductId, inputSliceNum, inputSliceSize);
 
     // then
+    check_reviewRetrieveRepository_findAllByProduct(inputProductId, inputSliceNum, inputSliceSize);
+  }
+
+  public List<Review> setReviews(List<Long> idList, Member givenReviewer, Product givenProduct) {
+    ArrayList<Review> reviews = new ArrayList<>();
+    idList.forEach(
+        id -> {
+          reviews.add(ReviewBuilder.makeReview(givenReviewer, givenProduct));
+        });
+    return reviews;
+  }
+
+  public void check_reviewRetrieveRepository_findAllByProduct(
+      long givenProductId, long givenSliceNum, long givenSliceSize) {
     ArgumentCaptor<Long> productIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockReviewRetrieveRepository, times(1))

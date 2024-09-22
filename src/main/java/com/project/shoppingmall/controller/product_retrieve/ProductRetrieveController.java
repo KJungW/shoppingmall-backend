@@ -4,13 +4,13 @@ import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProd
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsBySearchWordWithFilter;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetProductsByTypeWithFilter;
 import com.project.shoppingmall.controller.product_retrieve.output.OutputGetRandomProducts;
-import com.project.shoppingmall.entity.Product;
+import com.project.shoppingmall.dto.SliceResult;
+import com.project.shoppingmall.dto.product.ProductHeaderDto;
 import com.project.shoppingmall.service.product.ProductRetrieveService;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +24,7 @@ public class ProductRetrieveController {
       @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @RequestParam("sellerId") Long sellerId) {
-    Slice<Product> sliceResult =
+    SliceResult<ProductHeaderDto> sliceResult =
         productRetrieveService.retrieveBySeller(sellerId, sliceNumber, sliceSize);
     return new OutputGetProductBySeller(sliceResult);
   }
@@ -35,7 +35,7 @@ public class ProductRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @RequestParam("filterType") ProductRetrieveFilterType filterType) {
-    Slice<Product> sliceResult =
+    SliceResult<ProductHeaderDto> sliceResult =
         productRetrieveService.retrieveByTypeWithFilter(
             productId, sliceSize, sliceNumber, filterType);
     return new OutputGetProductsByTypeWithFilter(sliceResult);
@@ -47,7 +47,7 @@ public class ProductRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize,
       @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @RequestParam("filterType") ProductRetrieveFilterType filterType) {
-    Slice<Product> sliceResult =
+    SliceResult<ProductHeaderDto> sliceResult =
         productRetrieveService.retrieveBySearchWordWithFilter(
             searchWord, sliceSize, sliceNumber, filterType);
     return new OutputGetProductsBySearchWordWithFilter(sliceResult);
@@ -57,7 +57,8 @@ public class ProductRetrieveController {
   public OutputGetRandomProducts getRandomProducts(
       @PositiveOrZero @RequestParam("sliceNumber") Integer sliceNumber,
       @Positive @RequestParam("sliceSize") Integer sliceSize) {
-    Slice<Product> sliceResult = productRetrieveService.retrieveByRandom(sliceNumber, sliceSize);
+    SliceResult<ProductHeaderDto> sliceResult =
+        productRetrieveService.retrieveByRandom(sliceNumber, sliceSize);
     return new OutputGetRandomProducts(sliceResult);
   }
 }

@@ -1,11 +1,10 @@
 package com.project.shoppingmall.controller.refund_retrieve.output;
 
+import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.refund.RefundPurchaseItemForBuyer;
-import com.project.shoppingmall.entity.PurchaseItem;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.data.domain.Slice;
 
 @Getter
 @AllArgsConstructor
@@ -18,14 +17,13 @@ public class OutputFinaAllByBuyer {
   private boolean hasPrevious;
   private List<RefundPurchaseItemForBuyer> refundedPurchaseItemList;
 
-  public OutputFinaAllByBuyer(Slice<PurchaseItem> sliceResult) {
-    this.currentSliceNumber = sliceResult.getNumber();
-    this.sliceSize = sliceResult.getSize();
+  public OutputFinaAllByBuyer(SliceResult<RefundPurchaseItemForBuyer> sliceResult) {
+    this.currentSliceNumber = sliceResult.getCurrentSliceNumber();
+    this.sliceSize = sliceResult.getSliceSize();
     this.isFirst = sliceResult.isFirst();
     this.isLast = sliceResult.isLast();
-    this.hasNext = sliceResult.hasNext();
-    this.hasPrevious = sliceResult.hasPrevious();
-    this.refundedPurchaseItemList =
-        sliceResult.getContent().stream().map(RefundPurchaseItemForBuyer::new).toList();
+    this.hasNext = sliceResult.isHasNext();
+    this.hasPrevious = sliceResult.isHasPrevious();
+    this.refundedPurchaseItemList = sliceResult.getContentList();
   }
 }

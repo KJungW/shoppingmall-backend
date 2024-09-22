@@ -5,6 +5,9 @@ import com.project.shoppingmall.entity.Refund;
 import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.RefundStateType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class RefundBuilder {
   public static Refund.RefundBuilder fullData() {
@@ -12,6 +15,27 @@ public class RefundBuilder {
         .refundPrice(10000)
         .requestTitle("TestRefundRequestTitle")
         .requestContent("TestRefundRequestContent");
+  }
+
+  public static List<Refund> makeRefunds(List<Long> idList, PurchaseItem givenPurchaseItem) {
+    ArrayList<Refund> refunds = new ArrayList<>();
+    idList.forEach(
+        id -> {
+          refunds.add(RefundBuilder.makeRefund(id, givenPurchaseItem));
+        });
+    return refunds;
+  }
+
+  public static Refund makeRefund(long id, PurchaseItem purchaseItem) {
+    Refund refund =
+        Refund.builder()
+            .refundPrice(purchaseItem.getFinalPrice())
+            .requestTitle("TestRefundRequestTitle")
+            .requestContent("TestRefundRequestContent")
+            .build();
+    purchaseItem.addRefund(refund);
+    ReflectionTestUtils.setField(refund, "id", id);
+    return refund;
   }
 
   public static Refund makeRefund(PurchaseItem purchaseItem) {

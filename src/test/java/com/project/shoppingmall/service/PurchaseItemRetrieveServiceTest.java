@@ -20,10 +20,7 @@ import com.project.shoppingmall.repository.PurchaseItemRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.PurchaseBuilder;
-import com.project.shoppingmall.testdata.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.*;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -38,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class PurchaseItemRetrieveServiceTest {
   private PurchaseItemRetrieveService target;
@@ -70,7 +66,7 @@ class PurchaseItemRetrieveServiceTest {
     List<PurchaseItem> givenPurchaseItems =
         setPurchaseItems(List.of(10L, 20L, 30L, 40L), givenProduct);
     Slice<PurchaseItem> givenMockSlice =
-        setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
 
     set_memberFindService_findById(givenSeller);
     set_productFindService_findById(givenProduct);
@@ -103,7 +99,7 @@ class PurchaseItemRetrieveServiceTest {
     List<PurchaseItem> givenPurchaseItems =
         setPurchaseItems(List.of(10L, 20L, 30L, 40L), givenProduct);
     Slice<PurchaseItem> givenMockSlice =
-        setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
 
     set_memberFindService_findById(givenSeller);
     set_productFindService_findById(givenProduct);
@@ -132,7 +128,7 @@ class PurchaseItemRetrieveServiceTest {
     List<PurchaseItem> givenPurchaseItems =
         setPurchaseItems(List.of(10L, 20L, 30L, 40L), givenProduct);
     Slice<PurchaseItem> givenMockSlice =
-        setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
 
     set_purchaseItemRetrieveRepository_findAllForSellerBetweenDate(givenMockSlice);
 
@@ -152,34 +148,27 @@ class PurchaseItemRetrieveServiceTest {
   @DisplayName("retrieveRefundedAllForBuyer() : 정상흐름")
   public void retrieveRefundedAllForBuyer_ok() {
     // given
-    long givenBuyerId = 30L;
-    int givenSliceNumber = 1;
-    int givenSliceSize = 10;
+    long inputBuyerId = 30L;
+    int inputSliceNumber = 1;
+    int inputSliceSize = 10;
 
-    Member givenBuyer = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenBuyer, "id", givenBuyerId);
-    when(mockMemberFindService.findById(any())).thenReturn(Optional.of(givenBuyer));
+    Member givenBuyer = MemberBuilder.makeMember(inputBuyerId, LoginType.NAVER);
+    Member givenSeller = MemberBuilder.makeMember(60, LoginType.NAVER);
+    Product givenProduct = ProductBuilder.makeProduct(40L, givenSeller);
+    List<PurchaseItem> givenPurchaseItems =
+        setPurchaseItems(List.of(10L, 20L, 30L, 40L), givenProduct, givenBuyer);
+    Slice<PurchaseItem> givenMockSlice =
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItems);
+
+    set_memberFindService_findById(givenBuyer);
+    set__purchaseItemRetrieveRepository_findRefundedAllForBuyer(givenMockSlice);
 
     // when
-    target.retrieveRefundedAllForBuyer(givenBuyerId, givenSliceNumber, givenSliceSize);
+    target.retrieveRefundedAllForBuyer(inputBuyerId, inputSliceNumber, inputSliceSize);
 
     // then
-    ArgumentCaptor<Long> buyerIdCaptor = ArgumentCaptor.forClass(Long.class);
-    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
-    verify(mockPurchaseItemRetrieveRepository, times(1))
-        .findRefundedAllForBuyer(buyerIdCaptor.capture(), pageRequestCaptor.capture());
-
-    assertEquals(givenBuyerId, buyerIdCaptor.getValue());
-
-    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
-    assertEquals(givenSliceNumber, captoredPageRequest.getPageNumber());
-    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
-    assertEquals(
-        Sort.Direction.DESC,
-        captoredPageRequest.getSort().getOrderFor("finalRefundCreatedDate").getDirection());
-    assertEquals(
-        "finalRefundCreatedDate",
-        captoredPageRequest.getSort().getOrderFor("finalRefundCreatedDate").getProperty());
+    check_purchaseItemRetrieveRepository_findRefundedAllForBuyer(
+        inputBuyerId, inputSliceNumber, inputSliceSize, "finalRefundCreatedDate");
   }
 
   @Test
@@ -195,7 +184,7 @@ class PurchaseItemRetrieveServiceTest {
     List<PurchaseItem> givenPurchaseItemList =
         setTwoPurchaseItemsPerBuyer(givenBuyerList, givenSeller);
     Slice<PurchaseItem> givenMockSlice =
-        setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItemList);
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItemList);
 
     set_memberFindService_findById(givenSeller);
     set_purchaseItemRetrieveRepository_findRefundedAllForSeller(givenMockSlice);
@@ -226,7 +215,7 @@ class PurchaseItemRetrieveServiceTest {
         setTwoPurchaseItemsPerBuyer(givenBuyerList, givenSeller);
     givenPurchaseItemList.add(setPurchaseItemWithDeletedBuyer(2142L, 644234L, givenSeller));
     Slice<PurchaseItem> givenMockSlice =
-        setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItemList);
+        MockSliceResultBuilder.setSlice(inputSliceNumber, inputSliceSize, givenPurchaseItemList);
 
     set_memberFindService_findById(givenSeller);
     set_purchaseItemRetrieveRepository_findRefundedAllForSeller(givenMockSlice);
@@ -263,6 +252,12 @@ class PurchaseItemRetrieveServiceTest {
       Slice<PurchaseItem> givenMockSlice) {
     when(mockPurchaseItemRetrieveRepository.findAllForSellerBetweenDate(
             anyLong(), any(), any(), any()))
+        .thenReturn(givenMockSlice);
+  }
+
+  public void set__purchaseItemRetrieveRepository_findRefundedAllForBuyer(
+      Slice<PurchaseItem> givenMockSlice) {
+    when(mockPurchaseItemRetrieveRepository.findRefundedAllForBuyer(anyLong(), any()))
         .thenReturn(givenMockSlice);
   }
 
@@ -328,6 +323,25 @@ class PurchaseItemRetrieveServiceTest {
         givenSortField, realPageRequest.getSort().getOrderFor(givenSortField).getProperty());
   }
 
+  public void check_purchaseItemRetrieveRepository_findRefundedAllForBuyer(
+      long givenBuyerId, int givenSliceNum, int givenSliceSize, String givenSortField) {
+    ArgumentCaptor<Long> buyerIdCaptor = ArgumentCaptor.forClass(Long.class);
+    ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
+    verify(mockPurchaseItemRetrieveRepository, times(1))
+        .findRefundedAllForBuyer(buyerIdCaptor.capture(), pageRequestCaptor.capture());
+
+    assertEquals(givenBuyerId, buyerIdCaptor.getValue());
+
+    PageRequest captoredPageRequest = pageRequestCaptor.getValue();
+    assertEquals(givenSliceNum, captoredPageRequest.getPageNumber());
+    assertEquals(givenSliceSize, captoredPageRequest.getPageSize());
+    assertEquals(
+        Sort.Direction.DESC,
+        captoredPageRequest.getSort().getOrderFor(givenSortField).getDirection());
+    assertEquals(
+        givenSortField, captoredPageRequest.getSort().getOrderFor(givenSortField).getProperty());
+  }
+
   public void check_purchaseItemRetrieveRepository_findAllForSeller(
       long givenProductId, int givenSliceNum, int givenSliceSize, String givenSortField) {
     ArgumentCaptor<Long> productIdCaptor = ArgumentCaptor.forClass(Long.class);
@@ -386,6 +400,16 @@ class PurchaseItemRetrieveServiceTest {
     return purchaseItemList;
   }
 
+  public List<PurchaseItem> setPurchaseItems(
+      List<Long> purchaseItemIds, Product givenProduct, Member buyer) {
+    List<PurchaseItem> purchaseItemList =
+        purchaseItemIds.stream()
+            .map(id -> PurchaseItemBuilder.makePurchaseItem(id, givenProduct))
+            .toList();
+    Purchase givenPurchase = PurchaseBuilder.makPurchase(1234L, purchaseItemList, buyer);
+    return purchaseItemList;
+  }
+
   public PurchaseItem setPurchaseItemWithDeletedBuyer(
       long deletedBuyerId, long purchaseItemId, Member givenSeller) {
     Member givenDeletedBuyer = MemberBuilder.makeMember(deletedBuyerId, LoginType.NAVER);
@@ -418,18 +442,6 @@ class PurchaseItemRetrieveServiceTest {
       givenPurchaseItemList.add(givenPurchase2);
     }
     return givenPurchaseItemList;
-  }
-
-  public <T> Slice<T> setSlice(int givenSliceNum, int givenSliceSize, List<T> contents) {
-    Slice<T> mockSlice = mock(Slice.class);
-    when(mockSlice.getNumber()).thenReturn(givenSliceNum);
-    when(mockSlice.getSize()).thenReturn(givenSliceSize);
-    when(mockSlice.isFirst()).thenReturn(false);
-    when(mockSlice.isLast()).thenReturn(false);
-    when(mockSlice.hasNext()).thenReturn(true);
-    when(mockSlice.hasPrevious()).thenReturn(true);
-    when(mockSlice.getContent()).thenReturn(contents);
-    return mockSlice;
   }
 
   public void checkSliceResultWithPurchaseItemDtoForSeller(

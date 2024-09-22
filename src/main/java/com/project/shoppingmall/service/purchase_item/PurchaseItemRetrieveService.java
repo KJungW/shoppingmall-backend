@@ -2,6 +2,7 @@ package com.project.shoppingmall.service.purchase_item;
 
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.purchase.PurchaseItemDtoForSeller;
+import com.project.shoppingmall.dto.refund.RefundPurchaseItemForBuyer;
 import com.project.shoppingmall.dto.refund.RefundPurchaseItemForSeller;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
@@ -66,7 +67,7 @@ public class PurchaseItemRetrieveService {
     return new SliceResult<PurchaseItemDtoForSeller>(queryResult, contents);
   }
 
-  public Slice<PurchaseItem> retrieveRefundedAllForBuyer(
+  public SliceResult<RefundPurchaseItemForBuyer> retrieveRefundedAllForBuyer(
       long memberId, int sliceNumber, int sliceSize) {
     Member member =
         memberFindService
@@ -75,7 +76,11 @@ public class PurchaseItemRetrieveService {
     PageRequest pageRequest =
         PageRequest.of(
             sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
-    return purchaseItemRetrieveRepository.findRefundedAllForBuyer(member.getId(), pageRequest);
+    Slice<PurchaseItem> sliceResult =
+        purchaseItemRetrieveRepository.findRefundedAllForBuyer(member.getId(), pageRequest);
+    List<RefundPurchaseItemForBuyer> contents =
+        sliceResult.getContent().stream().map(RefundPurchaseItemForBuyer::new).toList();
+    return new SliceResult<RefundPurchaseItemForBuyer>(sliceResult, contents);
   }
 
   public SliceResult<RefundPurchaseItemForSeller> retrieveRefundedAllForSeller(

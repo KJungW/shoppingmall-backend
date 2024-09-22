@@ -4,9 +4,9 @@ import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrie
 import com.project.shoppingmall.controller.purchase_retrieve.output.OutputRetrieveSales;
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.auth.AuthMemberDetail;
+import com.project.shoppingmall.dto.purchase.PurchaseDto;
 import com.project.shoppingmall.dto.purchase.PurchaseItemDtoForSeller;
 import com.project.shoppingmall.dto.purchase.SalesRevenueInMonth;
-import com.project.shoppingmall.entity.Purchase;
 import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemRetrieveService;
 import com.project.shoppingmall.service.sales_statistics.SalesStatisticsService;
@@ -14,7 +14,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Range;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +34,7 @@ public class PurchaseRetrieveController {
       @Positive @RequestParam("sliceSize") Integer sliceSize) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Slice<Purchase> sliceResult =
+    SliceResult<PurchaseDto> sliceResult =
         purchaseRetrieveService.retrieveAllByMember(userDetail.getId(), sliceNumber, sliceSize);
     return new OutputRetrievePurchasesByBuyer(sliceResult);
   }

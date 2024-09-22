@@ -95,6 +95,23 @@ public class PurchaseBuilder {
     return purchase;
   }
 
+  public static Purchase makPurchase(long id, List<PurchaseItem> purchaseItems, Member buyer) {
+    int totalPrice = purchaseItems.stream().mapToInt(PurchaseItem::getFinalPrice).sum();
+    DeliveryInfo deliveryInfo =
+        new DeliveryInfo(buyer.getNickName(), "test address", "11011", "101-0000-0000");
+    Purchase purchase =
+        Purchase.builder()
+            .buyerId(buyer.getId())
+            .purchaseItems(purchaseItems)
+            .purchaseUid("test-purchaseUid" + UUID.randomUUID())
+            .purchaseTitle("test purchase")
+            .deliveryInfo(deliveryInfo)
+            .totalPrice(totalPrice)
+            .build();
+    ReflectionTestUtils.setField(purchase, "id", id);
+    return purchase;
+  }
+
   private static void updatePurchaseState(Purchase purchase, PurchaseStateType state) {
     switch (state) {
       case READY -> {}

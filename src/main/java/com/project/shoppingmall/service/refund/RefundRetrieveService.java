@@ -1,5 +1,7 @@
 package com.project.shoppingmall.service.refund;
 
+import com.project.shoppingmall.dto.SliceResult;
+import com.project.shoppingmall.dto.refund.RefundDto;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
@@ -7,6 +9,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -22,7 +25,7 @@ public class RefundRetrieveService {
   private final MemberFindService memberFindService;
   private final PurchaseItemFindService purchaseItemFindService;
 
-  public Slice<Refund> retrieveAllByPurchaseItem(
+  public SliceResult<RefundDto> retrieveAllByPurchaseItem(
       long memberId, long purchaseItemId, int sliceNumber, int sliceSize) {
     Member member =
         memberFindService
@@ -35,7 +38,10 @@ public class RefundRetrieveService {
     validateRetrieveRefundPermission(member, purchaseItem);
     PageRequest pageRequest =
         PageRequest.of(sliceNumber, sliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-    return refundRetrieveRepository.findByPurchaseItem(purchaseItemId, pageRequest);
+    Slice<Refund> sliceResult =
+        refundRetrieveRepository.findByPurchaseItem(purchaseItemId, pageRequest);
+    List<RefundDto> contents = sliceResult.getContent().stream().map(RefundDto::new).toList();
+    return new SliceResult<RefundDto>(sliceResult, contents);
   }
 
   private void validateRetrieveRefundPermission(Member member, PurchaseItem purchaseItem) {
