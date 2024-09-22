@@ -1,6 +1,5 @@
 package com.project.shoppingmall.service.refund;
 
-import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Refund;
@@ -8,7 +7,6 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.RefundRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase_item.PurchaseItemFindService;
-import com.project.shoppingmall.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -41,10 +39,8 @@ public class RefundRetrieveService {
   }
 
   private void validateRetrieveRefundPermission(Member member, PurchaseItem purchaseItem) {
-    ProductDataForPurchase productData =
-        JsonUtil.convertJsonToObject(purchaseItem.getProductData(), ProductDataForPurchase.class);
     if (!member.getId().equals(purchaseItem.getPurchase().getBuyerId())
-        && !member.getId().equals(productData.getSellerId())) {
+        && !member.getId().equals(purchaseItem.getSellerId())) {
       throw new DataNotFound("해당 환불데이터를 조회할 권한이 없는 회원입니다.");
     }
   }
