@@ -14,7 +14,6 @@ import com.project.shoppingmall.service.basket_item.BasketItemDeleteService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.testdata.BasketItemBuilder;
 import com.project.shoppingmall.testdata.MemberBuilder;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,8 +37,8 @@ class BasketItemDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteBasketItemByMember() : 정상흐름")
-  public void deleteBasketItemByMember_ok() throws IOException {
+  @DisplayName("deleteBasketItemInController() : 정상흐름")
+  public void deleteBasketItemInController_ok() {
     // given
     Long givenMemberId = 3L;
     List<Long> givenBasketItemList = new ArrayList<Long>(Arrays.asList(10L, 20L, 30L));
@@ -61,7 +60,7 @@ class BasketItemDeleteServiceTest {
     when(mockBasketItemRepository.findAllById(anyList())).thenReturn(givenBasketItemLlist);
 
     // when
-    target.deleteBasketItemByMember(givenMemberId, givenBasketItemList);
+    target.deleteBasketItemInController(givenMemberId, givenBasketItemList);
 
     // then
     ArgumentCaptor<List<BasketItem>> basketListCapture = ArgumentCaptor.forClass(List.class);
@@ -79,8 +78,8 @@ class BasketItemDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteBasketItemByMember() : 다른 회원의 장바구니 아이템을 삭제하려는 경우")
-  public void deleteBasketItemByMember_OtherMemberBasketItemDelete() throws IOException {
+  @DisplayName("deleteBasketItemInController() : 다른 회원의 장바구니 아이템을 삭제하려는 경우")
+  public void ddeleteBasketItemInController_OtherMemberBasketItemDelete() {
     // given
     Long givenMemberId = 3L;
     Long wrongMemberId = 20L;
@@ -105,12 +104,12 @@ class BasketItemDeleteServiceTest {
     // when then
     assertThrows(
         DataNotFound.class,
-        () -> target.deleteBasketItemByMember(givenMemberId, givenBasketItemList));
+        () -> target.deleteBasketItemInController(givenMemberId, givenBasketItemList));
   }
 
   @Test
-  @DisplayName("deleteBasketItemByMember() : 존재하지 않는 장바구니 아이템을 삭제하려는 경우")
-  public void deleteBasketItemByMember_InvalidBasketItemId() throws IOException {
+  @DisplayName("deleteBasketItemInController() : 존재하지 않는 장바구니 아이템을 삭제하려는 경우")
+  public void deleteBasketItemInController_InvalidBasketItemId() {
     // given
     Long givenMemberId = 3L;
     List<Long> givenBasketItemList = new ArrayList<Long>(Arrays.asList(10L, 20L, 30L));
@@ -123,6 +122,6 @@ class BasketItemDeleteServiceTest {
     // when then
     assertThrows(
         DataNotFound.class,
-        () -> target.deleteBasketItemByMember(givenMemberId, givenBasketItemList));
+        () -> target.deleteBasketItemInController(givenMemberId, givenBasketItemList));
   }
 }

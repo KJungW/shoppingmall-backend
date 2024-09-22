@@ -30,8 +30,8 @@ class AlarmDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteAlarmByListener() : 정상흐름")
-  public void deleteAlarmByListener_ok() {
+  @DisplayName("deleteAlarmInController() : 정상흐름")
+  public void deleteAlarmInController_ok() {
     // given
     long inputListenerId = 10L;
     long inputAlarmId = 20L;
@@ -46,7 +46,7 @@ class AlarmDeleteServiceTest {
     when(mockAlarmRepository.findById(anyLong())).thenReturn(Optional.of(givenAlarm));
 
     // when
-    target.deleteAlarmByListener(inputListenerId, inputAlarmId);
+    target.deleteAlarmInController(inputListenerId, inputAlarmId);
 
     // then
     ArgumentCaptor<Long> alarmIdCaptor = ArgumentCaptor.forClass(Long.class);
@@ -55,8 +55,8 @@ class AlarmDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteAlarmByListener() : 다른 회원의 알림을 제거하려고 시도함")
-  public void deleteAlarmByListener_otherMemberAlarm() {
+  @DisplayName("deleteAlarmInController() : 다른 회원의 알림을 제거하려고 시도함")
+  public void deleteAlarmInController_otherMemberAlarm() {
     // given
     long inputListenerId = 10L;
     long inputAlarmId = 20L;
@@ -73,6 +73,6 @@ class AlarmDeleteServiceTest {
 
     // when then
     assertThrows(
-        DataNotFound.class, () -> target.deleteAlarmByListener(inputListenerId, inputAlarmId));
+        DataNotFound.class, () -> target.deleteAlarmInController(inputListenerId, inputAlarmId));
   }
 }

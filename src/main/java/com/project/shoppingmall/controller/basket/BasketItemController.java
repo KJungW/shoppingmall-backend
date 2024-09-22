@@ -64,6 +64,6 @@ public class BasketItemController {
       @Size(min = 1) @RequestParam("basketItemIdList") List<Long> basketItemIdList) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    basketItemDeleteService.deleteBasketItemByMember(userDetail.getId(), basketItemIdList);
+    basketItemDeleteService.deleteBasketItemInController(userDetail.getId(), basketItemIdList);
   }
 }

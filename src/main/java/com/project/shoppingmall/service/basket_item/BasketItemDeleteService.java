@@ -27,7 +27,7 @@ public class BasketItemDeleteService {
     basketItemRepository.deleteAllInBatch(basketItems);
   }
 
-  public void deleteBasketItemByMember(Long memberId, List<Long> basketItemIdList) {
+  public void deleteBasketItemInController(Long memberId, List<Long> basketItemIdList) {
     Member member =
         memberFindService
             .findById(memberId)

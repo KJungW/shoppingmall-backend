@@ -64,7 +64,7 @@ public class ReviewDeleteService {
     reviews.forEach(this::deleteReview);
   }
 
-  public void deleteReviewByWriter(Long writerId, Long reviewId) {
+  public void deleteReviewInController(Long writerId, Long reviewId) {
     PurchaseItem purchaseItem =
         purchaseItemFindService
             .findByReviewId(reviewId)

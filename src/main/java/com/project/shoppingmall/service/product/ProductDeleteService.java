@@ -63,7 +63,7 @@ public class ProductDeleteService {
     productList.forEach(this::deleteProduct);
   }
 
-  public void deleteProductBySeller(long sellerId, long productId) {
+  public void deleteProductInController(long sellerId, long productId) {
     Product product =
         productFindService
             .findByIdWithSeller(productId)

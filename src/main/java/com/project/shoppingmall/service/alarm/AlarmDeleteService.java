@@ -25,7 +25,7 @@ public class AlarmDeleteService {
     alarmRepository.deleteAllInBatch(alarms);
   }
 
-  public void deleteAlarmByListener(long listenerId, long alarmId) {
+  public void deleteAlarmInController(long listenerId, long alarmId) {
     Member listener =
         memberFindService
             .findById(listenerId)

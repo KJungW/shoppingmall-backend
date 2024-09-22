@@ -77,8 +77,8 @@ class ProductDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteProductBySeller() : 정상흐름")
-  public void deleteProductBySeller_ok() throws IOException {
+  @DisplayName("deleteProductInController() : 정상흐름")
+  public void deleteProductInController_ok() throws IOException {
     // given
     // - 인자세팅
     long givenSellerId = 10L;
@@ -130,7 +130,7 @@ class ProductDeleteServiceTest {
     when(mockAlarmFindService.findByTargetProduct(anyLong())).thenReturn(givenAlarms);
 
     // when
-    target.deleteProductBySeller(givenSellerId, givenProductId);
+    target.deleteProductInController(givenSellerId, givenProductId);
 
     // then
     // - basketItemDeleteService.deleteBasketItemList() 체크
@@ -163,8 +163,8 @@ class ProductDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteProductBySeller() : 다른 회원의 제품을 제거하려고 시도하고 있습니다.")
-  public void deleteProductBySeller_OtherMemberProduct() throws IOException {
+  @DisplayName("deleteProductInController() : 다른 회원의 제품을 제거하려고 시도하고 있습니다.")
+  public void deleteProductInController_OtherMemberProduct() throws IOException {
     // given
     // - 인자세팅
     long givenSellerId = 10L;
@@ -180,12 +180,12 @@ class ProductDeleteServiceTest {
 
     // when
     assertThrows(
-        DataNotFound.class, () -> target.deleteProductBySeller(givenSellerId, givenProductId));
+        DataNotFound.class, () -> target.deleteProductInController(givenSellerId, givenProductId));
   }
 
   @Test
-  @DisplayName("deleteProductBySeller() : 최근 구매기록이 존재하는 제품의 삭제 시도")
-  public void deleteProductBySeller_RecentlyPurchasedProduct() throws IOException {
+  @DisplayName("deleteProductInController() : 최근 구매기록이 존재하는 제품의 삭제 시도")
+  public void deleteProductInController_RecentlyPurchasedProduct() throws IOException {
     // given
     // - 인자세팅
     long givenSellerId = 10L;
@@ -209,6 +209,6 @@ class ProductDeleteServiceTest {
     // when
     assertThrows(
         RecentlyPurchasedProduct.class,
-        () -> target.deleteProductBySeller(givenSellerId, givenProductId));
+        () -> target.deleteProductInController(givenSellerId, givenProductId));
   }
 }

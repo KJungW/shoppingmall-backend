@@ -19,6 +19,6 @@ public class AlarmController {
   public void deleteAlarm(@PathVariable("alarmId") Long alarmId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    alarmDeleteService.deleteAlarmByListener(userDetail.getId(), alarmId);
+    alarmDeleteService.deleteAlarmInController(userDetail.getId(), alarmId);
   }
 }

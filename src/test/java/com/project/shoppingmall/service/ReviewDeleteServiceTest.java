@@ -66,8 +66,8 @@ class ReviewDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteReviewByWriter() : 정상흐름")
-  public void deleteReviewByWriter_ok() throws IOException {
+  @DisplayName("deleteReviewInController() : 정상흐름")
+  public void deleteReviewInController_ok() throws IOException {
     // given
     // - 인자세팅
     long givenWriterId = 20L;
@@ -110,7 +110,7 @@ class ReviewDeleteServiceTest {
     when(mockReviewService.calcReviewScoresInProduct(anyLong())).thenReturn(givenReviewCalcResult);
 
     // when
-    target.deleteReviewByWriter(givenWriterId, givenReviewId);
+    target.deleteReviewInController(givenWriterId, givenReviewId);
 
     // then
     // - Review와 연결된 ReviewReport 제거 확인
@@ -141,8 +141,8 @@ class ReviewDeleteServiceTest {
   }
 
   @Test
-  @DisplayName("deleteReviewByWriter() : 다른 회원의 리뷰를 제거하려고 시도")
-  public void deleteReviewByWriter_otherMemberReview() throws IOException {
+  @DisplayName("deleteReviewInController() : 다른 회원의 리뷰를 제거하려고 시도")
+  public void deleteReviewInController_otherMemberReview() throws IOException {
     // given
     long givenWriterId = 20L;
     long givenReviewId = 27L;
@@ -163,6 +163,6 @@ class ReviewDeleteServiceTest {
 
     // when
     assertThrows(
-        DataNotFound.class, () -> target.deleteReviewByWriter(givenWriterId, givenReviewId));
+        DataNotFound.class, () -> target.deleteReviewInController(givenWriterId, givenReviewId));
   }
 }

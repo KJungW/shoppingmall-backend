@@ -68,6 +68,6 @@ public class ReviewController {
   public void deleteReview(@PathVariable("reviewId") Long reviewId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    reviewDeleteService.deleteReviewByWriter(userDetail.getId(), reviewId);
+    reviewDeleteService.deleteReviewInController(userDetail.getId(), reviewId);
   }
 }
