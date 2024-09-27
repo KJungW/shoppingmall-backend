@@ -14,6 +14,6 @@ public class InputRejectRefund {
   @NotNull private Long refundId;
 
   @NotBlank
-  @Length(min = 1, max = 500)
+  @Length(min = 1, max = 1000)
   private String responseMessage;
 }

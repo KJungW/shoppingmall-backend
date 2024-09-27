@@ -23,6 +23,7 @@ public class BasketItem extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Product product;
 
+  @Column(columnDefinition = "JSON")
   private String options;
 
   @Builder

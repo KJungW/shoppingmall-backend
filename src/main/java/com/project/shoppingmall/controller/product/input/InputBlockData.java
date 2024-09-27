@@ -14,6 +14,6 @@ public class InputBlockData {
   @NotNull private BlockType blockType;
 
   @NotBlank
-  @Length(min = 1, max = 500)
+  @Length(min = 1, max = 1000)
   private String content;
 }

@@ -10,18 +10,20 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 public class InputCompletePurchase {
   @NotBlank
-  @Length(min = 1, max = 100)
+  @Length(min = 1, max = 200)
   @JsonProperty("imp_uid")
   private String paymentUid;
 
   @NotBlank
-  @Length(min = 1, max = 100)
+  @Length(min = 1, max = 200)
   @JsonProperty("merchant_uid")
   private String purchaseUid;
 
   @JsonProperty("status")
+  @Length(min = 1, max = 200)
   private String status;
 
   @JsonProperty("cancellation_id")
+  @Length(min = 1, max = 200)
   private String cancellationUid;
 }

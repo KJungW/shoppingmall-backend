@@ -20,5 +20,6 @@ public class InputUpdateReview {
   @Length(min = 1, max = 100)
   private String title;
 
+  @Length(max = 1000)
   private String description;
 }

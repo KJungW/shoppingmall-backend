@@ -58,6 +58,7 @@ public class ChatController {
   }
 
   @PutMapping("/chat/record")
+  @PreAuthorize("hasRole('ROLE_MEMBER')")
   public void updateChatReadRecord(@Valid @RequestBody InputUpdateChatReadRecord input) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

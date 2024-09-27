@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class InputUpdateMemberInfo {
   @NotBlank
-  @Length(min = 5, max = 15)
+  @Length(min = 3, max = 30)
   private String nickName;
 
   @NotNull private MultipartFile profileImg;

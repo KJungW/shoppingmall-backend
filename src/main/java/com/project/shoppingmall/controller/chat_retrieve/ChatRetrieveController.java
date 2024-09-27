@@ -67,7 +67,7 @@ public class ChatRetrieveController {
   @PreAuthorize("hasRole('ROLE_MEMBER')")
   public OutputRetrieveChatMessage retrieveChatMessages(
       @Positive @RequestParam("sliceSize") Integer sliceSize,
-      @RequestParam("chatRoomId") Integer chatRoomId,
+      @RequestParam("chatRoomId") Long chatRoomId,
       @Length(min = 1, max = 50) @RequestParam("startChatMessageId") String startChatMessageId) {
     AuthMemberDetail userDetail =
         (AuthMemberDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
