@@ -141,7 +141,7 @@ public class MemberService {
     RefreshTokenData refreshTokenData =
         new RefreshTokenData(member.getId(), member.getRole().toString());
     String refreshToken = jwtUtil.createRefreshToken(refreshTokenData);
-    member.getToken().updateRefresh(refreshToken);
+    member.updateRefreshToken(new MemberToken(refreshToken));
 
     return member;
   }
