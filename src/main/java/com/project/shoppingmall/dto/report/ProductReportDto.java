@@ -29,7 +29,7 @@ public class ProductReportDto {
     this.reporterName = report.getReporter().getNickName();
     this.title = report.getTitle();
     this.description = report.getDescription();
-    this.isProcessedComplete = report.isProcessedComplete();
+    this.isProcessedComplete = report.getIsProcessedComplete();
     this.reportResultType = report.getReportResult();
     this.productId = report.getProduct().getId();
     this.productName = report.getProduct().getName();

@@ -131,7 +131,7 @@ class ProductReportRetrieveRepositoryTest {
         });
     resultProductReport.forEach(
         productReport -> {
-          assertFalse(productReport.isProcessedComplete());
+          assertFalse(productReport.getIsProcessedComplete());
         });
   }
 
@@ -203,7 +203,7 @@ class ProductReportRetrieveRepositoryTest {
         });
     resultProductReport.forEach(
         productReport -> {
-          assertFalse(productReport.isProcessedComplete());
+          assertFalse(productReport.getIsProcessedComplete());
         });
   }
 

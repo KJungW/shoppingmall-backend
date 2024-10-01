@@ -22,6 +22,7 @@ public class ProductContent extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private BlockType type;
 
+  @Column(columnDefinition = "JSON")
   private String content;
 
   @Builder

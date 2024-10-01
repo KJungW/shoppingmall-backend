@@ -49,7 +49,7 @@ class ReportProcessManageServiceTest {
     target.processProductReport(inputProductReportId, inputResultType);
 
     // then
-    assertTrue(givenProductReport.isProcessedComplete());
+    assertTrue(givenProductReport.getIsProcessedComplete());
     assertEquals(inputResultType.toReportResultType(), givenProductReport.getReportResult());
   }
 
@@ -90,7 +90,7 @@ class ReportProcessManageServiceTest {
     target.processReviewReport(inputReviewReportId, inputResultType);
 
     // then
-    assertTrue(givenReviewReport.isProcessedComplete());
+    assertTrue(givenReviewReport.getIsProcessedComplete());
     assertEquals(inputResultType.toReportResultType(), givenReviewReport.getReportResult());
   }
 

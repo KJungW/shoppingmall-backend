@@ -29,7 +29,7 @@ public class ReviewReportDto {
     this.reporterName = report.getReporter().getNickName();
     this.title = report.getTitle();
     this.description = report.getDescription();
-    this.isProcessedComplete = report.isProcessedComplete();
+    this.isProcessedComplete = report.getIsProcessedComplete();
     this.reportResultType = report.getReportResult();
     this.reviewId = report.getReview().getId();
     this.reviewTitle = report.getReview().getTitle();

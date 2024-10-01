@@ -166,7 +166,7 @@ class ReviewReportRetrieveRepositoryTest {
         });
     resultReviewReport.forEach(
         reviewReport -> {
-          assertFalse(reviewReport.isProcessedComplete());
+          assertFalse(reviewReport.getIsProcessedComplete());
         });
   }
 
@@ -256,7 +256,7 @@ class ReviewReportRetrieveRepositoryTest {
         });
     resultReviewReport.forEach(
         reviewReport -> {
-          assertFalse(reviewReport.isProcessedComplete());
+          assertFalse(reviewReport.getIsProcessedComplete());
         });
   }
 

@@ -34,7 +34,7 @@ public class Purchase extends BaseEntity {
 
   private String purchaseTitle;
   @Embedded private DeliveryInfo deliveryInfo;
-  private int totalPrice;
+  private Integer totalPrice;
 
   @Builder
   public Purchase(

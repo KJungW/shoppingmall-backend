@@ -92,7 +92,7 @@ class ReportServiceTest {
     assertEquals(rightMemberId, reportResult.getReporter().getId());
     assertEquals(rightTitle, reportResult.getTitle());
     assertEquals(rightDescription, reportResult.getDescription());
-    assertFalse(reportResult.isProcessedComplete());
+    assertFalse(reportResult.getIsProcessedComplete());
     assertEquals(givenProductId, reportResult.getProduct().getId());
   }
 
@@ -180,7 +180,7 @@ class ReportServiceTest {
     assertEquals(rightMemberId, reportResult.getReporter().getId());
     assertEquals(rightTitle, reportResult.getTitle());
     assertEquals(rightDescription, reportResult.getDescription());
-    assertFalse(reportResult.isProcessedComplete());
+    assertFalse(reportResult.getIsProcessedComplete());
     assertEquals(givenProductId, reportResult.getProduct().getId());
   }
 
@@ -221,7 +221,7 @@ class ReportServiceTest {
     assertEquals(givenReporterId, reportResult.getReporter().getId());
     assertEquals(givenTitle, reportResult.getTitle());
     assertEquals(givenDesc, reportResult.getDescription());
-    assertFalse(reportResult.isProcessedComplete());
+    assertFalse(reportResult.getIsProcessedComplete());
     assertEquals(givenReviewId, reportResult.getReview().getId());
   }
 
@@ -302,7 +302,7 @@ class ReportServiceTest {
     assertEquals(givenReporterId, reportResult.getReporter().getId());
     assertEquals(givenTitle, reportResult.getTitle());
     assertEquals(givenDesc, reportResult.getDescription());
-    assertFalse(reportResult.isProcessedComplete());
+    assertFalse(reportResult.getIsProcessedComplete());
     assertEquals(givenReviewId, reportResult.getReview().getId());
   }
 }
