@@ -24,9 +24,9 @@ import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.PurchaseItemBuilder;
-import com.project.shoppingmall.testdata.RefundBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.refund.RefundBuilder;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.RefundStateType;
 import java.time.LocalDateTime;
@@ -126,8 +126,8 @@ public class MemberDeleteServiceTest {
 
     List<Refund> givenNotProcessingRefund =
         List.of(
-            RefundBuilder.makeRefund(RefundStateType.REQUEST, givenPurchaseItem),
-            RefundBuilder.makeRefund(RefundStateType.ACCEPT, givenPurchaseItem));
+            RefundBuilder.makeRefund(600L, RefundStateType.REQUEST, givenPurchaseItem),
+            RefundBuilder.makeRefund(700L, RefundStateType.ACCEPT, givenPurchaseItem));
     when(mockRefundFindService.findAllProcessingStateRefundBySeller(anyLong()))
         .thenReturn(givenNotProcessingRefund);
 

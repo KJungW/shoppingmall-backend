@@ -11,7 +11,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
 import com.project.shoppingmall.service.auth.AuthMemberTokenService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import java.util.Optional;

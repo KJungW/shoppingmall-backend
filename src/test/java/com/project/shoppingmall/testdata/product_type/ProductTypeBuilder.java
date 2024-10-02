@@ -1,4 +1,4 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.product_type;
 
 import com.project.shoppingmall.entity.ProductType;
 import org.springframework.test.util.ReflectionTestUtils;

@@ -7,7 +7,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.ProductRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductRetrieveService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.type.ProductRetrieveFilterType;
 import java.util.ArrayList;
 import java.util.Optional;

@@ -10,7 +10,7 @@ import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service_manage.auth.AuthManagerDetailService;
 import com.project.shoppingmall.service_manage.common.ManagerService;
-import com.project.shoppingmall.testdata.ManagerBuilder;
+import com.project.shoppingmall.testdata.manager.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

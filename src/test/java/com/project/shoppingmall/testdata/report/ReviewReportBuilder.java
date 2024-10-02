@@ -1,8 +1,10 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.report;
 
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ReviewReport;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import com.project.shoppingmall.type.ReportResultType;
 import org.springframework.test.util.ReflectionTestUtils;
 

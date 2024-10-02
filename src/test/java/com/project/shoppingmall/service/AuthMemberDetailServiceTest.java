@@ -8,7 +8,7 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.service.auth.AuthMemberDetailService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.type.MemberRoleType;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,15 +1,15 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.purchaseitem;
 
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
-import java.io.IOException;
+import com.project.shoppingmall.testdata.product.ProductDataForPurchaseBuilder;
 import java.time.LocalDateTime;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class PurchaseItemBuilder {
-  public static PurchaseItem.PurchaseItemBuilder fullData() throws IOException {
+  public static PurchaseItem.PurchaseItemBuilder fullData() {
     ProductDataForPurchase productData =
         ProductDataForPurchase.builder()
             .productId(10L)
@@ -24,7 +24,7 @@ public class PurchaseItemBuilder {
     return PurchaseItem.builder().productData(productData).finalPrice(10000);
   }
 
-  public static PurchaseItem makePurchaseItem(Long id, Member seller) {
+  public static PurchaseItem makePurchaseItem(long id, Member seller) {
     ProductDataForPurchase productData =
         ProductDataForPurchase.builder()
             .productId(10L)
@@ -42,7 +42,7 @@ public class PurchaseItemBuilder {
     return purchaseItem;
   }
 
-  public static PurchaseItem makePurchaseItem(Long id, Member seller, LocalDateTime createDate) {
+  public static PurchaseItem makePurchaseItem(long id, Member seller, LocalDateTime createDate) {
     ProductDataForPurchase productData =
         ProductDataForPurchase.builder()
             .productId(10L)
@@ -61,25 +61,12 @@ public class PurchaseItemBuilder {
     return purchaseItem;
   }
 
-  public static PurchaseItem makePurchaseItem(Long id, Product product) {
+  public static PurchaseItem makePurchaseItem(long id, Product product) {
     ProductDataForPurchase productData =
         ProductDataForPurchaseBuilder.makeProductDataForPurchase(product);
     PurchaseItem purchaseItem =
         PurchaseItem.builder().productData(productData).finalPrice(10000).build();
     ReflectionTestUtils.setField(purchaseItem, "id", id);
     return purchaseItem;
-  }
-
-  public static PurchaseItem makePurchaseItem(Product product) {
-    try {
-      ProductDataForPurchase productOptionObj =
-          ProductDataForPurchaseBuilder.fullData(product).build();
-      return PurchaseItemBuilder.fullData()
-          .productData(productOptionObj)
-          .finalPrice(product.getFinalPrice())
-          .build();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 }

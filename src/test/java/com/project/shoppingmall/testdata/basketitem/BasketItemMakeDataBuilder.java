@@ -1,4 +1,4 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.basketitem;
 
 import com.project.shoppingmall.dto.basket.BasketItemMakeData;
 import java.util.ArrayList;

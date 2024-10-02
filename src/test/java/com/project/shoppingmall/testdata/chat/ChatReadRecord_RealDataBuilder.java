@@ -1,10 +1,10 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.chat;
 
 import com.project.shoppingmall.entity.ChatReadRecord;
 import com.project.shoppingmall.entity.ChatRoom;
 import com.project.shoppingmall.entity.Member;
 
-public class ChatReadRecordBuilder {
+public class ChatReadRecord_RealDataBuilder {
   public static ChatReadRecord makeChatReadRecord(ChatRoom chatRoom, Member member) {
     return ChatReadRecord.builder().chatRoom(chatRoom).member(member).build();
   }

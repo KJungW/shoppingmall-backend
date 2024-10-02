@@ -6,9 +6,9 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.entity.report.ProductReport;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.ProductReportBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
 import java.io.IOException;
@@ -48,17 +48,17 @@ class ProductReportRetrieveRepositoryTest {
 
     // 30개의 제품 생성
     for (int i = 0; i < 30; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
 
       // 제품마다 처리되지 않은 신고데이터 작성
       ProductReport noProcessedReport =
-          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
       em.persist(noProcessedReport);
 
       // 제품마다 처리된 신고데이터 작성
       ProductReport processedReport =
-          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
       em.persist(processedReport);
     }
   }
@@ -81,17 +81,17 @@ class ProductReportRetrieveRepositoryTest {
 
     // - 새로운 15개의 제품 생성
     for (int i = 0; i < 15; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
 
       // 제품마다 처리되지 않은 신고데이터 작성
       ProductReport noProcessedReport =
-          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
       em.persist(noProcessedReport);
 
       // 제품마다 처리된 신고데이터 작성
       ProductReport processedReport =
-          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
       em.persist(processedReport);
     }
     em.flush();
@@ -153,17 +153,17 @@ class ProductReportRetrieveRepositoryTest {
 
     // - 새로운 15개의 제품 생성
     for (int i = 0; i < 15; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
 
       // 제품마다 처리되지 않은 신고데이터 작성
       ProductReport noProcessedReport =
-          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
       em.persist(noProcessedReport);
 
       // 제품마다 처리된 신고데이터 작성
       ProductReport processedReport =
-          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
       em.persist(processedReport);
     }
     em.flush();
@@ -225,17 +225,17 @@ class ProductReportRetrieveRepositoryTest {
 
     // - 새로운 10개의 제품 생성
     for (int i = 0; i < 10; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
 
       // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
       ProductReport noProcessedReport =
-          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
       em.persist(noProcessedReport);
 
       // 제품마다 처리된 신고데이터 작성 (총 10개)
       ProductReport processedReport =
-          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
       em.persist(processedReport);
     }
     em.flush();
@@ -293,17 +293,17 @@ class ProductReportRetrieveRepositoryTest {
 
     // - 새로운 10개의 제품 생성
     for (int i = 0; i < 10; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
 
       // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
       ProductReport noProcessedReport =
-          ProductReportBuilder.makeNoProcessedProductReport(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
       em.persist(noProcessedReport);
 
       // 제품마다 처리된 신고데이터 작성 (총 10개)
       ProductReport processedReport =
-          ProductReportBuilder.makeProcessedProductReportTestData(reporter, targetProduct);
+          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
       em.persist(processedReport);
     }
     em.flush();

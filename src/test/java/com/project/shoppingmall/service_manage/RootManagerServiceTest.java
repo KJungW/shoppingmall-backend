@@ -10,7 +10,7 @@ import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.repository.ManagerRepository;
 import com.project.shoppingmall.service_manage.common.RootManagerService;
-import com.project.shoppingmall.testdata.ManagerBuilder;
+import com.project.shoppingmall.testdata.manager.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

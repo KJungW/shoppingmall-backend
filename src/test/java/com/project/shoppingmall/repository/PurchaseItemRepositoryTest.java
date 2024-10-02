@@ -3,7 +3,10 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
@@ -130,7 +133,7 @@ class PurchaseItemRepositoryTest {
   }
 
   private Product saveProduct(Member member, ProductType type) {
-    Product product = ProductBuilder.makeNoBannedProduct(member, type);
+    Product product = Product_RealDataBuilder.makeProduct(member, type);
     em.persist(product);
     return product;
   }
@@ -139,10 +142,10 @@ class PurchaseItemRepositoryTest {
       int count, Member givenBuyer, Product givenProduct, PurchaseStateType purchaseState) {
     List<PurchaseItem> purchaseItems = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(givenProduct);
+      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(givenProduct);
       purchaseItems.add(purchaseItem);
       Purchase purchase =
-          PurchaseBuilder.makePurchase(
+          Purchase_RealDataBuilder.makePurchase(
               givenBuyer, new ArrayList<>(List.of(purchaseItem)), purchaseState);
       em.persist(purchase);
     }

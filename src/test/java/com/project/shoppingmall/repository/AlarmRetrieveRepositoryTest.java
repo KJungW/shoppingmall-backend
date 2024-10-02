@@ -3,11 +3,16 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.alarm.Alarm_RealDataBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.refund.Refund_RealDataBuilder;
+import com.project.shoppingmall.testdata.review.Review_RealDataBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -29,17 +34,17 @@ class AlarmRetrieveRepositoryTest {
 
   @Test
   @DisplayName("retrieveAllByMember() : 정상흐름")
-  public void retrieveAllByMember_ok() throws IOException {
+  public void retrieveAllByMember_ok() {
     // given
     Member listener = makeMember();
     Product listenerProduct = makeProduct(listener);
     Review listenerReview = makeReview(listener);
     Refund listenerTargerRefund = makeRefund(listenerProduct);
     for (int i = 0; i < 3; i++) {
-      em.persist(AlamBuilder.memberBanFullData(listener).build());
-      em.persist(AlamBuilder.reviewBanFullData(listener, listenerReview).build());
-      em.persist(AlamBuilder.productBanFullData(listener, listenerProduct).build());
-      em.persist(AlamBuilder.refundRequestFullData(listener, listenerTargerRefund).build());
+      em.persist(Alarm_RealDataBuilder.makeMemberBanAlarm(listener));
+      em.persist(Alarm_RealDataBuilder.makeReviewBanAlarm(listener, listenerReview));
+      em.persist(Alarm_RealDataBuilder.makeProductBanAlarm(listener, listenerProduct));
+      em.persist(Alarm_RealDataBuilder.makeRefundRequestAlarm(listener, listenerTargerRefund));
     }
     em.flush();
     em.clear();
@@ -89,35 +94,35 @@ class AlarmRetrieveRepositoryTest {
     return type;
   }
 
-  public Product makeProduct(Member member) throws IOException {
+  public Product makeProduct(Member member) {
     ProductType type = makeProductType("test$test");
-    Product listenerProduct = ProductBuilder.makeNoBannedProduct(member, type);
+    Product listenerProduct = Product_RealDataBuilder.makeProduct(member, type);
     em.persist(listenerProduct);
     return listenerProduct;
   }
 
-  public Review makeReview(Member reviewWriter) throws IOException {
+  public Review makeReview(Member reviewWriter) {
     Member otherSeller = makeMember();
     Product otherSellerProduct = makeProduct(otherSeller);
-    PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(otherSellerProduct);
+    PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(otherSellerProduct);
     Purchase purchase =
-        PurchaseBuilder.makePurchase(
+        Purchase_RealDataBuilder.makePurchase(
             reviewWriter, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
-    Review review = ReviewBuilder.makeReview(reviewWriter, otherSellerProduct);
+    Review review = Review_RealDataBuilder.makeReview(reviewWriter, otherSellerProduct);
     purchaseItem.registerReview(review);
     em.persist(review);
     return review;
   }
 
-  public Refund makeRefund(Product targetProduct) throws IOException {
+  public Refund makeRefund(Product targetProduct) {
     Member refundRequester = makeMember();
-    PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+    PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
     Purchase purchase =
-        PurchaseBuilder.makePurchase(
+        Purchase_RealDataBuilder.makePurchase(
             refundRequester, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
-    Refund refund = RefundBuilder.makeRefund(purchaseItem);
+    Refund refund = Refund_RealDataBuilder.makeRefund(purchaseItem);
     em.persist(refund);
     return refund;
   }

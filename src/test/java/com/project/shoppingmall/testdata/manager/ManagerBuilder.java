@@ -1,4 +1,4 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.manager;
 
 import com.project.shoppingmall.entity.Manager;
 import com.project.shoppingmall.type.ManagerRoleType;

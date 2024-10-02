@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.review.Review_RealDataBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
@@ -47,7 +52,7 @@ class ReviewReportRetrieveRepositoryTest {
     em.persist(type);
 
     // 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // 5개의 Complete상태의 Purchase 데이터 생성
@@ -55,11 +60,11 @@ class ReviewReportRetrieveRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
 
         // PurchaseItem마다 Review 생성
-        Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
         purchaseItem.registerReview(review);
         em.persist(review);
 
@@ -75,14 +80,14 @@ class ReviewReportRetrieveRepositoryTest {
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
   }
 
   @Test
   @DisplayName("findUnprocessedReviewReportReport() : 정상흐름 - 첫번째 페이지")
-  public void findUnprocessedReviewReportReport_ok_firstPage() throws IOException {
+  public void findUnprocessedReviewReportReport_ok_firstPage() {
     // given
     // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
@@ -98,7 +103,7 @@ class ReviewReportRetrieveRepositoryTest {
     long givenProductTypeId = type.getId();
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // - 5개의 Complete상태의 Purchase 데이터 생성
@@ -106,11 +111,11 @@ class ReviewReportRetrieveRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
 
         // PurchaseItem마다 Review 생성
-        Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
         purchaseItem.registerReview(review);
         em.persist(review);
 
@@ -126,7 +131,7 @@ class ReviewReportRetrieveRepositoryTest {
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -172,7 +177,7 @@ class ReviewReportRetrieveRepositoryTest {
 
   @Test
   @DisplayName("findUnprocessedReviewReportReport() : 정상흐름 - 마지막 페이지")
-  public void findUnprocessedReviewReportReport_ok_lastPage() throws IOException {
+  public void findUnprocessedReviewReportReport_ok_lastPage() {
     // given
     // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
@@ -188,7 +193,7 @@ class ReviewReportRetrieveRepositoryTest {
     long givenProductTypeId = type.getId();
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // - 5개의 Complete상태의 Purchase 데이터 생성
@@ -196,11 +201,11 @@ class ReviewReportRetrieveRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
 
         // PurchaseItem마다 Review 생성
-        Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
         purchaseItem.registerReview(review);
         em.persist(review);
 
@@ -216,7 +221,7 @@ class ReviewReportRetrieveRepositoryTest {
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -262,7 +267,7 @@ class ReviewReportRetrieveRepositoryTest {
 
   @Test
   @DisplayName("findReviewReportsByReviewWriter() : 정상흐름 - 첫번째 페이지")
-  public void findReviewReportsByReviewWriter_ok_firstPage() throws IOException {
+  public void findReviewReportsByReviewWriter_ok_firstPage() {
     // given
     // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
@@ -278,17 +283,17 @@ class ReviewReportRetrieveRepositoryTest {
     em.persist(type);
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     List<PurchaseItem> purchaseItems = new ArrayList<>();
     // 10개의 PurchaseItem 생성
     for (int k = 0; k < 10; k++) {
-      PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
       purchaseItems.add(purchaseItem);
 
       // PurchaseItem마다 Review 생성 (총 10개)
-      Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+      Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
       purchaseItem.registerReview(review);
       em.persist(review);
 
@@ -305,7 +310,7 @@ class ReviewReportRetrieveRepositoryTest {
 
     // 생성한 PurchaseItem으로 Purchase 생성
     Purchase purchase =
-        PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+        Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
     em.persist(purchase);
 
     em.flush();
@@ -346,7 +351,7 @@ class ReviewReportRetrieveRepositoryTest {
 
   @Test
   @DisplayName("findReviewReportsByReviewWriter() : 정상흐름 - 마지막 페이지")
-  public void findReviewReportsByReviewWriter_ok_lastPage() throws IOException {
+  public void findReviewReportsByReviewWriter_ok_lastPage() {
     // given
     // - 새로운 판매자와 구매자 그리고 신고자 생성
     Member seller = MemberBuilder.fullData().build();
@@ -362,17 +367,17 @@ class ReviewReportRetrieveRepositoryTest {
     em.persist(type);
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     List<PurchaseItem> purchaseItems = new ArrayList<>();
     // 10개의 PurchaseItem 생성
     for (int k = 0; k < 10; k++) {
-      PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
       purchaseItems.add(purchaseItem);
 
       // PurchaseItem마다 Review 생성 (총 10개)
-      Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+      Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
       purchaseItem.registerReview(review);
       em.persist(review);
 
@@ -389,7 +394,7 @@ class ReviewReportRetrieveRepositoryTest {
 
     // 생성한 PurchaseItem으로 Purchase 생성
     Purchase purchase =
-        PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+        Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
     em.persist(purchase);
 
     em.flush();

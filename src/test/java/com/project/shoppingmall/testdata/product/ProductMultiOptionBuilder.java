@@ -1,4 +1,4 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.product;
 
 import com.project.shoppingmall.entity.ProductMultipleOption;
 import org.springframework.test.util.ReflectionTestUtils;

@@ -11,7 +11,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.PurchaseRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.purchase.PurchaseRetrieveService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

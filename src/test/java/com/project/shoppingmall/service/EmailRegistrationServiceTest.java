@@ -12,7 +12,7 @@ import com.project.shoppingmall.repository.CacheRepository;
 import com.project.shoppingmall.service.email.EmailRegistrationService;
 import com.project.shoppingmall.service.email.EmailService;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.util.JsonUtil;
 import com.project.shoppingmall.util.RandomNumberGenerator;
 import java.util.Optional;

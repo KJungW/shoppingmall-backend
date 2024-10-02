@@ -20,7 +20,12 @@ import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.alarm.AlamBuilder;
+import com.project.shoppingmall.testdata.basketitem.BasketItemBuilder;
+import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -122,15 +127,14 @@ class ProductDeleteServiceTest {
     List<ProductReport> givenProductReports =
         new ArrayList<>(
             List.of(
-                ProductReportBuilder.fullData().build(), ProductReportBuilder.fullData().build()));
+                ProductReport_RealDataBuilder.fullData().build(),
+                ProductReport_RealDataBuilder.fullData().build()));
     when(mockReportFindService.findAllByProduct(anyLong())).thenReturn(givenProductReports);
 
     // - alarmFindService.findByTargetProduct() 세팅
     List<Alarm> givenAlarms =
         new ArrayList<>(
-            List.of(
-                AlamBuilder.productBanFullData().build(),
-                AlamBuilder.productBanFullData().build()));
+            List.of(AlamBuilder.makeProductBanAlarm(10L), AlamBuilder.makeProductBanAlarm(20L)));
     when(mockAlarmFindService.findByTargetProduct(anyLong())).thenReturn(givenAlarms);
 
     // when

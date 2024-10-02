@@ -21,7 +21,11 @@ import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.alarm.AlamBuilder;
+import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.report.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,8 +105,7 @@ class ReviewDeleteServiceTest {
     // - alarmFindService.findByTargetProduct() 세팅
     List<Alarm> givenAlarms =
         new ArrayList<>(
-            List.of(
-                AlamBuilder.reviewBanFullData().build(), AlamBuilder.reviewBanFullData().build()));
+            List.of(AlamBuilder.makeReviewBanAlarm(10L), AlamBuilder.makeReviewBanAlarm(15L)));
     when(mockAlarmFindService.findByTargetReview(anyLong())).thenReturn(givenAlarms);
 
     // - reviewService.calcReviewScoresInProduct() 세팅

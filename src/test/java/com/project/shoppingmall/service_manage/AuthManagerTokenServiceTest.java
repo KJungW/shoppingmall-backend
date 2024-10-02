@@ -11,7 +11,7 @@ import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.exception.JwtTokenException;
 import com.project.shoppingmall.service_manage.auth.AuthManagerTokenService;
 import com.project.shoppingmall.service_manage.common.ManagerService;
-import com.project.shoppingmall.testdata.ManagerBuilder;
+import com.project.shoppingmall.testdata.manager.ManagerBuilder;
 import com.project.shoppingmall.type.ManagerRoleType;
 import com.project.shoppingmall.util.JwtUtil;
 import com.project.shoppingmall.util.PasswordEncoderUtil;

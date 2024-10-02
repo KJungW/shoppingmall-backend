@@ -7,7 +7,7 @@ import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.alarm.AlarmDto;
 import com.project.shoppingmall.entity.Alarm;
 import com.project.shoppingmall.repository.AlarmRetrieveRepository;
-import com.project.shoppingmall.testdata.AlamBuilder;
+import com.project.shoppingmall.testdata.alarm.AlamBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class AlarmRetrieveServiceTest {
     int givenAlarmListSize = 5;
     List<Alarm> givenAlarmData = new ArrayList<>();
     for (int i = 0; i < givenAlarmListSize; i++) {
-      givenAlarmData.add(AlamBuilder.memberBanFullData().build());
+      givenAlarmData.add(AlamBuilder.makeMemberBanAlarm(634L));
     }
 
     Slice<Alarm> givenSliceData = mock(Slice.class);

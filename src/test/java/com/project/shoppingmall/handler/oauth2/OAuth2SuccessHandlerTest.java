@@ -8,7 +8,7 @@ import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;

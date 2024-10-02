@@ -9,8 +9,8 @@ import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.exception.AlreadyProcessedReport;
 import com.project.shoppingmall.service.report.ReportFindService;
-import com.project.shoppingmall.testdata.ProductReportBuilder;
-import com.project.shoppingmall.testdata.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ReviewReportBuilder;
 import com.project.shoppingmall.type.ReportResultType;
 import com.project.shoppingmall.type.ReportResultTypeForApi;
 import java.io.IOException;
@@ -38,7 +38,7 @@ class ReportProcessManageServiceTest {
     long inputProductReportId = 10L;
     ReportResultTypeForApi inputResultType = ReportResultTypeForApi.MEMBER_BAN;
 
-    ProductReport givenProductReport = ProductReportBuilder.fullData().build();
+    ProductReport givenProductReport = ProductReport_RealDataBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProductReport, "id", inputProductReportId);
     ReflectionTestUtils.setField(
         givenProductReport, "reportResult", ReportResultType.WAITING_PROCESSED);
@@ -60,7 +60,7 @@ class ReportProcessManageServiceTest {
     long inputProductReportId = 10L;
     ReportResultTypeForApi inputResultType = ReportResultTypeForApi.MEMBER_BAN;
 
-    ProductReport givenProductReport = ProductReportBuilder.fullData().build();
+    ProductReport givenProductReport = ProductReport_RealDataBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProductReport, "id", inputProductReportId);
     ReflectionTestUtils.setField(givenProductReport, "reportResult", ReportResultType.MEMBER_BAN);
     when(mockReportFindService.finaProductReportById(anyLong()))

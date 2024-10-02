@@ -15,7 +15,11 @@ import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.report.ReportService;
 import com.project.shoppingmall.service.review.ReviewFindService;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -120,7 +124,7 @@ class ReportServiceTest {
     when(mockProductFindService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
-    ProductReport givenLatestReport = ProductReportBuilder.fullData().build();
+    ProductReport givenLatestReport = ProductReport_RealDataBuilder.fullData().build();
     ReflectionTestUtils.setField(
         givenLatestReport, "createDate", LocalDateTime.now().minusHours(15));
 
@@ -160,7 +164,7 @@ class ReportServiceTest {
     when(mockProductFindService.findByIdWithSeller(any())).thenReturn(Optional.of(givenProduct));
 
     // - productReportRepository.findLatestReport() 세팅
-    ProductReport givenLatestReport = ProductReportBuilder.fullData().build();
+    ProductReport givenLatestReport = ProductReport_RealDataBuilder.fullData().build();
     ReflectionTestUtils.setField(
         givenLatestReport, "createDate", LocalDateTime.now().minusHours(30));
 

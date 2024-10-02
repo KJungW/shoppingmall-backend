@@ -8,8 +8,8 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.exception.DataNotFound;
 import com.project.shoppingmall.repository.AlarmRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
-import com.project.shoppingmall.testdata.AlamBuilder;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.alarm.AlamBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +40,7 @@ class AlarmDeleteServiceTest {
     ReflectionTestUtils.setField(givenMember, "id", inputListenerId);
     when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
-    Alarm givenAlarm = AlamBuilder.memberBanFullData().build();
+    Alarm givenAlarm = AlamBuilder.makeMemberBanAlarm(634L);
     ReflectionTestUtils.setField(givenAlarm, "id", inputAlarmId);
     ReflectionTestUtils.setField(givenAlarm.getListener(), "id", inputListenerId);
     when(mockAlarmRepository.findById(anyLong())).thenReturn(Optional.of(givenAlarm));
@@ -66,7 +66,7 @@ class AlarmDeleteServiceTest {
     when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
 
     long otherMemberId = 30L;
-    Alarm givenAlarm = AlamBuilder.memberBanFullData().build();
+    Alarm givenAlarm = AlamBuilder.makeMemberBanAlarm(634L);
     ReflectionTestUtils.setField(givenAlarm, "id", inputAlarmId);
     ReflectionTestUtils.setField(givenAlarm.getListener(), "id", otherMemberId);
     when(mockAlarmRepository.findById(anyLong())).thenReturn(Optional.of(givenAlarm));

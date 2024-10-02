@@ -19,7 +19,7 @@ import com.project.shoppingmall.service.email.EmailService;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.JsonUtil;

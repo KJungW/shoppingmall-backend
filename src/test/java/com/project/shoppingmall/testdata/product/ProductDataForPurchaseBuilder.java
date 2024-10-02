@@ -1,12 +1,10 @@
-package com.project.shoppingmall.testdata;
+package com.project.shoppingmall.testdata.product;
 
 import com.project.shoppingmall.dto.purchase.ProductDataForPurchase;
 import com.project.shoppingmall.entity.Product;
-import java.io.IOException;
 
 public class ProductDataForPurchaseBuilder {
-  public static ProductDataForPurchase.ProductDataForPurchaseBuilder fullData(Product product)
-      throws IOException {
+  public static ProductDataForPurchase.ProductDataForPurchaseBuilder fullData(Product product) {
     return ProductDataForPurchase.builder()
         .productId(product.getId())
         .sellerId(product.getSeller().getId())

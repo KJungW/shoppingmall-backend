@@ -3,7 +3,8 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
@@ -34,14 +35,14 @@ class ProductBulkRepositoryTest {
 
     // 제품 생성
     for (int i = 0; i < 10; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
     }
   }
 
   @Test
   @DisplayName("banProductsBySellerId() : 정상흐름")
-  public void banProductsBySellerId_ok() throws IOException {
+  public void banProductsBySellerId_ok() {
     // given
     // - 새로운 판매자 생성
     Member seller = MemberBuilder.fullData().build();
@@ -54,7 +55,7 @@ class ProductBulkRepositoryTest {
 
     // - 새로운 제품 생성
     for (int i = 0; i < 8; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
       em.persist(targetProduct);
     }
     // - 인자세팅
@@ -120,7 +121,7 @@ class ProductBulkRepositoryTest {
 
     // - 새로운 제품 생성
     for (int i = 0; i < 8; i++) {
-      Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, commonType);
+      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, commonType);
       em.persist(targetProduct);
     }
     em.flush();

@@ -8,7 +8,7 @@ import com.project.shoppingmall.repository.ProductReportRetrieveRepository;
 import com.project.shoppingmall.repository.ReviewReportRetrieveRepository;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service_manage.report.ReportRetrieveManageService;
-import com.project.shoppingmall.testdata.MemberBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

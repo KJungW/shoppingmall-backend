@@ -11,10 +11,11 @@ import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewFindService;
-import com.project.shoppingmall.testdata.MemberBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.RefundBuilder;
-import com.project.shoppingmall.testdata.ReviewBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.testdata.refund.RefundBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import com.project.shoppingmall.type.AlarmType;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,13 +103,13 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeRefundRequestAlarm() : 정상흐름")
-  public void makeRefundRequestAlarm_ok() throws IOException {
+  public void makeRefundRequestAlarm_ok() {
     // given
     long inputRefundId = 30L;
 
     long givenSellerId = 20L;
-    Refund givenRefund = set_refundFindService_findByIdWithPurchaseItemProduct(30L, 20L);
     Member givenSeller = set_mockMemberFindService_findById(givenSellerId, true);
+    Refund givenRefund = set_refundFindService_findByIdWithPurchaseItemProduct(30L, givenSeller);
 
     // when
     Alarm resultAlarm = target.makeRefundRequestAlarm(inputRefundId);
@@ -245,7 +246,7 @@ class AlarmServiceTest {
   }
 
   public Product set_productFindService_findByIdWithSeller(
-      long productId, long sellerId, boolean isBan) throws IOException {
+      long productId, long sellerId, boolean isBan) {
     Product givenProduct = ProductBuilder.fullData().build();
     ReflectionTestUtils.setField(givenProduct, "id", productId);
     ReflectionTestUtils.setField(givenProduct, "isBan", isBan);
@@ -255,11 +256,10 @@ class AlarmServiceTest {
     return givenProduct;
   }
 
-  public Refund set_refundFindService_findByIdWithPurchaseItemProduct(long refundId, long sellerId)
-      throws IOException {
-    Refund givenRefund = RefundBuilder.makeRefundWithPurchaseItem();
-    ReflectionTestUtils.setField(givenRefund, "id", refundId);
-    ReflectionTestUtils.setField(givenRefund.getPurchaseItem(), "sellerId", sellerId);
+  public Refund set_refundFindService_findByIdWithPurchaseItemProduct(
+      long refundId, Member seller) {
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.makePurchaseItem(60L, seller);
+    Refund givenRefund = RefundBuilder.makeRefund(refundId, givenPurchaseItem);
     when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
     return givenRefund;

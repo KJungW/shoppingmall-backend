@@ -4,6 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.refund.Refund_RealDataBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
@@ -172,7 +177,7 @@ class PurchaseItemRetrieveRepositoryTest {
   }
 
   private Product saveProduct(Member member, ProductType type) {
-    Product product = ProductBuilder.makeNoBannedProduct(member, type);
+    Product product = Product_RealDataBuilder.makeProduct(member, type);
     em.persist(product);
     return product;
   }
@@ -180,10 +185,10 @@ class PurchaseItemRetrieveRepositoryTest {
   private List<PurchaseItem> savePurchaseItems(int count, Member givenBuyer, Product givenProduct) {
     List<PurchaseItem> purchaseItems = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(givenProduct);
+      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(givenProduct);
       purchaseItems.add(purchaseItem);
       Purchase purchase =
-          PurchaseBuilder.makePurchase(
+          Purchase_RealDataBuilder.makePurchase(
               givenBuyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
@@ -196,7 +201,7 @@ class PurchaseItemRetrieveRepositoryTest {
     return savedPurchaseItems.stream()
         .map(
             purchaseItem -> {
-              Refund givenRefund = RefundBuilder.makeRefund(purchaseItem);
+              Refund givenRefund = Refund_RealDataBuilder.makeRefund(purchaseItem);
               em.persist(givenRefund);
               return givenRefund;
             })

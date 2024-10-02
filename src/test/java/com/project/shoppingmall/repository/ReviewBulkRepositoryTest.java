@@ -3,7 +3,11 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.review.Review_RealDataBuilder;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
@@ -38,7 +42,7 @@ class ReviewBulkRepositoryTest {
     em.persist(type);
 
     // 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // 5개의 Complete상태의 Purchase 데이터 생성
@@ -46,18 +50,18 @@ class ReviewBulkRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
 
         // PurchaseItem마다 Review 생성
-        Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
         ReflectionTestUtils.setField(review, "isBan", false);
         purchaseItem.registerReview(review);
         em.persist(review);
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
   }
@@ -78,7 +82,7 @@ class ReviewBulkRepositoryTest {
     em.persist(type);
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // - 5개의 Complete상태의 Purchase 데이터 생성
@@ -86,18 +90,18 @@ class ReviewBulkRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
 
         // PurchaseItem마다 Review 생성
-        Review review = ReviewBuilder.makeReview(buyer, targetProduct);
+        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
         ReflectionTestUtils.setField(review, "isBan", false);
         purchaseItem.registerReview(review);
         em.persist(review);
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();
@@ -137,7 +141,7 @@ class ReviewBulkRepositoryTest {
     em.persist(type);
 
     // - 새로운 구매할 제품 생성
-    Product targetProduct = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(targetProduct);
 
     // - 5개의 Complete상태의 Purchase 데이터 생성
@@ -145,12 +149,12 @@ class ReviewBulkRepositoryTest {
       List<PurchaseItem> purchaseItems = new ArrayList<>();
       // Purchase마다 3개의 PurchaseItem 생성
       for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(targetProduct);
+        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
         purchaseItems.add(purchaseItem);
       }
 
       Purchase purchase =
-          PurchaseBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
+          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
       em.persist(purchase);
     }
     em.flush();

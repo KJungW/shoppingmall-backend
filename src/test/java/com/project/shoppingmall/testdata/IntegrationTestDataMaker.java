@@ -7,6 +7,18 @@ import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
 import com.project.shoppingmall.service.s3.S3Service;
+import com.project.shoppingmall.testdata.alarm.Alarm_RealDataBuilder;
+import com.project.shoppingmall.testdata.basketitem.BasketItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.chat.ChatMessage_RealDataBuilder;
+import com.project.shoppingmall.testdata.chat.ChatReadRecord_RealDataBuilder;
+import com.project.shoppingmall.testdata.chat.ChatRoom_RealDataBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
+import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
+import com.project.shoppingmall.testdata.report.ReviewReportBuilder;
+import com.project.shoppingmall.testdata.review.Review_RealDataBuilder;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.util.JsonUtil;
@@ -29,19 +41,21 @@ public class IntegrationTestDataMaker {
   @Autowired private S3Service s3Service;
 
   public ChatReadRecord saveChatReadRecord(ChatRoom chatRoom, Member member) {
-    ChatReadRecord chatReadRecord = ChatReadRecordBuilder.makeChatReadRecord(chatRoom, member);
+    ChatReadRecord chatReadRecord =
+        ChatReadRecord_RealDataBuilder.makeChatReadRecord(chatRoom, member);
     em.persist(chatReadRecord);
     return chatReadRecord;
   }
 
   public ChatMessage saveChatMessage(ChatRoom chatRoom, Member writer, String message) {
-    ChatMessage chatMessage = ChatMessageBuilder.makeChatMessage(chatRoom, writer, message);
+    ChatMessage chatMessage =
+        ChatMessage_RealDataBuilder.makeChatMessage(chatRoom, writer, message);
     mongoTemplate.insert(chatMessage);
     return chatMessage;
   }
 
   public ChatRoom saveChatRoom(Member buyer, Product product) {
-    ChatRoom chatRoom = ChatRoomBuilder.makeChatRoom(buyer, product);
+    ChatRoom chatRoom = ChatRoom_RealDataBuilder.makeChatRoom(buyer, product);
     em.persist(chatRoom);
     return chatRoom;
   }
@@ -54,41 +68,41 @@ public class IntegrationTestDataMaker {
 
   public ProductReport saveProductReport(Member reporter, Product product) {
     ProductReport productReport =
-        ProductReportBuilder.makeNoProcessedProductReport(reporter, product);
+        ProductReport_RealDataBuilder.makeProductReport(reporter, product, false);
     em.persist(productReport);
     return productReport;
   }
 
-  public Alarm saveAlarm(Member listener) throws IOException {
-    Alarm alarm = AlarmBuilder.makeMemberBanAlarm(listener);
+  public Alarm saveAlarm(Member listener) {
+    Alarm alarm = Alarm_RealDataBuilder.makeMemberBanAlarm(listener);
     em.persist(alarm);
     return alarm;
   }
 
   public BasketItem saveBasketItem(Member member, Product product) {
-    BasketItem basketItem = BasketItemBuilder.makeBasketItem(member, product);
+    BasketItem basketItem = BasketItem_RealDataBuilder.makeBasketItem(member, product);
     em.persist(basketItem);
     return basketItem;
   }
 
   public Review saveReview(Member reviewer, Product product, PurchaseItem purchaseItem) {
-    Review review = ReviewBuilder.makeReview(reviewer, product);
+    Review review = Review_RealDataBuilder.makeReview(reviewer, product);
     purchaseItem.registerReview(review);
     em.persist(review);
     return review;
   }
 
   public PurchaseItem savePurchaseItem(Product product, Member buyer) {
-    PurchaseItem purchaseItem = PurchaseItemBuilder.makePurchaseItem(product);
+    PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(product);
     Purchase purchase =
-        PurchaseBuilder.makePurchase(
+        Purchase_RealDataBuilder.makePurchase(
             buyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
     em.persist(purchase);
     return purchaseItem;
   }
 
   public Product saveProduct(Member seller, ProductType type) {
-    Product product = ProductBuilder.makeNoBannedProduct(seller, type);
+    Product product = Product_RealDataBuilder.makeProduct(seller, type);
     em.persist(product);
     return product;
   }

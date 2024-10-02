@@ -9,10 +9,10 @@ import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.repository.ReviewRetrieveRepository;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.review.ReviewRetrieveService;
-import com.project.shoppingmall.testdata.MemberBuilder;
 import com.project.shoppingmall.testdata.MockSliceResultBuilder;
-import com.project.shoppingmall.testdata.ProductBuilder;
-import com.project.shoppingmall.testdata.ReviewBuilder;
+import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.testdata.review.ReviewBuilder;
 import com.project.shoppingmall.type.LoginType;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +67,7 @@ class ReviewRetrieveServiceTest {
     ArrayList<Review> reviews = new ArrayList<>();
     idList.forEach(
         id -> {
-          reviews.add(ReviewBuilder.makeReview(givenReviewer, givenProduct));
+          reviews.add(ReviewBuilder.makeReview(734L, givenReviewer, givenProduct));
         });
     return reviews;
   }
