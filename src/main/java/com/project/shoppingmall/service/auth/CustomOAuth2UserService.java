@@ -6,6 +6,7 @@ import com.project.shoppingmall.dto.oauth2.user_info.KakaoUserInfo;
 import com.project.shoppingmall.dto.oauth2.user_info.NaverUserInfo;
 import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.exception.OAuth2AuthenticationProcessingException;
+import com.project.shoppingmall.exception.ServerLogicError;
 import com.project.shoppingmall.type.LoginType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -21,34 +22,39 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-  private final DefaultOAuth2UserService superClass = new DefaultOAuth2UserService();
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    OAuth2User oAuth2User = superClass.loadUser(userRequest);
+    OAuth2User oAuth2User = loadUserInSuperClass(userRequest);
     try {
-      OAuth2UserInfo oAuth2UserInfo = makeOAuthUserInfo(userRequest, oAuth2User);
+      LoginType loginType = findLoginType(userRequest);
+      OAuth2UserInfo oAuth2UserInfo = makeOAuthUserInfo(loginType, oAuth2User);
       return new OAuth2UserPrinciple(oAuth2UserInfo);
-    } catch (AuthenticationException ex) {
-      throw ex;
+    } catch (AuthenticationException authenticationException) {
+      throw authenticationException;
     } catch (Exception ex) {
       throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
     }
   }
 
-  private OAuth2UserInfo makeOAuthUserInfo(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
-    String registrationId = userRequest.getClientRegistration().getRegistrationId();
-    OAuth2UserInfo oAuth2Response = null;
-    if (registrationId.equals(LoginType.NAVER.getRegistrationId())) {
-      oAuth2Response = new NaverUserInfo(oAuth2User.getAttributes());
-      return oAuth2Response;
-    } else if (registrationId.equals(LoginType.GOOGLE.getRegistrationId())) {
-      oAuth2Response = new GoogleUserInfo(oAuth2User.getAttributes());
-      return oAuth2Response;
-    } else if (registrationId.equals(LoginType.KAKAO.getRegistrationId())) {
-      oAuth2Response = new KakaoUserInfo(oAuth2User.getAttributes());
-      return oAuth2Response;
-    } else {
+  public OAuth2User loadUserInSuperClass(OAuth2UserRequest userRequest) {
+    return super.loadUser(userRequest);
+  }
+
+  private OAuth2UserInfo makeOAuthUserInfo(LoginType loginType, OAuth2User oAuth2User) {
+    return switch (loginType) {
+      case NAVER -> new NaverUserInfo(oAuth2User.getAttributes());
+      case GOOGLE -> new GoogleUserInfo(oAuth2User.getAttributes());
+      case KAKAO -> new KakaoUserInfo(oAuth2User.getAttributes());
+      default -> throw new OAuth2AuthenticationProcessingException("지원하지 않는 oauth2 서비스입니다.");
+    };
+  }
+
+  private LoginType findLoginType(OAuth2UserRequest userRequest) {
+    try {
+      String registrationId = userRequest.getClientRegistration().getRegistrationId();
+      return LoginType.getLoginType(registrationId);
+    } catch (ServerLogicError error) {
       throw new OAuth2AuthenticationProcessingException("지원하지 않는 oauth2 서비스입니다.");
     }
   }
