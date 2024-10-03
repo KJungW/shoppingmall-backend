@@ -132,4 +132,8 @@ public class Member extends BaseEntity {
       throw new ServerLogicError("Member의 accountNumber필드에 빈값이 입력되었습니다.");
     this.accountNumber = accountNumber;
   }
+
+  public boolean checkAccountAvailable() {
+    return this.accountNumber != null && !this.accountNumber.isBlank();
+  }
 }

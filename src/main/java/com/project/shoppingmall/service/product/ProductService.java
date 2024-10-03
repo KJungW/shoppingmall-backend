@@ -18,6 +18,7 @@ import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service.s3.S3Service;
 import com.project.shoppingmall.type.BlockType;
 import com.project.shoppingmall.util.JsonUtil;
+import com.project.shoppingmall.util.PriceCalculateUtil;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,9 +47,9 @@ public class ProductService {
             .findById(productData.getProductTypeId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
 
-    if (seller.getIsBan()) throw new CannotSaveProductBecauseMemberBan("벤상태의 회원은 제품등록이 불가능합니다.");
-    if (seller.getAccountNumber() == null || seller.getAccountNumber().isBlank())
-      throw new MemberAccountIsNotRegistered("제품을 등록하기 전에 회원의 계좌를 등록해야합니다.");
+    checkPriceAvailable(productData);
+    checkSellerIsBan(seller);
+    checkMemberAccountIsAvailable(seller);
 
     List<ProductSingleOption> productSingleOptions =
         makeProductSingleOptionList(productData.getSingleOptions());
@@ -80,7 +81,7 @@ public class ProductService {
   }
 
   @Transactional
-  public void update(Long memberId, Long productId, ProductMakeData productData) {
+  public Product update(Long memberId, Long productId, ProductMakeData productData) {
     Product product =
         productFindService
             .findById(productId)
@@ -89,9 +90,9 @@ public class ProductService {
         productTypeService
             .findById(productData.getProductTypeId())
             .orElseThrow(() -> new DataNotFound("Id에 해당하는 제품타입이 존재하지 않습니다."));
-    if (!validateMemberIsProductSeller(product, memberId)) {
-      throw new DataNotFound("회원에게 해당하는 productId를 가진 제품이 존재하지 않습니다.");
-    }
+
+    checkMemberIsProductSeller(product, memberId);
+    checkPriceAvailable(productData);
 
     removeOriginProductImages(product);
     removeOriginProductContentImage(product);
@@ -115,6 +116,8 @@ public class ProductService {
     product.updateMultiOptions(productMultipleOptions);
     product.updateProductImages(productImages);
     product.updateContents(productContents);
+
+    return product;
   }
 
   @Transactional
@@ -141,10 +144,6 @@ public class ProductService {
     }
     product.changeSalesStateToDiscontinued();
     return product;
-  }
-
-  private boolean validateMemberIsProductSeller(Product product, Long memberId) {
-    return product.getSeller().getId().equals(memberId);
   }
 
   private void removeOriginProductImages(Product product) {
@@ -244,5 +243,25 @@ public class ProductService {
       productMultipleOptions.add(newProductMultipleOption);
     }
     return productMultipleOptions;
+  }
+
+  private void checkPriceAvailable(ProductMakeData productData) {
+    PriceCalculateUtil.calculatePrice(
+        productData.getPrice(), productData.getDiscountAmount(), productData.getDiscountRate());
+  }
+
+  private void checkSellerIsBan(Member seller) {
+    if (seller.getIsBan()) throw new CannotSaveProductBecauseMemberBan("벤상태의 회원은 제품등록이 불가능합니다.");
+  }
+
+  private void checkMemberAccountIsAvailable(Member seller) {
+    if (seller.checkAccountAvailable())
+      throw new MemberAccountIsNotRegistered("제품을 등록하기 전에 회원의 계좌를 등록해야합니다.");
+  }
+
+  private void checkMemberIsProductSeller(Product product, Long memberId) {
+    if (!product.getSeller().getId().equals(memberId)) {
+      throw new DataNotFound("회원에게 해당하는 productId를 가진 제품이 존재하지 않습니다.");
+    }
   }
 }
