@@ -1,8 +1,6 @@
 package com.project.shoppingmall.service.review;
 
-import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.entity.Alarm;
-import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
 import com.project.shoppingmall.entity.Review;
 import com.project.shoppingmall.entity.report.ReviewReport;
@@ -54,10 +52,7 @@ public class ReviewDeleteService {
     reviewRepository.delete(review);
     reviewRepository.flush();
 
-    Product product = review.getProduct();
-    ReviewScoresCalcResult scoreCalcResult =
-        reviewService.calcReviewScoresInProduct(product.getId());
-    product.refreshScore(scoreCalcResult);
+    reviewService.updateProductScore(review.getProduct());
   }
 
   public void deleteReviewList(List<Review> reviews) {

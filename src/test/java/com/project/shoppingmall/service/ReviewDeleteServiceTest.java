@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-import com.project.shoppingmall.dto.refund.ReviewScoresCalcResult;
 import com.project.shoppingmall.entity.Alarm;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.PurchaseItem;
@@ -108,10 +107,6 @@ class ReviewDeleteServiceTest {
             List.of(AlamBuilder.makeReviewBanAlarm(10L), AlamBuilder.makeReviewBanAlarm(15L)));
     when(mockAlarmFindService.findByTargetReview(anyLong())).thenReturn(givenAlarms);
 
-    // - reviewService.calcReviewScoresInProduct() 세팅
-    ReviewScoresCalcResult givenReviewCalcResult = new ReviewScoresCalcResult(20L, 4.5);
-    when(mockReviewService.calcReviewScoresInProduct(anyLong())).thenReturn(givenReviewCalcResult);
-
     // when
     target.deleteReviewInController(givenWriterId, givenReviewId);
 
@@ -140,7 +135,7 @@ class ReviewDeleteServiceTest {
     assertSame(givenReview, reviewCaptor.getValue());
 
     // - 리뷰 제거로 인한 제품의 평점 업데이트 확인
-    assertEquals(givenReviewCalcResult.getScoreAverage(), givenProduct.getScoreAvg());
+    verify(mockReviewService, times(1)).updateProductScore(any());
   }
 
   @Test
