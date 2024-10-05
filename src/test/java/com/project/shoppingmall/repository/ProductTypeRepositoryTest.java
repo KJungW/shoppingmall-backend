@@ -4,15 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.final_value.FinalValue;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
 import jakarta.persistence.EntityManager;
+import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -21,57 +21,28 @@ import org.springframework.transaction.annotation.Transactional;
 class ProductTypeRepositoryTest {
   @Autowired private ProductTypeRepository target;
   @Autowired private EntityManager em;
-
-  @BeforeEach
-  public void beforeEach() {
-    String jpql =
-        "select pt from ProductType pt "
-            + "where pt.typeName like concat(:baseProductTypePrefix, '%') ";
-    ProductType originBaseProductType =
-        em.createQuery(jpql, ProductType.class)
-            .setParameter("baseProductTypePrefix", FinalValue.BASE_PRODUCT_TYPE_PREFIX)
-            .getSingleResult();
-    em.remove(originBaseProductType);
-  }
+  @Autowired private IntegrationTestDataMaker testDataMaker;
 
   @Test
   @DisplayName("findBaseProductType() : 정상흐름")
   public void findBaseProductType_ok() {
     // given
-    // - 기본 제품타입 생성
-    ProductType baseProductType = new ProductType(FinalValue.BASE_PRODUCT_TYPE_NAME);
-    ReflectionTestUtils.setField(
-        baseProductType,
-        "typeName",
-        FinalValue.BASE_PRODUCT_TYPE_PREFIX + FinalValue.BASE_PRODUCT_TYPE_NAME);
-    em.persist(baseProductType);
-
-    // - 그외 일반 제품타입 생성
-    for (int i = 0; i < 10; i++) {
-      ProductType testType = new ProductType("test$test" + i);
-      em.persist(testType);
-    }
+    List<ProductType> otherProductType = testDataMaker.saveProductTypeList(5);
 
     // when
     Optional<ProductType> queryResult =
         target.findBaseProductType(FinalValue.BASE_PRODUCT_TYPE_PREFIX);
 
     // then
-    assertTrue(queryResult.isPresent());
-    assertEquals(
-        FinalValue.BASE_PRODUCT_TYPE_PREFIX + FinalValue.BASE_PRODUCT_TYPE_NAME,
-        queryResult.get().getTypeName());
+    checkResult_findBaseProductType(queryResult);
   }
 
   @Test
   @DisplayName("findBaseProductType() : 기본 제품타입이 없는 경우")
   public void findBaseProductType_noProductType() {
     // given
-    // - 일반 제품타입 생성
-    for (int i = 0; i < 10; i++) {
-      ProductType testType = new ProductType("test$test" + i);
-      em.persist(testType);
-    }
+    deleteBaseProductType();
+    List<ProductType> otherProductType = testDataMaker.saveProductTypeList(5);
 
     // when
     Optional<ProductType> queryResult =
@@ -79,5 +50,23 @@ class ProductTypeRepositoryTest {
 
     // then
     assertTrue(queryResult.isEmpty());
+  }
+
+  public void deleteBaseProductType() {
+    String deleteQueryString =
+        "delete from ProductType pt "
+            + "where pt.typeName like concat(:baseProductTypePrefix, '%')";
+    int deletedRowCount =
+        em.createQuery(deleteQueryString)
+            .setParameter("baseProductTypePrefix", FinalValue.BASE_PRODUCT_TYPE_PREFIX)
+            .executeUpdate();
+    assertEquals(1, deletedRowCount);
+  }
+
+  public void checkResult_findBaseProductType(Optional<ProductType> queryResult) {
+    assertTrue(queryResult.isPresent());
+    assertEquals(
+        FinalValue.BASE_PRODUCT_TYPE_PREFIX + FinalValue.BASE_PRODUCT_TYPE_NAME,
+        queryResult.get().getTypeName());
   }
 }

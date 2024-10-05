@@ -3,23 +3,15 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
-import com.project.shoppingmall.testdata.review.Review_RealDataBuilder;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
 import com.project.shoppingmall.type.PurchaseStateType;
 import jakarta.persistence.EntityManager;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -28,152 +20,64 @@ import org.springframework.transaction.annotation.Transactional;
 class ReviewBulkRepositoryTest {
   @Autowired private ReviewBulkRepository target;
   @Autowired private EntityManager em;
-
-  @BeforeEach
-  public void beforeEach() throws IOException {
-    // 판매자와 구매자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member buyer = MemberBuilder.fullData().build();
-    em.persist(buyer);
-
-    // 제품 타입 생성
-    ProductType type = new ProductType("test$test");
-    em.persist(type);
-
-    // 구매할 제품 생성
-    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-    em.persist(targetProduct);
-
-    // 5개의 Complete상태의 Purchase 데이터 생성
-    for (int i = 0; i < 5; i++) {
-      List<PurchaseItem> purchaseItems = new ArrayList<>();
-      // Purchase마다 3개의 PurchaseItem 생성
-      for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
-        purchaseItems.add(purchaseItem);
-
-        // PurchaseItem마다 Review 생성
-        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
-        ReflectionTestUtils.setField(review, "isBan", false);
-        purchaseItem.registerReview(review);
-        em.persist(review);
-      }
-
-      Purchase purchase =
-          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
-      em.persist(purchase);
-    }
-  }
+  @Autowired private IntegrationTestDataMaker testDataMaker;
 
   @Test
   @DisplayName("banReviewsByWriterId() : 정상흐름")
-  public void banReviewsByWriterId_ok() throws IOException {
+  public void banReviewsByWriterId_ok() {
     // given
-    // - 새로운 판매자와 구매자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member buyer = MemberBuilder.fullData().build();
-    em.persist(buyer);
-    long givenWriterId = buyer.getId();
+    long inputWriterId;
+    boolean inputIsBan = true;
 
-    // - 새로운 제품 타입 생성
-    ProductType type = new ProductType("test$test1");
-    em.persist(type);
+    Product givenProduct = testDataMaker.saveProduct();
+    Member givenBuyer = testDataMaker.saveMember();
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenBuyer, givenProduct, 5, PurchaseStateType.COMPLETE);
+    List<Review> givenReviews =
+        testDataMaker.saveReviewList(givenBuyer, givenProduct, givenPurchase.getPurchaseItems());
 
-    // - 새로운 구매할 제품 생성
-    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-    em.persist(targetProduct);
-
-    // - 5개의 Complete상태의 Purchase 데이터 생성
-    for (int i = 0; i < 5; i++) {
-      List<PurchaseItem> purchaseItems = new ArrayList<>();
-      // Purchase마다 3개의 PurchaseItem 생성
-      for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
-        purchaseItems.add(purchaseItem);
-
-        // PurchaseItem마다 Review 생성
-        Review review = Review_RealDataBuilder.makeReview(buyer, targetProduct);
-        ReflectionTestUtils.setField(review, "isBan", false);
-        purchaseItem.registerReview(review);
-        em.persist(review);
-      }
-
-      Purchase purchase =
-          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
-      em.persist(purchase);
-    }
+    inputWriterId = givenBuyer.getId();
     em.flush();
     em.clear();
-
-    // - 인자세팅
-    long inputWriterId = givenWriterId;
-    boolean inputIsBan = true;
-    ;
 
     // when
     int rowCount = target.banReviewsByWriterId(inputWriterId, inputIsBan);
 
     // target
-    assertEquals(15, rowCount);
-
-    String jpql = "select r From Review r " + "left join r.writer w " + "where w.id = :writerId ";
-    List<Review> resultReviews =
-        em.createQuery(jpql, Review.class).setParameter("writerId", givenWriterId).getResultList();
-    assertEquals(15, resultReviews.size());
-    resultReviews.forEach(review -> assertEquals(inputIsBan, review.getIsBan()));
+    check_rowCount(5, rowCount);
+    checkResult_inputWriterId(inputWriterId, inputIsBan);
   }
 
   @Test
   @DisplayName("banReviewsByWriterId() : 리뷰데이터 없음")
-  public void banReviewsByWriterId_noReview() throws IOException {
-    // given
-    // - 새로운 판매자와 구매자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member buyer = MemberBuilder.fullData().build();
-    em.persist(buyer);
-    long givenWriterId = buyer.getId();
+  public void banReviewsByWriterId_noReview() {
+    long inputWriterId;
+    boolean inputIsBan = true;
 
-    // - 새로운 제품 타입 생성
-    ProductType type = new ProductType("test$test1");
-    em.persist(type);
+    Product givenProduct = testDataMaker.saveProduct();
+    Member givenBuyer = testDataMaker.saveMember();
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenBuyer, givenProduct, 5, PurchaseStateType.COMPLETE);
 
-    // - 새로운 구매할 제품 생성
-    Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-    em.persist(targetProduct);
-
-    // - 5개의 Complete상태의 Purchase 데이터 생성
-    for (int i = 0; i < 5; i++) {
-      List<PurchaseItem> purchaseItems = new ArrayList<>();
-      // Purchase마다 3개의 PurchaseItem 생성
-      for (int k = 0; k < 3; k++) {
-        PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(targetProduct);
-        purchaseItems.add(purchaseItem);
-      }
-
-      Purchase purchase =
-          Purchase_RealDataBuilder.makePurchase(buyer, purchaseItems, PurchaseStateType.COMPLETE);
-      em.persist(purchase);
-    }
+    inputWriterId = givenBuyer.getId();
     em.flush();
     em.clear();
-
-    // - 인자세팅
-    long inputWriterId = givenWriterId;
-    boolean inputIsBan = true;
-    ;
 
     // when
     int rowCount = target.banReviewsByWriterId(inputWriterId, inputIsBan);
 
     // target
-    assertEquals(0, rowCount);
+    check_rowCount(0, rowCount);
+  }
 
+  public void check_rowCount(long expectedRowCount, long resultRowCount) {
+    assertEquals(expectedRowCount, resultRowCount);
+  }
+
+  public void checkResult_inputWriterId(long writerId, boolean isBan) {
     String jpql = "select r From Review r " + "left join r.writer w " + "where w.id = :writerId ";
     List<Review> resultReviews =
-        em.createQuery(jpql, Review.class).setParameter("writerId", givenWriterId).getResultList();
-    assertEquals(0, resultReviews.size());
+        em.createQuery(jpql, Review.class).setParameter("writerId", writerId).getResultList();
+    resultReviews.forEach(review -> assertEquals(isBan, review.getIsBan()));
   }
 }

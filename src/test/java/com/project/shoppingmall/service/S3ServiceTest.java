@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.dto.file.FileUploadResult;
 import com.project.shoppingmall.service.s3.S3Service;
+import com.project.shoppingmall.testutil.TestUtil;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,8 +13,6 @@ import java.util.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -24,12 +23,12 @@ import software.amazon.awssdk.services.s3.model.*;
 class S3ServiceTest {
   @Autowired private S3Service target;
   @Autowired private S3Client s3Client;
-  private String givenTestDirectoryPath;
+  private String givenDirectoryPath;
   private String bucketName;
 
   @BeforeEach
   public void beforeEach() {
-    givenTestDirectoryPath = "testDirectory/";
+    givenDirectoryPath = "testDirectory/";
     bucketName = ReflectionTestUtils.getField(target, "bucketName").toString();
   }
 
@@ -40,94 +39,95 @@ class S3ServiceTest {
 
   @Test()
   @DisplayName("S3Service.uploadFile() : 정상흐름")
-  public void uploadFile_ok() throws IOException {
+  public void uploadFile_ok() {
     // given
-    MultipartFile givenMockFile =
-        new MockMultipartFile(
-            "s3TestSampleFile.txt",
-            new FileInputStream(new ClassPathResource("static/s3TestSampleFile.txt").getFile()));
+    MultipartFile inputMockFile =
+        TestUtil.loadTestFile("s3TestSampleFile.txt", "static/s3TestSampleFile.txt");
+    String inputDirectoryPath = givenDirectoryPath;
 
     // when
-    FileUploadResult fileUploadResult = target.uploadFile(givenMockFile, givenTestDirectoryPath);
+    FileUploadResult fileUploadResult = target.uploadFile(inputMockFile, inputDirectoryPath);
 
     // then
-    // fileUploadResult.fileServerUri 검증
-    String expectedFileContent1 = new String(givenMockFile.getBytes(), StandardCharsets.UTF_8);
-    String savedFileContent1 = downLoadFileContentByServerUri(fileUploadResult.getFileServerUri());
-    assertEquals(expectedFileContent1, savedFileContent1);
-
-    // fileUploadResult.downLoadUrl 검증
-    String expectedFileContent2 = new String(givenMockFile.getBytes(), StandardCharsets.UTF_8);
-    String savedFileContent2 = downLoadFileContentByDownloadUrl(fileUploadResult.getDownLoadUrl());
-    assertEquals(expectedFileContent2, savedFileContent2);
+    checkUploadUri(inputMockFile, fileUploadResult.getFileServerUri());
+    checkDownloadUrl(inputMockFile, fileUploadResult.getDownLoadUrl());
   }
 
   @Test()
   @DisplayName("S3Service.uploadFile() : directoryPath인자 마지막에 '/'가 포함되지 않음")
-  public void uploadFile_NoSlashInDirPath() throws IOException {
+  public void uploadFile_NoSlashInDirPath() {
     // given
-    String givenWrongTestDirectoryPath =
-        givenTestDirectoryPath.substring(0, givenTestDirectoryPath.length() - 1);
-    MultipartFile givenMockFile =
-        new MockMultipartFile(
-            "s3TestSampleFile.txt",
-            new FileInputStream(new ClassPathResource("static/s3TestSampleFile.txt").getFile()));
+    MultipartFile inputMockFile =
+        TestUtil.loadTestFile("s3TestSampleFile.txt", "static/s3TestSampleFile.txt");
+    String inputDirectoryPath = givenDirectoryPath.substring(0, givenDirectoryPath.length() - 1);
 
     // when
-    FileUploadResult fileUploadResult =
-        target.uploadFile(givenMockFile, givenWrongTestDirectoryPath);
+    FileUploadResult fileUploadResult = target.uploadFile(inputMockFile, inputDirectoryPath);
 
     // then
-    assertTrue(fileUploadResult.getFileServerUri().contains(givenTestDirectoryPath));
-    assertTrue(
-        fileUploadResult
-            .getDownLoadUrl()
-            .contains("/" + bucketName + "/" + givenTestDirectoryPath));
+    String serverUriPart = givenDirectoryPath;
+    String downloadUrlPart = "/" + bucketName + "/" + givenDirectoryPath;
+    checkFileUpdateResult(serverUriPart, downloadUrlPart, fileUploadResult);
   }
 
   @Test()
   @DisplayName("S3Service.deleteFile() : 정상흐름")
-  public void deleteFile_ok() throws IOException {
+  public void deleteFile_ok() {
     // given
-    MultipartFile givenMockFile =
-        new MockMultipartFile(
-            "s3TestSampleFile.txt",
-            new FileInputStream(new ClassPathResource("static/s3TestSampleFile.txt").getFile()));
-    FileUploadResult givenFileUploadResult =
-        target.uploadFile(givenMockFile, givenTestDirectoryPath);
+    MultipartFile inputMockFile =
+        TestUtil.loadTestFile("s3TestSampleFile.txt", "static/s3TestSampleFile.txt");
 
+    FileUploadResult givenFileUploadResult = target.uploadFile(inputMockFile, givenDirectoryPath);
+
+    // when
     target.deleteFile(givenFileUploadResult.getFileServerUri());
 
-    // when then
+    // then
     assertThrows(
         S3Exception.class,
-        () -> {
-          downLoadFileContentByServerUri(givenFileUploadResult.getFileServerUri());
-        });
+        () -> downLoadFileContentByServerUri(givenFileUploadResult.getFileServerUri()));
   }
 
   @Test()
   @DisplayName("S3Service.deleteFile() : 존재하지 않는 파일제거 제거")
-  public void deleteFile_NoData() throws IOException {
+  public void deleteFile_NoData() {
     // given
-    String wrongServerUri = givenTestDirectoryPath + "NoData/test.txt";
+    String wrongServerUri = givenDirectoryPath + "NoData/test.txt";
 
     // when then
     target.deleteFile(wrongServerUri);
   }
 
   public void resetBucket() {
-    // 테스트 디렉토리의 모든 파일조회
     ListObjectsResponse findReq =
         s3Client.listObjects(
-            ListObjectsRequest.builder().bucket(bucketName).prefix(givenTestDirectoryPath).build());
+            ListObjectsRequest.builder().bucket(bucketName).prefix(givenDirectoryPath).build());
     List<S3Object> contents = findReq.contents();
 
-    // 조회된 모든 파일제거
     ArrayList<ObjectIdentifier> keys = new ArrayList<>();
     for (S3Object content : contents) {
       s3Client.deleteObject(
           DeleteObjectRequest.builder().bucket(bucketName).key(content.key()).build());
+    }
+  }
+
+  public void checkUploadUri(MultipartFile mockFile, String uploadUri) {
+    try {
+      String expectedFileContent1 = new String(mockFile.getBytes(), StandardCharsets.UTF_8);
+      String savedFileContent1 = downLoadFileContentByServerUri(uploadUri);
+      assertEquals(expectedFileContent1, savedFileContent1);
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public void checkDownloadUrl(MultipartFile mockFile, String downloadUrl) {
+    try {
+      String expectedFileContent2 = new String(mockFile.getBytes(), StandardCharsets.UTF_8);
+      String savedFileContent2 = downLoadFileContentByDownloadUrl(downloadUrl);
+      assertEquals(expectedFileContent2, savedFileContent2);
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
     }
   }
 
@@ -149,5 +149,11 @@ class S3ServiceTest {
       content.append(line);
     }
     return content.toString();
+  }
+
+  private void checkFileUpdateResult(
+      String serverUriPart, String downloadPart, FileUploadResult target) {
+    assertTrue(target.getFileServerUri().contains(serverUriPart));
+    assertTrue(target.getDownLoadUrl().contains(downloadPart));
   }
 }

@@ -255,7 +255,7 @@ public class ProductService {
   }
 
   private void checkMemberAccountIsAvailable(Member seller) {
-    if (seller.checkAccountAvailable())
+    if (!seller.checkAccountAvailable())
       throw new MemberAccountIsNotRegistered("제품을 등록하기 전에 회원의 계좌를 등록해야합니다.");
   }
 

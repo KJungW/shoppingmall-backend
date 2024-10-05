@@ -16,7 +16,7 @@ import com.project.shoppingmall.service.EntityManagerService;
 import com.project.shoppingmall.service.alarm.AlarmService;
 import com.project.shoppingmall.service.product_type.ProductTypeService;
 import com.project.shoppingmall.service_manage.product.ProductManageService;
-import com.project.shoppingmall.testdata.product.ProductBuilder;
+import com.project.shoppingmall.test_entity.product.ProductBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

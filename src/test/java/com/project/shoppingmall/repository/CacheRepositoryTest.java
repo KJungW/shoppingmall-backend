@@ -12,43 +12,37 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @SpringBootTest
 class CacheRepositoryTest {
+  @Autowired private CacheRepository target;
   @Autowired private StringRedisTemplate redisTemplate;
-
-  @Autowired private CacheRepository cacheRepository;
 
   @AfterEach
   public void afterEach() {
-    Set<String> keys = redisTemplate.keys("*");
-    Iterator<String> iterator = keys.iterator();
-    while (iterator.hasNext()) {
-      String key = iterator.next();
-      redisTemplate.delete(key);
-    }
+    resetRedisCache();
   }
 
   @Test
   @DisplayName("CacheRepository.saveCache()/getCache(): 정상흐름")
   public void saveCache_ok() {
     // given
-    String givenKey = "testKey";
-    String givenValue = "testValue";
+    String inputKey = "testKey";
+    String inputValue = "testValue";
 
     // when
-    cacheRepository.saveCache(givenKey, givenValue, 120L);
+    target.saveCache(inputKey, inputValue, 120L);
 
     // then
-    String savedValue = cacheRepository.getCache(givenKey).get();
-    assertEquals(givenValue, savedValue);
+    String savedValue = target.getCache(inputKey).get();
+    assertEquals(inputValue, savedValue);
   }
 
   @Test
   @DisplayName("CacheRepository.getCache(): 캐시가 존재하지 않을 경우")
   public void getCache_NoData() {
     // given
-    String wrongKey = "wrongKey";
+    String inputKey = "testKey";
 
     // when
-    Optional<String> queryResult = cacheRepository.getCache(wrongKey);
+    Optional<String> queryResult = target.getCache(inputKey);
 
     // then
     assertTrue(queryResult.isEmpty());
@@ -58,29 +52,39 @@ class CacheRepositoryTest {
   @DisplayName("CacheRepository.removeCache: 정상흐름")
   public void removeCache_ok() {
     // given
-    String givenKey = "testKey";
+    String inputKey = "testKey";
+
     String givenValue = "testValue";
-    cacheRepository.saveCache(givenKey, givenValue, 120L);
+    target.saveCache(inputKey, givenValue, 120L);
 
     // then
-    cacheRepository.removeCache(givenKey);
+    target.removeCache(inputKey);
 
     // then
-    Optional<String> queryResult = cacheRepository.getCache(givenKey);
-    assertTrue(queryResult.isEmpty());
+    assertTrue(target.getCache(inputKey).isEmpty());
   }
 
   @Test
   @DisplayName("CacheRepository.hasKey: 정상흐름")
   public void hasKey() {
     // given
-    String givenKey = "testKey";
-    String givenValue = "testValue";
-    String wrongKey = "wrongKey";
-    cacheRepository.saveCache(givenKey, givenValue, 120L);
+    String inputKey = "testKey";
+
+    String otherKey = "wrongKey";
+    String otherValue = "testValue";
+    target.saveCache(otherKey, otherValue, 120L);
 
     // when
-    assertTrue(cacheRepository.hasKey(givenKey));
-    assertFalse(cacheRepository.hasKey(wrongKey));
+    assertFalse(target.hasKey(inputKey));
+    assertTrue(target.hasKey(otherKey));
+  }
+
+  public void resetRedisCache() {
+    Set<String> keys = redisTemplate.keys("*");
+    Iterator<String> iterator = keys.iterator();
+    while (iterator.hasNext()) {
+      String key = iterator.next();
+      redisTemplate.delete(key);
+    }
   }
 }

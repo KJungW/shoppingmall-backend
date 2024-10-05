@@ -24,9 +24,9 @@ import com.project.shoppingmall.service.report.ReportFindService;
 import com.project.shoppingmall.service.review.ReviewDeleteService;
 import com.project.shoppingmall.service.review.ReviewFindService;
 import com.project.shoppingmall.service.s3.S3Service;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
-import com.project.shoppingmall.testdata.refund.RefundBuilder;
+import com.project.shoppingmall.test_entity.member.MemberBuilder;
+import com.project.shoppingmall.test_entity.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.test_entity.refund.RefundBuilder;
 import com.project.shoppingmall.type.LoginType;
 import com.project.shoppingmall.type.RefundStateType;
 import java.time.LocalDateTime;
@@ -75,10 +75,11 @@ public class MemberDeleteServiceTest {
     long inputMemberId = 10L;
 
     Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
-    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    LocalDateTime refundImpossibleDate = LocalDateTime.now().minusDays(refundPossibleDay + 1);
     PurchaseItem givenPurchaseItem =
-        PurchaseItemBuilder.makePurchaseItem(
-            42L, givenMember, LocalDateTime.now().minusDays(refundPossibleDay + 1));
+        PurchaseItemBuilder.makePurchaseItem(42L, givenMember, refundImpossibleDate);
+
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
     when(mockPurchaseItemFindService.findLatestBySeller(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
     when(mockRefundFindService.findAllProcessingStateRefundBySeller(anyLong()))
@@ -95,10 +96,11 @@ public class MemberDeleteServiceTest {
     long inputMemberId = 10L;
 
     Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
-    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    LocalDateTime refundPossibleDate = LocalDateTime.now().minusDays(refundPossibleDay - 15);
     PurchaseItem givenPurchaseItem =
-        PurchaseItemBuilder.makePurchaseItem(
-            42L, givenMember, LocalDateTime.now().minusDays(refundPossibleDay - 15));
+        PurchaseItemBuilder.makePurchaseItem(42L, givenMember, refundPossibleDate);
+
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
     when(mockPurchaseItemFindService.findLatestBySeller(anyLong()))
         .thenReturn(Optional.of(givenPurchaseItem));
     when(mockRefundFindService.findAllProcessingStateRefundBySeller(anyLong()))
@@ -117,17 +119,17 @@ public class MemberDeleteServiceTest {
     long inputMemberId = 10L;
 
     Member givenMember = MemberBuilder.makeMember(inputMemberId, LoginType.NAVER);
-    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    LocalDateTime refundImpossibleDate = LocalDateTime.now().minusDays(refundPossibleDay + 1);
     PurchaseItem givenPurchaseItem =
-        PurchaseItemBuilder.makePurchaseItem(
-            42L, givenMember, LocalDateTime.now().minusDays(refundPossibleDay + 1));
-    when(mockPurchaseItemFindService.findLatestBySeller(anyLong()))
-        .thenReturn(Optional.of(givenPurchaseItem));
-
+        PurchaseItemBuilder.makePurchaseItem(42L, givenMember, refundImpossibleDate);
     List<Refund> givenNotProcessingRefund =
         List.of(
-            RefundBuilder.makeRefund(600L, RefundStateType.REQUEST, givenPurchaseItem),
-            RefundBuilder.makeRefund(700L, RefundStateType.ACCEPT, givenPurchaseItem));
+            RefundBuilder.make(600L, RefundStateType.REQUEST, givenPurchaseItem),
+            RefundBuilder.make(700L, RefundStateType.ACCEPT, givenPurchaseItem));
+
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
+    when(mockPurchaseItemFindService.findLatestBySeller(anyLong()))
+        .thenReturn(Optional.of(givenPurchaseItem));
     when(mockRefundFindService.findAllProcessingStateRefundBySeller(anyLong()))
         .thenReturn(givenNotProcessingRefund);
 

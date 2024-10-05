@@ -17,31 +17,32 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class OAuth2FailureHandlerTest {
   private OAuth2FailureHandler target;
-  private HttpServletRequest request;
-  private HttpServletResponse response;
-  private AuthenticationException exception;
+  private final String givenLoginFailRedirectionUrl = "http://localhost:3000/exit";
 
   @BeforeEach
   public void beforeEach() {
     target = new OAuth2FailureHandler();
-    request = new MockHttpServletRequest();
-    response = new MockHttpServletResponse();
-    exception = mock(AuthenticationException.class);
+    ReflectionTestUtils.setField(target, "loginFailRedirectionUrl", givenLoginFailRedirectionUrl);
   }
 
   @Test
   @DisplayName("OAuth2FailureHandler.onAuthenticationFailure : 정상흐름")
   public void onAuthenticationFailure_ok() throws ServletException, IOException {
     // given
-    String givenFailRedirectionUrl = "http://localhost:3000/exit";
-    ReflectionTestUtils.setField(target, "loginFailRedirectionUrl", givenFailRedirectionUrl);
+    HttpServletRequest inputRequest = new MockHttpServletRequest();
+    HttpServletResponse inputResponse = new MockHttpServletResponse();
+    AuthenticationException inputException = mock(AuthenticationException.class);
 
     // when
-    target.onAuthenticationFailure(request, response, exception);
+    target.onAuthenticationFailure(inputRequest, inputResponse, inputException);
 
     // then
+    checkResponseResult(inputResponse);
+  }
+
+  public void checkResponseResult(HttpServletResponse response) {
     MockHttpServletResponse resultResponse = (MockHttpServletResponse) response;
     assertEquals(302, resultResponse.getStatus());
-    assertEquals(givenFailRedirectionUrl, resultResponse.getRedirectedUrl());
+    assertEquals(givenLoginFailRedirectionUrl, resultResponse.getRedirectedUrl());
   }
 }

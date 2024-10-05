@@ -11,21 +11,18 @@ import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.product.ProductFindService;
 import com.project.shoppingmall.service.refund.RefundFindService;
 import com.project.shoppingmall.service.review.ReviewFindService;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.product.ProductBuilder;
-import com.project.shoppingmall.testdata.purchaseitem.PurchaseItemBuilder;
-import com.project.shoppingmall.testdata.refund.RefundBuilder;
-import com.project.shoppingmall.testdata.review.ReviewBuilder;
+import com.project.shoppingmall.test_entity.member.MemberBuilder;
+import com.project.shoppingmall.test_entity.product.ProductBuilder;
+import com.project.shoppingmall.test_entity.purchaseitem.PurchaseItemBuilder;
+import com.project.shoppingmall.test_entity.refund.RefundBuilder;
+import com.project.shoppingmall.test_entity.review.ReviewBuilder;
 import com.project.shoppingmall.type.AlarmType;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.util.ReflectionTestUtils;
 
 class AlarmServiceTest {
   private AlarmService target;
@@ -58,24 +55,28 @@ class AlarmServiceTest {
     long inputListenerId = 10L;
 
     boolean givenIsBan = true;
-    Member givenMember = set_mockMemberFindService_findById(inputListenerId, givenIsBan);
+    Member givenListener = MemberBuilder.makeMember(inputListenerId, givenIsBan);
+
+    set_mockMemberFindService_findById(givenListener);
 
     // when
     Alarm resultAlarm = target.makeMemberBanAlarm(inputListenerId);
 
     // then
-    checkResultAlarm(givenMember, resultAlarm, AlarmType.MEMBER_BAN);
+    checkResultAlarm(givenListener, resultAlarm, AlarmType.MEMBER_BAN);
   }
 
   @Test
   @DisplayName("makeReviewBanAlarm() : 정상흐름")
-  public void makeReviewBanAlarm_ok() throws IOException {
+  public void makeReviewBanAlarm_ok() {
     // given
     long inputReviewId = 30L;
 
-    long givenWriterId = 10L;
-    boolean givenIsBan = true;
-    Review givenReview = set_reviewFindService_findByIdWithWriter(givenWriterId, givenIsBan);
+    Member givenWriter = MemberBuilder.makeMember(10L);
+    boolean givenReviewBan = true;
+    Review givenReview = ReviewBuilder.makeReview(inputReviewId, givenWriter, givenReviewBan);
+
+    set_reviewFindService_findByIdWithWriter(givenReview);
 
     // when
     Alarm resultAlarm = target.makeReviewBanAlarm(inputReviewId);
@@ -85,14 +86,15 @@ class AlarmServiceTest {
   }
 
   @DisplayName("makeProductBanAlarm() : 정상흐름")
-  public void makeProductBanAlarm_ok() throws IOException {
+  public void makeProductBanAlarm_ok() {
     // given
     long inputProductId = 30L;
 
-    boolean givenIsBan = true;
-    long givenSellerId = 10L;
-    Product givenProduct =
-        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, givenIsBan);
+    Member givenSeller = MemberBuilder.makeMember(30L);
+    boolean givenProductBan = true;
+    Product givenProduct = ProductBuilder.makeProduct(inputProductId, givenSeller, givenProductBan);
+
+    set_productFindService_findByIdWithSeller(givenProduct);
 
     // when
     Alarm resultAlarm = target.makeProductBanAlarm(inputProductId);
@@ -107,9 +109,12 @@ class AlarmServiceTest {
     // given
     long inputRefundId = 30L;
 
-    long givenSellerId = 20L;
-    Member givenSeller = set_mockMemberFindService_findById(givenSellerId, true);
-    Refund givenRefund = set_refundFindService_findByIdWithPurchaseItemProduct(30L, givenSeller);
+    Member givenSeller = MemberBuilder.makeMember(20L, false);
+    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.makePurchaseItem(60L, givenSeller);
+    Refund givenRefund = RefundBuilder.make(inputRefundId, givenPurchaseItem);
+
+    set_mockMemberFindService_findById(givenSeller);
+    set_refundFindService_findByIdWithPurchaseItemProduct(givenRefund);
 
     // when
     Alarm resultAlarm = target.makeRefundRequestAlarm(inputRefundId);
@@ -120,13 +125,14 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeTypeDeleteAlarm() : 정상흐름")
-  public void makeTypeDeleteAlarm_ok() throws IOException {
+  public void makeTypeDeleteAlarm_ok() {
     // given
     long inputProductId = 30L;
 
-    long givenSellerId = 20L;
-    Product givenProduct =
-        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, true);
+    Member givenSeller = MemberBuilder.makeMember(20L, false);
+    Product givenProduct = ProductBuilder.makeProduct(inputProductId, givenSeller);
+
+    set_productFindService_findByIdWithSeller(givenProduct);
 
     // when
     Alarm resultAlarm = target.makeTypeDeleteAlarm(inputProductId);
@@ -137,14 +143,9 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeAllTypeDeleteAlarm() : 정상흐름")
-  public void makeAllTypeDeleteAlarm_ok() throws IOException {
+  public void makeAllTypeDeleteAlarm_ok() {
     // given
-    List<Product> givenProducts =
-        new ArrayList<>(
-            List.of(
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build()));
+    List<Product> givenProducts = ProductBuilder.makeProductList(List.of(10L, 20L, 30L));
 
     // when
     List<Alarm> resultAlarms = target.makeAllTypeDeleteAlarm(givenProducts);
@@ -157,14 +158,9 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeAllTypeDeleteAlarm() : 영속성 컨텍스트에서 관리되지 않는 제품이 입력됨")
-  public void makeAllTypeDeleteAlarm_noProduct() throws IOException {
+  public void makeAllTypeDeleteAlarm_noProduct() {
     // given
-    List<Product> givenProducts =
-        new ArrayList<>(
-            List.of(
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build()));
+    List<Product> givenProducts = ProductBuilder.makeProductList(List.of(10L, 20L, 30L));
 
     when(mockAlarmRepository.saveAll(any()))
         .thenThrow(new DataIntegrityViolationException("알림이 존재하지 않는 제품을 참조하고 있음"));
@@ -175,13 +171,14 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeTypeUpdateAlarm() : 정상흐름")
-  public void makeTypeUpdateAlarm_ok() throws IOException {
+  public void makeTypeUpdateAlarm_ok() {
     // given
     long inputProductId = 30L;
 
-    long givenSellerId = 20L;
-    Product givenProduct =
-        set_productFindService_findByIdWithSeller(inputProductId, givenSellerId, true);
+    Member givenSeller = MemberBuilder.makeMember(20L);
+    Product givenProduct = ProductBuilder.makeProduct(inputProductId, givenSeller);
+
+    set_productFindService_findByIdWithSeller(givenProduct);
 
     // when
     Alarm resultAlarm = target.makeTypeUpdateAlarm(inputProductId);
@@ -192,14 +189,9 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeAllTypeUpdateAlarm() : 정상흐름")
-  public void makeAllTypeUpdateAlarm_ok() throws IOException {
+  public void makeAllTypeUpdateAlarm_ok() {
     // given
-    List<Product> givenProducts =
-        new ArrayList<>(
-            List.of(
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build()));
+    List<Product> givenProducts = ProductBuilder.makeProductList(List.of(10L, 20L, 30L));
 
     // when
     List<Alarm> resultAlarms = target.makeAllTypeUpdateAlarm(givenProducts);
@@ -212,14 +204,9 @@ class AlarmServiceTest {
 
   @Test
   @DisplayName("makeAllTypeUpdateAlarm() : 영속성 컨텍스트에서 관리되지 않는 제품이 입력됨")
-  public void makeAllTypeUpdateAlarm_noProduct() throws IOException {
+  public void makeAllTypeUpdateAlarm_noProduct() {
     // given
-    List<Product> givenProducts =
-        new ArrayList<>(
-            List.of(
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build(),
-                ProductBuilder.lightData().build()));
+    List<Product> givenProducts = ProductBuilder.makeProductList(List.of(10L, 20L, 30L));
 
     when(mockAlarmRepository.saveAll(any()))
         .thenThrow(new DataIntegrityViolationException("알림이 존재하지 않는 제품을 참조하고 있음"));
@@ -228,41 +215,22 @@ class AlarmServiceTest {
     assertThrows(ServerLogicError.class, () -> target.makeAllTypeUpdateAlarm(givenProducts));
   }
 
-  public Member set_mockMemberFindService_findById(long memberId, boolean isBan) {
-    Member givenMember = MemberBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenMember, "id", memberId);
-    ReflectionTestUtils.setField(givenMember, "isBan", isBan);
-    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenMember));
-    return givenMember;
+  public void set_mockMemberFindService_findById(Member givenListener) {
+    when(mockMemberFindService.findById(anyLong())).thenReturn(Optional.of(givenListener));
   }
 
-  public Review set_reviewFindService_findByIdWithWriter(long writerId, boolean isBan)
-      throws IOException {
-    Review givenReview = ReviewBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenReview, "isBan", isBan);
-    ReflectionTestUtils.setField(givenReview.getWriter(), "id", writerId);
+  public void set_reviewFindService_findByIdWithWriter(Review givenReview) {
     when(mockReviewFindService.findByIdWithWriter(anyLong())).thenReturn(Optional.of(givenReview));
-    return givenReview;
   }
 
-  public Product set_productFindService_findByIdWithSeller(
-      long productId, long sellerId, boolean isBan) {
-    Product givenProduct = ProductBuilder.fullData().build();
-    ReflectionTestUtils.setField(givenProduct, "id", productId);
-    ReflectionTestUtils.setField(givenProduct, "isBan", isBan);
-    ReflectionTestUtils.setField(givenProduct.getSeller(), "id", sellerId);
+  public void set_productFindService_findByIdWithSeller(Product givenProduct) {
     when(mockProductFindService.findByIdWithSeller(anyLong()))
         .thenReturn(Optional.of(givenProduct));
-    return givenProduct;
   }
 
-  public Refund set_refundFindService_findByIdWithPurchaseItemProduct(
-      long refundId, Member seller) {
-    PurchaseItem givenPurchaseItem = PurchaseItemBuilder.makePurchaseItem(60L, seller);
-    Refund givenRefund = RefundBuilder.makeRefund(refundId, givenPurchaseItem);
+  public void set_refundFindService_findByIdWithPurchaseItemProduct(Refund givenRefund) {
     when(mockRefundFindService.findByIdWithPurchaseItemProduct(anyLong()))
         .thenReturn(Optional.of(givenRefund));
-    return givenRefund;
   }
 
   public void checkResultAlarm(Member givenListener, Alarm resultAlarm, AlarmType alarmType) {

@@ -8,8 +8,9 @@ import com.project.shoppingmall.dto.oauth2.user_info.OAuth2UserInfo;
 import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.service.member.MemberFindService;
 import com.project.shoppingmall.service.member.MemberService;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
+import com.project.shoppingmall.test_entity.member.MemberBuilder;
 import com.project.shoppingmall.type.LoginType;
+import com.project.shoppingmall.type.MemberRoleType;
 import com.project.shoppingmall.util.CookieUtil;
 import com.project.shoppingmall.util.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -33,13 +35,10 @@ class OAuth2SuccessHandlerTest {
   private MemberService mockMemberService;
   private JwtUtil mockJwtUtil;
   private CookieUtil mockCookieUtil;
-  private HttpServletRequest mockRequest;
-  private HttpServletResponse mockResponse;
-  private Authentication mockAuthentication;
+  private final String givenRedirectionUrl = "/test/test/login/success";
 
   @BeforeEach
   public void beforeEach() {
-    // target 구성
     mockMemberFindService = mock(MemberFindService.class);
     mockMemberService = mock(MemberService.class);
     mockJwtUtil = mock(JwtUtil.class);
@@ -48,83 +47,109 @@ class OAuth2SuccessHandlerTest {
         new OAuth2SuccessHandler(
             mockMemberFindService, mockMemberService, mockJwtUtil, mockCookieUtil);
 
-    // 테스트할 메서드 인수 구성
-    mockRequest = new MockHttpServletRequest();
-    mockResponse = new MockHttpServletResponse();
-    mockAuthentication = mock(Authentication.class);
+    ReflectionTestUtils.setField(target, "loginSuccessRedirectionUrl", givenRedirectionUrl);
   }
 
   @Test
   @DisplayName("OAuth2SuccessHandler.onAuthenticationSuccess() : 정상흐름(이미 멤버가 존재할때)")
   void onAuthenticationSuccess_ok_memberExist() throws ServletException, IOException {
     // given
-    String givenRedirectionUrl = "/test/test/login/success";
-    ReflectionTestUtils.setField(target, "loginSuccessRedirectionUrl", givenRedirectionUrl);
+    HttpServletRequest inputRequest = new MockHttpServletRequest();
+    HttpServletResponse inputResponse = new MockHttpServletResponse();
+    Authentication inputAuthentication =
+        setMockAuthentication("testName1234", LoginType.NAVER, "d123sfdsfds");
 
-    OAuth2UserPrinciple mockUserPrinciple = mock(OAuth2UserPrinciple.class);
-    when(mockAuthentication.getPrincipal()).thenReturn(mockUserPrinciple);
-    OAuth2UserInfo mockUserInfo = mock(OAuth2UserInfo.class);
-    when(mockUserPrinciple.getUserInfo()).thenReturn(mockUserInfo);
-    String givenMemberName = "testName1234";
-    when(mockUserInfo.getName()).thenReturn(givenMemberName);
+    Member givenMember = MemberBuilder.makeMember(3210L);
+    String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
+    String givenCookieKey = "refresh";
 
-    Member givenMember = MemberBuilder.fullData().build();
     when(mockMemberFindService.findByLonginTypeAndSocialId(any(), any()))
         .thenReturn(Optional.of(givenMember));
-
-    String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
-    when(mockJwtUtil.createAccessToken(any())).thenReturn(givenRefreshToken);
-
-    String givenCookieKey = "refresh";
+    ;
+    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenRefreshToken);
     when(mockCookieUtil.createCookie(any(), any(), anyInt()))
         .thenReturn(ResponseCookie.from(givenCookieKey, givenRefreshToken).build());
 
     // when
-    target.onAuthenticationSuccess(mockRequest, mockResponse, mockAuthentication);
+    target.onAuthenticationSuccess(inputRequest, inputResponse, inputAuthentication);
 
     // then
-    MockHttpServletResponse resultResponse = (MockHttpServletResponse) mockResponse;
-    assertEquals(302, resultResponse.getStatus());
-    assertEquals(givenRedirectionUrl, resultResponse.getRedirectedUrl());
-    assertEquals(givenRefreshToken, resultResponse.getCookie(givenCookieKey).getValue());
-    verify(mockMemberFindService, times(1)).findByLonginTypeAndSocialId(any(), any());
+    checkRefreshTokenUpdateInMember(givenRefreshToken, givenMember);
+    checkNotCreateMember();
+    checkResponseResult(givenCookieKey, givenRefreshToken, inputResponse);
   }
 
   @Test
   @DisplayName("OAuth2SuccessHandler.onAuthenticationSuccess() : 정상흐름(멤버가 존재하지 않을때)")
   void onAuthenticationSuccess_ok_memberNotExist() throws ServletException, IOException {
     // given
-    String givenRedirectionUrl = "/test/test/login/success";
-    ReflectionTestUtils.setField(target, "loginSuccessRedirectionUrl", givenRedirectionUrl);
+    String givenUserName = "testName1234";
+    LoginType givenLoginType = LoginType.NAVER;
+    String givenSocialId = "d123sfdsfds";
 
-    OAuth2UserPrinciple mockUserPrinciple = mock(OAuth2UserPrinciple.class);
-    when(mockAuthentication.getPrincipal()).thenReturn(mockUserPrinciple);
-    OAuth2UserInfo mockUserInfo = mock(OAuth2UserInfo.class);
-    when(mockUserInfo.getLoginType()).thenReturn(LoginType.GOOGLE);
-    when(mockUserInfo.getSocialId()).thenReturn("dafsafrewr3123");
-    when(mockUserInfo.getName()).thenReturn("Kim");
-    when(mockUserPrinciple.getUserInfo()).thenReturn(mockUserInfo);
-    String givenMemberName = "testName1234";
-    when(mockUserInfo.getName()).thenReturn(givenMemberName);
+    HttpServletRequest inputRequest = new MockHttpServletRequest();
+    HttpServletResponse inputResponse = new MockHttpServletResponse();
+    Authentication inputAuthentication =
+        setMockAuthentication(givenUserName, givenLoginType, givenSocialId);
+
+    String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
+    String givenCookieKey = "refresh";
 
     when(mockMemberFindService.findByLonginTypeAndSocialId(any(), any()))
         .thenReturn(Optional.empty());
-
-    String givenRefreshToken = "asdkjlajdklqwle123123xcvczxvcxv";
-    when(mockJwtUtil.createAccessToken(any())).thenReturn(givenRefreshToken);
-
-    String givenCookieKey = "refresh";
+    ;
+    when(mockJwtUtil.createRefreshToken(any())).thenReturn(givenRefreshToken);
     when(mockCookieUtil.createCookie(any(), any(), anyInt()))
         .thenReturn(ResponseCookie.from(givenCookieKey, givenRefreshToken).build());
 
     // when
-    target.onAuthenticationSuccess(mockRequest, mockResponse, mockAuthentication);
+    target.onAuthenticationSuccess(inputRequest, inputResponse, inputAuthentication);
 
     // then
-    MockHttpServletResponse resultResponse = (MockHttpServletResponse) mockResponse;
+    checkCreateMember(givenUserName, givenLoginType, givenSocialId);
+    checkResponseResult(givenCookieKey, givenRefreshToken, inputResponse);
+  }
+
+  public Authentication setMockAuthentication(
+      String userName, LoginType loginType, String socialId) {
+    OAuth2UserInfo mockUserInfo = mock(OAuth2UserInfo.class);
+    when(mockUserInfo.getName()).thenReturn(userName);
+    when(mockUserInfo.getLoginType()).thenReturn(loginType);
+    when(mockUserInfo.getSocialId()).thenReturn(socialId);
+
+    OAuth2UserPrinciple mockUserPrinciple = mock(OAuth2UserPrinciple.class);
+    when(mockUserPrinciple.getUserInfo()).thenReturn(mockUserInfo);
+
+    Authentication authentication = mock(Authentication.class);
+    when(authentication.getPrincipal()).thenReturn(mockUserPrinciple);
+    return authentication;
+  }
+
+  public void checkResponseResult(
+      String givenCookieKey, String givenRefreshToken, HttpServletResponse response) {
+    MockHttpServletResponse resultResponse = (MockHttpServletResponse) response;
     assertEquals(302, resultResponse.getStatus());
     assertEquals(givenRedirectionUrl, resultResponse.getRedirectedUrl());
     assertEquals(givenRefreshToken, resultResponse.getCookie(givenCookieKey).getValue());
-    verify(mockMemberFindService, times(1)).findByLonginTypeAndSocialId(any(), any());
+  }
+
+  public void checkRefreshTokenUpdateInMember(String refreshToken, Member member) {
+    assertEquals(refreshToken, member.getToken().getRefresh());
+  }
+
+  public void checkNotCreateMember() {
+    verify(mockMemberService, times(0)).save(any());
+  }
+
+  public void checkCreateMember(String userName, LoginType loginType, String socialId) {
+    ArgumentCaptor<Member> memberCaptor = ArgumentCaptor.forClass(Member.class);
+    verify(mockMemberService, times(1)).save(memberCaptor.capture());
+
+    Member memberArg = memberCaptor.getValue();
+    assertEquals(loginType, memberArg.getLoginType());
+    assertEquals(socialId, memberArg.getSocialId());
+    assertEquals(userName, memberArg.getNickName());
+    assertEquals(MemberRoleType.ROLE_MEMBER, memberArg.getRole());
+    assertEquals(false, memberArg.getIsBan());
   }
 }

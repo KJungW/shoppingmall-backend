@@ -6,12 +6,11 @@ import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.entity.Product;
 import com.project.shoppingmall.entity.ProductType;
 import com.project.shoppingmall.entity.report.ProductReport;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
-import com.project.shoppingmall.testdata.report.ProductReport_RealDataBuilder;
+import com.project.shoppingmall.test_dto.SliceManager;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
+import com.project.shoppingmall.type.ReportResultType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceUnitUtil;
-import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,316 +29,204 @@ import org.springframework.transaction.annotation.Transactional;
 class ProductReportRetrieveRepositoryTest {
   @Autowired private ProductReportRetrieveRepository target;
   @Autowired private EntityManager em;
+  @Autowired private IntegrationTestDataMaker testDataMaker;
   private PersistenceUnitUtil emUtil;
 
   @BeforeEach
-  public void beforeEach() throws IOException {
+  public void beforeEach() {
     emUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
-
-    // - 새로운 판매자와 신고자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member reporter = MemberBuilder.fullData().build();
-    em.persist(reporter);
-
-    // 제품 타입 생성
-    ProductType type = new ProductType("test$test");
-    em.persist(type);
-
-    // 30개의 제품 생성
-    for (int i = 0; i < 30; i++) {
-      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-      em.persist(targetProduct);
-
-      // 제품마다 처리되지 않은 신고데이터 작성
-      ProductReport noProcessedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
-      em.persist(noProcessedReport);
-
-      // 제품마다 처리된 신고데이터 작성
-      ProductReport processedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
-      em.persist(processedReport);
-    }
   }
 
   @Test
   @DisplayName("findUnprocessedProductReport() : 정상흐름 - 첫번째 페이지")
-  public void findUnprocessedProductReport_ok_firstPage() throws IOException {
+  public void findUnprocessedProductReport_ok_firstPage() {
     // given
-    // - 새로운 판매자와 신고자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member reporter = MemberBuilder.fullData().build();
-    em.persist(reporter);
+    long inputProductTypeId;
+    PageRequest inputPageRequest =
+        PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createDate"));
 
-    // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test$test2";
-    ProductType type = new ProductType(givenProductTypeName);
-    em.persist(type);
-    long givenProductTypeId = type.getId();
+    int givenProductCount = 15;
+    Member seller = testDataMaker.saveMember();
+    ProductType productType = testDataMaker.saveProductType("test$test");
+    List<Product> productList =
+        testDataMaker.saveProductList(givenProductCount, seller, productType, false);
 
-    // - 새로운 15개의 제품 생성
-    for (int i = 0; i < 15; i++) {
-      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-      em.persist(targetProduct);
+    Member reporter = testDataMaker.saveMember();
+    List<ProductReport> notProcessedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.WAITING_PROCESSED);
+    List<ProductReport> processedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.NO_ACTION);
 
-      // 제품마다 처리되지 않은 신고데이터 작성
-      ProductReport noProcessedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
-      em.persist(noProcessedReport);
-
-      // 제품마다 처리된 신고데이터 작성
-      ProductReport processedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
-      em.persist(processedReport);
-    }
+    inputProductTypeId = productType.getId();
     em.flush();
     em.clear();
 
-    // - 인자세팅
-    long inputProductTypeId = givenProductTypeId;
-    int inputSliceNum = 0;
-    int inputSliceSize = 10;
-    PageRequest inputPageRequest =
-        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<ProductReport> sliceResult =
+    Slice<ProductReport> result =
         target.findUnprocessedProductReport(inputProductTypeId, inputPageRequest);
 
     // target
-    // - 페이지 검증
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    List<ProductReport> resultProductReport = sliceResult.getContent();
-    assertEquals(10, resultProductReport.size());
-
-    // - fetch 로딩 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertTrue(emUtil.isLoaded(productReport, "reporter"));
-          assertTrue(emUtil.isLoaded(productReport, "product"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
-        });
-
-    // - where 조건 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertEquals(givenProductTypeId, productReport.getProduct().getProductType().getId());
-        });
-    resultProductReport.forEach(
-        productReport -> {
-          assertFalse(productReport.getIsProcessedComplete());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(inputPageRequest.getPageSize(), result);
+    checkFetchLoad_findUnprocessedProductReport(result);
+    checkWhere_findUnprocessedProductReport(inputProductTypeId, result);
   }
 
   @Test
   @DisplayName("findUnprocessedProductReport() : 정상흐름 - 마지막 페이지")
-  public void findUnprocessedProductReport_ok_lastPage() throws IOException {
+  public void findUnprocessedProductReport_ok_lastPage() {
     // given
-    // - 새로운 판매자와 신고자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    Member reporter = MemberBuilder.fullData().build();
-    em.persist(reporter);
+    long inputProductTypeId;
+    PageRequest inputPageRequest =
+        PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "createDate"));
 
-    // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test$test2";
-    ProductType type = new ProductType(givenProductTypeName);
-    em.persist(type);
-    long givenProductTypeId = type.getId();
+    int givenProductCount = 15;
+    Member seller = testDataMaker.saveMember();
+    ProductType productType = testDataMaker.saveProductType("test$test");
+    List<Product> productList =
+        testDataMaker.saveProductList(givenProductCount, seller, productType, false);
 
-    // - 새로운 15개의 제품 생성
-    for (int i = 0; i < 15; i++) {
-      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-      em.persist(targetProduct);
+    Member reporter = testDataMaker.saveMember();
+    List<ProductReport> notProcessedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.WAITING_PROCESSED);
+    List<ProductReport> processedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.NO_ACTION);
 
-      // 제품마다 처리되지 않은 신고데이터 작성
-      ProductReport noProcessedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
-      em.persist(noProcessedReport);
-
-      // 제품마다 처리된 신고데이터 작성
-      ProductReport processedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
-      em.persist(processedReport);
-    }
+    inputProductTypeId = productType.getId();
     em.flush();
     em.clear();
 
-    // - 인자세팅
-    long inputProductTypeId = givenProductTypeId;
-    int inputSliceNum = 1;
-    int inputSliceSize = 10;
-    PageRequest inputPageRequest =
-        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<ProductReport> sliceResult =
+    Slice<ProductReport> result =
         target.findUnprocessedProductReport(inputProductTypeId, inputPageRequest);
 
     // target
-    // - 페이지 검증
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    List<ProductReport> resultProductReport = sliceResult.getContent();
-    assertEquals(5, resultProductReport.size());
-
-    // - fetch 로딩 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertTrue(emUtil.isLoaded(productReport, "reporter"));
-          assertTrue(emUtil.isLoaded(productReport, "product"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
-        });
-
-    // - where 조건 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertEquals(givenProductTypeId, productReport.getProduct().getProductType().getId());
-        });
-    resultProductReport.forEach(
-        productReport -> {
-          assertFalse(productReport.getIsProcessedComplete());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(5, result);
+    checkFetchLoad_findUnprocessedProductReport(result);
+    checkWhere_findUnprocessedProductReport(inputProductTypeId, result);
   }
 
   @Test
   @DisplayName("findProductReportsByProductSeller() : 정상흐름 - 첫번째 페이지")
-  public void findProductReportsByProductSeller_ok_firstPage() throws IOException {
+  public void findProductReportsByProductSeller_ok_firstPage() {
     // given
-    // - 새로운 판매자와 신고자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    long givenProductSellerId = seller.getId();
-    Member reporter = MemberBuilder.fullData().build();
-    em.persist(reporter);
+    long inputSellerId;
+    PageRequest inputPageRequest =
+        PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "createDate"));
 
-    // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test$test2";
-    ProductType type = new ProductType(givenProductTypeName);
-    em.persist(type);
+    int givenProductCount = 10;
+    Member seller = testDataMaker.saveMember();
+    ProductType productType = testDataMaker.saveProductType("test$test");
+    List<Product> productList =
+        testDataMaker.saveProductList(givenProductCount, seller, productType, false);
 
-    // - 새로운 10개의 제품 생성
-    for (int i = 0; i < 10; i++) {
-      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-      em.persist(targetProduct);
+    Member reporter = testDataMaker.saveMember();
+    List<ProductReport> notProcessedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.WAITING_PROCESSED);
+    List<ProductReport> processedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.NO_ACTION);
 
-      // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
-      ProductReport noProcessedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
-      em.persist(noProcessedReport);
-
-      // 제품마다 처리된 신고데이터 작성 (총 10개)
-      ProductReport processedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
-      em.persist(processedReport);
-    }
+    inputSellerId = seller.getId();
     em.flush();
     em.clear();
 
-    // - 인자세팅
-    long inputProductSellerId = givenProductSellerId;
-    int inputSliceNum = 0;
-    int inputSliceSize = 15;
-    PageRequest inputPageRequest =
-        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<ProductReport> sliceResult =
-        target.findProductReportsByProductSeller(inputProductSellerId, inputPageRequest);
+    Slice<ProductReport> result =
+        target.findProductReportsByProductSeller(inputSellerId, inputPageRequest);
 
     // target
-    // - 페이지 검증
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    List<ProductReport> resultProductReport = sliceResult.getContent();
-    assertEquals(15, resultProductReport.size());
-
-    // - fetch 로딩 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertTrue(emUtil.isLoaded(productReport, "reporter"));
-          assertTrue(emUtil.isLoaded(productReport, "product"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
-        });
-
-    // - where 조건 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertEquals(givenProductSellerId, productReport.getProduct().getSeller().getId());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(15, result);
+    checkFetchLoad_findProductReportsByProductSeller(result);
+    checkWhere_findProductReportsByProductSeller(inputSellerId, result);
   }
 
   @Test
   @DisplayName("findProductReportsByProductSeller() : 정상흐름 - 마지막 페이지")
-  public void findProductReportsByProductSeller_ok_lastPage() throws IOException {
+  public void findProductReportsByProductSeller_ok_lastPage() {
     // given
-    // - 새로운 판매자와 신고자 생성
-    Member seller = MemberBuilder.fullData().build();
-    em.persist(seller);
-    long givenProductSellerId = seller.getId();
-    Member reporter = MemberBuilder.fullData().build();
-    em.persist(reporter);
+    long inputSellerId;
+    PageRequest inputPageRequest =
+        PageRequest.of(1, 15, Sort.by(Sort.Direction.DESC, "createDate"));
 
-    // - 새로운 제품 타입 생성
-    String givenProductTypeName = "test$test2";
-    ProductType type = new ProductType(givenProductTypeName);
-    em.persist(type);
+    int givenProductCount = 10;
+    Member seller = testDataMaker.saveMember();
+    ProductType productType = testDataMaker.saveProductType("test$test");
+    List<Product> productList =
+        testDataMaker.saveProductList(givenProductCount, seller, productType, false);
 
-    // - 새로운 10개의 제품 생성
-    for (int i = 0; i < 10; i++) {
-      Product targetProduct = Product_RealDataBuilder.makeProduct(seller, type);
-      em.persist(targetProduct);
+    Member reporter = testDataMaker.saveMember();
+    List<ProductReport> notProcessedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.WAITING_PROCESSED);
+    List<ProductReport> processedReportList =
+        makeProductReportByProduct(productList, reporter, ReportResultType.NO_ACTION);
 
-      // 제품마다 처리되지 않은 신고데이터 작성 (총 10개)
-      ProductReport noProcessedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, false);
-      em.persist(noProcessedReport);
-
-      // 제품마다 처리된 신고데이터 작성 (총 10개)
-      ProductReport processedReport =
-          ProductReport_RealDataBuilder.makeProductReport(reporter, targetProduct, true);
-      em.persist(processedReport);
-    }
+    inputSellerId = seller.getId();
     em.flush();
     em.clear();
 
-    // - 인자세팅
-    long inputProductSellerId = givenProductSellerId;
-    int inputSliceNum = 1;
-    int inputSliceSize = 15;
-    PageRequest inputPageRequest =
-        PageRequest.of(inputSliceNum, inputSliceSize, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<ProductReport> sliceResult =
-        target.findProductReportsByProductSeller(inputProductSellerId, inputPageRequest);
+    Slice<ProductReport> result =
+        target.findProductReportsByProductSeller(inputSellerId, inputPageRequest);
 
     // target
-    // - 페이지 검증
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    List<ProductReport> resultProductReport = sliceResult.getContent();
-    assertEquals(5, resultProductReport.size());
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(5, result);
+    checkFetchLoad_findProductReportsByProductSeller(result);
+    checkWhere_findProductReportsByProductSeller(inputSellerId, result);
+  }
 
+  public List<ProductReport> makeProductReportByProduct(
+      List<Product> productList, Member reporter, ReportResultType state) {
+    return productList.stream()
+        .map(product -> testDataMaker.saveProductReport(reporter, product, state))
+        .toList();
+  }
+
+  public void checkFetchLoad_findUnprocessedProductReport(Slice<ProductReport> target) {
+    target
+        .getContent()
+        .forEach(
+            productReport -> {
+              assertTrue(emUtil.isLoaded(productReport, "reporter"));
+              assertTrue(emUtil.isLoaded(productReport, "product"));
+              assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
+              assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
+            });
+  }
+
+  public void checkWhere_findUnprocessedProductReport(
+      long productTypeId, Slice<ProductReport> target) {
+    target
+        .getContent()
+        .forEach(
+            productReport -> {
+              assertEquals(productTypeId, productReport.getProduct().getProductType().getId());
+              assertFalse(productReport.getIsProcessedComplete());
+            });
+  }
+
+  public void checkFetchLoad_findProductReportsByProductSeller(Slice<ProductReport> target) {
     // - fetch 로딩 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertTrue(emUtil.isLoaded(productReport, "reporter"));
-          assertTrue(emUtil.isLoaded(productReport, "product"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
-          assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
-        });
+    target
+        .getContent()
+        .forEach(
+            productReport -> {
+              assertTrue(emUtil.isLoaded(productReport, "reporter"));
+              assertTrue(emUtil.isLoaded(productReport, "product"));
+              assertTrue(emUtil.isLoaded(productReport.getProduct(), "seller"));
+              assertTrue(emUtil.isLoaded(productReport.getProduct(), "productType"));
+            });
+  }
 
-    // - where 조건 검증
-    resultProductReport.forEach(
-        productReport -> {
-          assertEquals(givenProductSellerId, productReport.getProduct().getSeller().getId());
-        });
+  public void checkWhere_findProductReportsByProductSeller(
+      long sellerId, Slice<ProductReport> target) {
+    target
+        .getContent()
+        .forEach(
+            productReport -> {
+              assertEquals(sellerId, productReport.getProduct().getSeller().getId());
+            });
   }
 }

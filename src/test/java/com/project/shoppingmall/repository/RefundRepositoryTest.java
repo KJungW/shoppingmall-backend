@@ -3,18 +3,14 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
-import com.project.shoppingmall.testdata.refund.Refund_RealDataBuilder;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
 import com.project.shoppingmall.type.PurchaseStateType;
 import com.project.shoppingmall.type.RefundStateType;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceUnitUtil;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,102 +24,77 @@ import org.springframework.transaction.annotation.Transactional;
 class RefundRepositoryTest {
   @Autowired private RefundRepository target;
   @Autowired private EntityManager em;
+  @Autowired private IntegrationTestDataMaker testDataMaker;
+  private PersistenceUnitUtil emUtil;
+
+  @BeforeEach
+  public void beforeEach() {
+    emUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
+  }
 
   @Test
   @DisplayName("findRefundPriceInPeriodBySeller() : 정상흐름")
   public void findRefundPriceInPeriodBySeller_ok() {
     // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    LocalDateTime inputStartDate = LocalDateTime.now();
-    List<Refund> givenRefunds =
-        saveRefundedPurchaseItems(10, givenBuyer, givenProduct, RefundStateType.COMPLETE);
-    em.flush();
-    LocalDateTime inputEndDate = LocalDateTime.now();
-    em.clear();
+    long inputSellerId;
+    LocalDateTime inputStartDate;
+    LocalDateTime inputEndDate;
 
-    long inputSellerId = givenSeller.getId();
+    inputStartDate = LocalDateTime.now();
+    Product givenProduct = testDataMaker.saveProduct();
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenProduct, 5, PurchaseStateType.COMPLETE);
+    List<Refund> givenRefunds =
+        testDataMaker.saveRefundList(givenPurchase.getPurchaseItems(), RefundStateType.COMPLETE);
+
+    em.flush();
+    em.clear();
+    inputSellerId = givenProduct.getSeller().getId();
+    inputEndDate = LocalDateTime.now();
 
     // when
-    Long realRefundPrice =
+    Long result =
         target.findRefundPriceInPeriodBySeller(inputSellerId, inputStartDate, inputEndDate);
 
     // then
-    long expectRefundPrice = givenRefunds.stream().mapToLong(Refund::getRefundPrice).sum();
-    assertEquals(expectRefundPrice, realRefundPrice);
+    checkResult_findRefundPriceInPeriodBySeller(givenRefunds, result);
   }
 
   @Test
   @DisplayName("findRefundPriceInPeriodBySeller() : 정상흐름 - Complete 상태의 환불만을 토대로 조회되는 것을 체크")
   public void findRefundPriceInPeriodBySeller_checkRefundStateIsComplete() {
     // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    LocalDateTime inputStartDate = LocalDateTime.now();
-    List<Refund> givenCompleteRefunds =
-        saveRefundedPurchaseItems(10, givenBuyer, givenProduct, RefundStateType.COMPLETE);
-    List<Refund> givenRequestRefunds =
-        saveRefundedPurchaseItems(10, givenBuyer, givenProduct, RefundStateType.REJECTED);
-    em.flush();
-    LocalDateTime inputEndDate = LocalDateTime.now();
-    em.clear();
+    long inputSellerId;
+    LocalDateTime inputStartDate;
+    LocalDateTime inputEndDate;
 
-    long inputSellerId = givenSeller.getId();
+    inputStartDate = LocalDateTime.now();
+    Product givenProduct = testDataMaker.saveProduct();
+    List<Refund> completeRefund = makeRefunds(5, givenProduct, RefundStateType.COMPLETE);
+    List<Refund> notCompleteRefund = makeRefunds(5, givenProduct, RefundStateType.REJECTED);
+
+    em.flush();
+    em.clear();
+    inputSellerId = givenProduct.getSeller().getId();
+    inputEndDate = LocalDateTime.now();
 
     // when
-    Long realRefundPrice =
+    Long result =
         target.findRefundPriceInPeriodBySeller(inputSellerId, inputStartDate, inputEndDate);
 
     // then
-    long expectRefundPrice = givenCompleteRefunds.stream().mapToLong(Refund::getRefundPrice).sum();
-    assertEquals(expectRefundPrice, realRefundPrice);
+    checkResult_findRefundPriceInPeriodBySeller(completeRefund, result);
   }
 
-  private Member saveMember() {
-    Member member = MemberBuilder.fullData().build();
-    em.persist(member);
-    return member;
+  public List<Refund> makeRefunds(int refundCount, Product product, RefundStateType state) {
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(product, refundCount, PurchaseStateType.COMPLETE);
+    return testDataMaker.saveRefundList(givenPurchase.getPurchaseItems(), state);
   }
 
-  private ProductType saveProductType(String typeName) {
-    ProductType givenType = new ProductType(typeName);
-    em.persist(givenType);
-    return givenType;
-  }
-
-  private Product saveProduct(Member member, ProductType type) {
-    Product product = Product_RealDataBuilder.makeProduct(member, type);
-    em.persist(product);
-    return product;
-  }
-
-  private List<PurchaseItem> savePurchaseItems(int count, Member givenBuyer, Product givenProduct) {
-    List<PurchaseItem> purchaseItems = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(givenProduct);
-      purchaseItems.add(purchaseItem);
-      Purchase purchase =
-          Purchase_RealDataBuilder.makePurchase(
-              givenBuyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
-      em.persist(purchase);
-    }
-    return purchaseItems;
-  }
-
-  private List<Refund> saveRefundedPurchaseItems(
-      int count, Member givenBuyer, Product givenProduct, RefundStateType refundState) {
-    List<PurchaseItem> savedPurchaseItems = savePurchaseItems(count, givenBuyer, givenProduct);
-    return savedPurchaseItems.stream()
-        .map(
-            purchaseItem -> {
-              Refund givenRefund = Refund_RealDataBuilder.makeRefund(refundState, purchaseItem);
-              em.persist(givenRefund);
-              return givenRefund;
-            })
-        .toList();
+  public void checkResult_findRefundPriceInPeriodBySeller(
+      List<Refund> refundList, long totalRefundPrice) {
+    long expectRefundPrice = refundList.stream().mapToLong(Refund::getRefundPrice).sum();
+    assertEquals(expectRefundPrice, totalRefundPrice);
   }
 }

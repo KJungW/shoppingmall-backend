@@ -1,15 +1,13 @@
 package com.project.shoppingmall.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.type.LoginType;
-import com.project.shoppingmall.type.MemberRoleType;
+import com.project.shoppingmall.test_dto.SliceManager;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
 import com.project.shoppingmall.type.ProductSaleType;
 import jakarta.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.HashSet;
+import jakarta.persistence.PersistenceUnitUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,425 +24,290 @@ import org.springframework.transaction.annotation.Transactional;
 class ProductRetrieveRepositoryTest {
   @Autowired private ProductRetrieveRepository target;
   @Autowired private EntityManager em;
-
-  private Member givenSeller;
-  private ProductType givenType;
+  @Autowired private IntegrationTestDataMaker testDataMaker;
+  private PersistenceUnitUtil emUtil;
 
   @BeforeEach
   public void beforeEach() {
-    // 판매자와 구매자 생성
-    Member seller =
-        Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialId123123421aaa")
-            .nickName("seller")
-            .profileImageUrl("init/member_profile_img.png")
-            .profileImageDownLoadUrl(
-                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    em.persist(seller);
-    givenSeller = seller;
-
-    // 제품 타입 생성
-    ProductType type = new ProductType("test$test");
-    em.persist(type);
-    givenType = type;
-
-    // 제품 15개 생성 (벤처리x, 판매중)
-    for (int i = 0; i < 15; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(seller)
-              .productType(type)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("정상 유형의 판매상품")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-
-    // 제품 5개 생성 (벤처리x, 판매중단)
-    for (int i = 0; i < 5; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(seller)
-              .productType(type)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("판매중단된 판매상품")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      targetProduct.changeSalesStateToDiscontinued();
-      em.persist(targetProduct);
-    }
-
-    // 제품 5개 생성 (벤처리o, 판매중)
-    for (int i = 0; i < 5; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(seller)
-              .productType(type)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("벤처리된 판매상품")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(true)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
+    emUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
   }
 
   @Test
   @DisplayName("findByProductType() : 정상흐름 - 첫번째 페이지")
   public void findByProductType_ok_firstPage() {
     // given
-    // - 별도 타입의 제품 8개 생성
-    ProductType givenNewType = new ProductType("new$productType");
-    em.persist(givenNewType);
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenSeller)
-              .productType(givenNewType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("정상 유형의 판매상품")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    // - 인자 생성
-    long givenTypeId = givenNewType.getId();
-    PageRequest givenPageRequest = PageRequest.of(0, 5);
+    long inputTypeId;
+    PageRequest inputPageRequest = PageRequest.of(0, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.DISCONTINUED);
+
+    inputTypeId = type.getId();
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findByProductType(givenTypeId, givenPageRequest);
+    Slice<Product> result = target.findByProductType(inputTypeId, inputPageRequest);
 
     // then
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    assertEquals(5, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(4, result);
+    checkFetchLoad_findByProductType(result);
+    checkWhere_findByProductType(inputTypeId, result);
   }
 
   @Test
   @DisplayName("findByProductType() : 정상흐름 - 마지막 페이지")
   public void findByProductType_ok_lastPage() {
     // given
-    // - 별도 타입의 제품 8개 생성
-    ProductType givenNewType = new ProductType("new$productType");
-    em.persist(givenNewType);
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenSeller)
-              .productType(givenNewType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("정상 유형의 판매상품")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    // - 인자 생성
-    long givenTypeId = givenNewType.getId();
-    PageRequest givenPageRequest = PageRequest.of(1, 5);
+    long inputTypeId;
+    PageRequest inputPageRequest = PageRequest.of(1, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(3, seller, type, false, ProductSaleType.DISCONTINUED);
+
+    inputTypeId = type.getId();
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findByProductType(givenTypeId, givenPageRequest);
+    Slice<Product> result = target.findByProductType(inputTypeId, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    assertEquals(3, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findByProductType(result);
+    checkWhere_findByProductType(inputTypeId, result);
   }
 
   @Test
   @DisplayName("findBySearchWord() : 정상흐름 - 첫번째 페이지")
   public void findBySearchWord_ok_firstPage() {
     // given
-    // - 별도 타입의 제품 8개 생성
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenSeller)
-              .productType(givenType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("검색 기능 관련 테스트")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    // - 인자 생성
-    String searchWord = "검색";
-    PageRequest givenPageRequest = PageRequest.of(0, 5);
+    String inputSearchWord = "searchWordTest";
+    PageRequest inputPageRequest = PageRequest.of(0, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(
+        3, inputSearchWord + "1234", seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(
+        3, inputSearchWord + " test", seller, type, false, ProductSaleType.ON_SALE);
+
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findBySearchWord(searchWord, givenPageRequest);
+    Slice<Product> result = target.findBySearchWord(inputSearchWord, inputPageRequest);
 
     // then
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    assertEquals(5, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertTrue(product.getName().contains("검색"));
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(4, result);
+    checkFetchLoad_findBySearchWord(result);
+    checkWhere_findBySearchWord(inputSearchWord, result);
   }
 
   @Test
   @DisplayName("findBySearchWord() : 정상흐름 - 마지막 페이지")
   public void findBySearchWord_ok_lastPage() {
     // given
-    // - 별도 타입의 제품 8개 생성
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenSeller)
-              .productType(givenType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("검색 기능 관련 테스트")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    // - 인자 생성
-    String searchWord = "검색";
-    PageRequest givenPageRequest = PageRequest.of(1, 5);
+    String inputSearchWord = "searchWordTest";
+    PageRequest inputPageRequest = PageRequest.of(1, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(
+        3, inputSearchWord + "1234", seller, type, false, ProductSaleType.ON_SALE);
+    testDataMaker.saveProductList(
+        3, inputSearchWord + " test", seller, type, false, ProductSaleType.ON_SALE);
+
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findBySearchWord(searchWord, givenPageRequest);
+    Slice<Product> result = target.findBySearchWord(inputSearchWord, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    assertEquals(3, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertTrue(product.getName().contains("검색"));
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findBySearchWord(result);
+    checkWhere_findBySearchWord(inputSearchWord, result);
   }
 
   @Test
   @DisplayName("findAllBySeller() : 정상흐름 - 첫번째 페이지")
   public void findAllBySeller_ok_firstPage() {
     // given
-    // - 별도의 판매자 생성
-    Member givenNewMember =
-        Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialId123123421aaa")
-            .nickName("seller")
-            .profileImageUrl("init/member_profile_img.png")
-            .profileImageDownLoadUrl(
-                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    em.persist(givenNewMember);
-    // - 생성한 판매자에 대해 판매상품 8개 생성
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenNewMember)
-              .productType(givenType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("검색 기능 관련 테스트")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    long givenSellerId = givenNewMember.getId();
-    PageRequest givenPageRequest = PageRequest.of(0, 5);
+    long inputSellerId;
+    PageRequest inputPageRequest = PageRequest.of(0, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(6, seller, type, false);
+
+    inputSellerId = seller.getId();
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findAllBySeller(givenSellerId, givenPageRequest);
+    Slice<Product> result = target.findAllBySeller(inputSellerId, inputPageRequest);
 
     // then
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    assertEquals(5, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertEquals(givenSellerId, product.getSeller().getId());
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(4, result);
+    checkFetchLoad_findAllBySeller(result);
+    checkWhere_findAllBySeller(inputSellerId, result);
   }
 
   @Test
-  @DisplayName("findAllBySeller() : 정상흐름 - 첫번째 페이지")
+  @DisplayName("findAllBySeller() : 정상흐름 - 마지막 페이지")
   public void findAllBySeller_ok_lastPage() {
     // given
-    // - 별도의 판매자 생성
-    Member givenNewMember =
-        Member.builder()
-            .loginType(LoginType.NAVER)
-            .socialId("testMemberSocialId123123421aaa")
-            .nickName("seller")
-            .profileImageUrl("init/member_profile_img.png")
-            .profileImageDownLoadUrl(
-                "https://shoppingmall-s3-bucket.s3.ap-northeast-2.amazonaws.com/init/member_profile_img.png")
-            .role(MemberRoleType.ROLE_MEMBER)
-            .isBan(false)
-            .build();
-    em.persist(givenNewMember);
-    // - 생성한 판매자에 대해 판매상품 8개 생성
-    for (int i = 0; i < 8; i++) {
-      Product targetProduct =
-          Product.builder()
-              .seller(givenNewMember)
-              .productType(givenType)
-              .productImages(new ArrayList<>())
-              .contents(new ArrayList<>())
-              .singleOptions(new ArrayList<>())
-              .multipleOptions(new ArrayList<>())
-              .name("검색 기능 관련 테스트")
-              .price(2000)
-              .discountAmount(100)
-              .discountRate(10.0)
-              .isBan(false)
-              .scoreAvg(0.0)
-              .build();
-      em.persist(targetProduct);
-    }
-    long givenSellerId = givenNewMember.getId();
-    PageRequest givenPageRequest = PageRequest.of(1, 5);
+    long inputSellerId;
+    PageRequest inputPageRequest = PageRequest.of(1, 4);
+
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(6, seller, type, false);
+
+    inputSellerId = seller.getId();
+    em.flush();
+    em.clear();
 
     // when
-    Slice<Product> sliceResult = target.findAllBySeller(givenSellerId, givenPageRequest);
+    Slice<Product> result = target.findAllBySeller(inputSellerId, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    assertEquals(3, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertEquals(givenSellerId, product.getSeller().getId());
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findAllBySeller(result);
+    checkWhere_findAllBySeller(inputSellerId, result);
   }
 
   @Test
   @DisplayName("findAllByRandom() : 정상흐름 - 첫번째 페이지")
   public void findAllByRandom_ok_firstPage() {
-    PageRequest pageRequest = PageRequest.of(0, 10);
+    // given
+    PageRequest inputpageRequest = PageRequest.of(0, 5);
 
-    Slice<Product> sliceResult = target.findAllByRandom(pageRequest);
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(8, seller, type, false);
 
-    assertTrue(sliceResult.isFirst());
-    assertFalse(sliceResult.isLast());
-    assertEquals(10, sliceResult.getContent().size());
-    sliceResult
-        .getContent()
-        .forEach(
-            product -> {
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
-            });
-    HashSet<Long> productHashSet =
-        new HashSet<>(sliceResult.getContent().stream().map(Product::getId).toList());
-    assertEquals(sliceResult.getContent().size(), productHashSet.size());
+    // when
+    Slice<Product> result = target.findAllByRandom(inputpageRequest);
+
+    // then
+    SliceManager.checkOnlyPageData(inputpageRequest, true, false, true, false, result);
+    SliceManager.checkContentSize(5, result);
+    checkFetchLoad_findAllByRandom(result);
+    checkWhere_findAllByRandom(result);
   }
 
   @Test
   @DisplayName("findAllByRandom() : 정상흐름 - 마지막 페이지")
   public void findAllByRandom_ok_lastPage() {
-    PageRequest pageRequest = PageRequest.of(1, 10);
+    // given
+    PageRequest inputPageRequest = PageRequest.of(1, 5);
 
-    Slice<Product> sliceResult = target.findAllByRandom(pageRequest);
+    Member seller = testDataMaker.saveMember();
+    ProductType type = testDataMaker.saveProductType("test$test");
+    testDataMaker.saveProductList(8, seller, type, false);
 
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    assertEquals(5, sliceResult.getContent().size());
-    sliceResult
+    // when
+    Slice<Product> result = target.findAllByRandom(inputPageRequest);
+
+    // then
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(3, result);
+    checkFetchLoad_findAllByRandom(result);
+    checkWhere_findAllByRandom(result);
+  }
+
+  public void checkFetchLoad_findByProductType(Slice<Product> target) {
+    target
         .getContent()
         .forEach(
             product -> {
-              assertFalse(product.getIsBan());
-              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
+              assertTrue(emUtil.isLoaded(product, "seller"));
+              assertTrue(emUtil.isLoaded(product, "productType"));
             });
-    HashSet<Long> productHashSet =
-        new HashSet<>(sliceResult.getContent().stream().map(Product::getId).toList());
-    assertEquals(sliceResult.getContent().size(), productHashSet.size());
+  }
+
+  public void checkWhere_findByProductType(long typeId, Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertEquals(typeId, product.getProductType().getId());
+              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
+              assertFalse(product.getIsBan());
+            });
+  }
+
+  public void checkFetchLoad_findBySearchWord(Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertTrue(emUtil.isLoaded(product, "seller"));
+              assertTrue(emUtil.isLoaded(product, "productType"));
+            });
+  }
+
+  public void checkWhere_findBySearchWord(String searchWord, Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertTrue(product.getName().contains(searchWord));
+              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
+              assertFalse(product.getIsBan());
+            });
+  }
+
+  public void checkFetchLoad_findAllBySeller(Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertTrue(emUtil.isLoaded(product, "seller"));
+              assertTrue(emUtil.isLoaded(product, "productType"));
+            });
+  }
+
+  public void checkWhere_findAllBySeller(long sellerId, Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertEquals(sellerId, product.getSeller().getId());
+            });
+  }
+
+  public void checkFetchLoad_findAllByRandom(Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertTrue(emUtil.isLoaded(product, "seller"));
+              assertTrue(emUtil.isLoaded(product, "productType"));
+            });
+  }
+
+  public void checkWhere_findAllByRandom(Slice<Product> target) {
+    target
+        .getContent()
+        .forEach(
+            product -> {
+              assertEquals(ProductSaleType.ON_SALE, product.getSaleState());
+              assertFalse(product.getIsBan());
+            });
   }
 }

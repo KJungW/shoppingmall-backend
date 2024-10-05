@@ -3,17 +3,15 @@ package com.project.shoppingmall.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.project.shoppingmall.entity.*;
-import com.project.shoppingmall.testdata.*;
-import com.project.shoppingmall.testdata.member.MemberBuilder;
-import com.project.shoppingmall.testdata.product.Product_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchase.Purchase_RealDataBuilder;
-import com.project.shoppingmall.testdata.purchaseitem.PurchaseItem_RealDataBuilder;
-import com.project.shoppingmall.testdata.refund.Refund_RealDataBuilder;
+import com.project.shoppingmall.test_dto.SliceManager;
+import com.project.shoppingmall.test_entity.IntegrationTestDataMaker;
 import com.project.shoppingmall.type.PurchaseStateType;
+import com.project.shoppingmall.type.RefundStateType;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceUnitUtil;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,181 +28,212 @@ import org.springframework.transaction.annotation.Transactional;
 class PurchaseItemRetrieveRepositoryTest {
   @Autowired private PurchaseItemRetrieveRepository target;
   @Autowired private EntityManager em;
+  @Autowired private IntegrationTestDataMaker testDataMaker;
+  private PersistenceUnitUtil emUtil;
+
+  @BeforeEach
+  public void beforeEach() {
+    emUtil = em.getEntityManagerFactory().getPersistenceUnitUtil();
+  }
 
   @Test
   @DisplayName("findAllForSeller() : 정상흐름 - 마지막 페이지")
   public void findAllForSeller_ok_lastPage() {
     // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    savePurchaseItems(10, givenBuyer, givenProduct);
+    long inputProductId;
+    PageRequest inputPageRequest = PageRequest.of(1, 4, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    Member givenSeller = testDataMaker.saveMember();
+    ProductType givenType = testDataMaker.saveProductType("test$test");
+    Product givenProduct = testDataMaker.saveProduct(givenSeller, givenType);
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenProduct, 6, PurchaseStateType.COMPLETE);
+
+    inputProductId = givenProduct.getId();
     em.flush();
     em.clear();
 
-    Long inputProductId = givenProduct.getId();
-    PageRequest inputPageRequest = PageRequest.of(1, 6, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<PurchaseItem> sliceResult = target.findAllForSeller(inputProductId, inputPageRequest);
+    Slice<PurchaseItem> result = target.findAllForSeller(inputProductId, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    List<PurchaseItem> resultPurchaseItems = sliceResult.getContent();
-    assertEquals(4, resultPurchaseItems.size());
-    resultPurchaseItems.forEach(
-        purchaseItem -> {
-          assertEquals(inputProductId, purchaseItem.getProductId());
-          assertEquals(PurchaseStateType.COMPLETE, purchaseItem.getPurchase().getState());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findAllForSeller(result);
+    checkWhere_findAllForSeller(inputProductId, result);
   }
 
   @Test
   @DisplayName("findAllForSellerBetweenDate() : 정상흐름 마지막 페이지 페이지")
-  public void findAllForSellerBetweenDate_ok_lastPage() throws InterruptedException {
-    // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    LocalDateTime inputStartDate = LocalDateTime.now();
-    savePurchaseItems(10, givenBuyer, givenProduct);
-    LocalDateTime inputEndDate = LocalDateTime.now();
-    Thread.sleep(1000L);
-    savePurchaseItems(10, givenBuyer, givenProduct);
+  public void findAllForSellerBetweenDate_ok_lastPage() {
+    long inputSellerId;
+    LocalDateTime inputStartDate;
+    LocalDateTime inputEndDate;
+    PageRequest inputPageRequest = PageRequest.of(1, 4, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    inputStartDate = LocalDateTime.now();
+    Member givenSeller = testDataMaker.saveMember();
+    ProductType givenType = testDataMaker.saveProductType("test$test");
+    Product givenProduct = testDataMaker.saveProduct(givenSeller, givenType);
+    Purchase givenPurchaseInDate =
+        testDataMaker.savePurchase(givenProduct, 6, PurchaseStateType.COMPLETE);
+    em.flush();
+    inputSellerId = givenSeller.getId();
+    inputEndDate = LocalDateTime.now();
+
+    Purchase givenPurchaseOutDate =
+        testDataMaker.savePurchase(givenProduct, 6, PurchaseStateType.COMPLETE);
     em.flush();
     em.clear();
 
-    long inputSellerId = givenSeller.getId();
-    PageRequest inputPageRequest = PageRequest.of(1, 6, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<PurchaseItem> sliceResult =
+    Slice<PurchaseItem> result =
         target.findAllForSellerBetweenDate(
             inputSellerId, inputStartDate, inputEndDate, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    List<PurchaseItem> resultPurchaseItems = sliceResult.getContent();
-    assertEquals(4, resultPurchaseItems.size());
-    resultPurchaseItems.forEach(
-        item -> {
-          assertEquals(inputSellerId, item.getSellerId());
-          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
-          assertTrue(item.getCreateDate().isAfter(inputStartDate));
-          assertTrue(item.getCreateDate().isBefore(inputEndDate));
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findAllForSellerBetweenDate(result);
+    checkWhere_findAllForSellerBetweenDate(inputSellerId, inputStartDate, inputEndDate, result);
   }
 
   @Test
   @DisplayName("findRefundedAllForBuyer() : 정상흐름 마지막 페이지 페이지")
   public void findRefundedAllForBuyer_ok_lastPage() {
     // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    saveRefundedPurchaseItems(10, givenBuyer, givenProduct);
+    long inputBuyerId;
+    PageRequest inputPageRequest = PageRequest.of(1, 4, Sort.by(Sort.Direction.DESC, "createDate"));
+
+    Product givenProduct = testDataMaker.saveProduct();
+    Member givenBuyer = testDataMaker.saveMember();
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenBuyer, givenProduct, 6, PurchaseStateType.COMPLETE);
+    List<Refund> givenRefunds =
+        testDataMaker.saveRefundList(givenPurchase.getPurchaseItems(), RefundStateType.COMPLETE);
+
+    inputBuyerId = givenBuyer.getId();
     em.flush();
     em.clear();
 
-    long inputBuyerId = givenBuyer.getId();
-    PageRequest inputPageRequest = PageRequest.of(1, 6, Sort.by(Sort.Direction.DESC, "createDate"));
-
     // when
-    Slice<PurchaseItem> sliceResult =
-        target.findRefundedAllForBuyer(inputBuyerId, inputPageRequest);
+    Slice<PurchaseItem> result = target.findRefundedAllForBuyer(inputBuyerId, inputPageRequest);
 
     // then
-    assertFalse(sliceResult.isFirst());
-    assertTrue(sliceResult.isLast());
-    List<PurchaseItem> resultPurchaseItems = sliceResult.getContent();
-    assertEquals(4, resultPurchaseItems.size());
-    resultPurchaseItems.forEach(
-        item -> {
-          assertEquals(inputBuyerId, item.getPurchase().getBuyerId());
-          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
-          assertFalse(item.getRefunds().isEmpty());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findRefundedAllForBuyer(result);
+    checkWhere_findRefundedAllForBuyer(inputBuyerId, result);
   }
 
   @Test
   @DisplayName("findRefundedAllForSeller() : 정상흐름 마지막 페이지")
   public void findRefundedAllForSeller_ok_lastPage() {
     // given
-    Member givenSeller = saveMember();
-    Member givenBuyer = saveMember();
-    ProductType givenType = saveProductType("test$test");
-    Product givenProduct = saveProduct(givenSeller, givenType);
-    saveRefundedPurchaseItems(10, givenBuyer, givenProduct);
+    long inputSellerId;
+    PageRequest inputPageRequest =
+        PageRequest.of(1, 4, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
+
+    Member givenSeller = testDataMaker.saveMember();
+    ProductType givenType = testDataMaker.saveProductType("test$test");
+    Product givenProduct = testDataMaker.saveProduct(givenSeller, givenType);
+    Purchase givenPurchase =
+        testDataMaker.savePurchase(givenProduct, 6, PurchaseStateType.COMPLETE);
+    List<Refund> givenRefunds =
+        testDataMaker.saveRefundList(givenPurchase.getPurchaseItems(), RefundStateType.COMPLETE);
+
+    inputSellerId = givenSeller.getId();
     em.flush();
     em.clear();
 
-    long inputSellerId = givenSeller.getId();
-    PageRequest inputPageRequest =
-        PageRequest.of(1, 6, Sort.by(Sort.Direction.DESC, "finalRefundCreatedDate"));
-
     // when
-    Slice<PurchaseItem> sliceData =
-        target.findRefundedAllForSeller(inputSellerId, inputPageRequest);
+    Slice<PurchaseItem> result = target.findRefundedAllForSeller(inputSellerId, inputPageRequest);
 
     // then
-    assertFalse(sliceData.isFirst());
-    assertTrue(sliceData.isLast());
-    assertEquals(4, sliceData.getContent().size());
-    List<PurchaseItem> purchaseItems = sliceData.getContent();
-    purchaseItems.forEach(
-        item -> {
-          assertEquals(inputSellerId, item.getSellerId());
-          assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
-          assertFalse(item.getRefunds().isEmpty());
-        });
+    SliceManager.checkOnlyPageData(inputPageRequest, false, true, false, true, result);
+    SliceManager.checkContentSize(2, result);
+    checkFetchLoad_findRefundedAllForSeller(result);
+    checkWhere_findRefundedAllForSeller(inputSellerId, result);
   }
 
-  private Member saveMember() {
-    Member member = MemberBuilder.fullData().build();
-    em.persist(member);
-    return member;
-  }
-
-  private ProductType saveProductType(String typeName) {
-    ProductType givenType = new ProductType(typeName);
-    em.persist(givenType);
-    return givenType;
-  }
-
-  private Product saveProduct(Member member, ProductType type) {
-    Product product = Product_RealDataBuilder.makeProduct(member, type);
-    em.persist(product);
-    return product;
-  }
-
-  private List<PurchaseItem> savePurchaseItems(int count, Member givenBuyer, Product givenProduct) {
-    List<PurchaseItem> purchaseItems = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      PurchaseItem purchaseItem = PurchaseItem_RealDataBuilder.makePurchaseItem(givenProduct);
-      purchaseItems.add(purchaseItem);
-      Purchase purchase =
-          Purchase_RealDataBuilder.makePurchase(
-              givenBuyer, new ArrayList<>(List.of(purchaseItem)), PurchaseStateType.COMPLETE);
-      em.persist(purchase);
-    }
-    return purchaseItems;
-  }
-
-  private List<Refund> saveRefundedPurchaseItems(
-      int count, Member givenBuyer, Product givenProduct) {
-    List<PurchaseItem> savedPurchaseItems = savePurchaseItems(count, givenBuyer, givenProduct);
-    return savedPurchaseItems.stream()
-        .map(
+  public void checkFetchLoad_findAllForSeller(Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
             purchaseItem -> {
-              Refund givenRefund = Refund_RealDataBuilder.makeRefund(purchaseItem);
-              em.persist(givenRefund);
-              return givenRefund;
-            })
-        .toList();
+              assertTrue(emUtil.isLoaded(purchaseItem, "purchase"));
+            });
+  }
+
+  public void checkWhere_findAllForSeller(long inputProductId, Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            item -> {
+              assertEquals(inputProductId, item.getProductId());
+              assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+            });
+  }
+
+  public void checkFetchLoad_findAllForSellerBetweenDate(Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            purchaseItem -> {
+              assertTrue(emUtil.isLoaded(purchaseItem, "purchase"));
+            });
+  }
+
+  public void checkWhere_findAllForSellerBetweenDate(
+      long sellerId, LocalDateTime startDate, LocalDateTime endDate, Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            item -> {
+              assertEquals(sellerId, item.getSellerId());
+              assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+              assertTrue(item.getCreateDate().isAfter(startDate));
+              assertTrue(item.getCreateDate().isBefore(endDate));
+            });
+  }
+
+  public void checkFetchLoad_findRefundedAllForBuyer(Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            purchaseItem -> {
+              assertTrue(emUtil.isLoaded(purchaseItem, "purchase"));
+            });
+  }
+
+  public void checkWhere_findRefundedAllForBuyer(long buyerId, Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            item -> {
+              assertFalse(item.getRefunds().isEmpty());
+              assertEquals(buyerId, item.getPurchase().getBuyerId());
+              assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+            });
+  }
+
+  public void checkFetchLoad_findRefundedAllForSeller(Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            purchaseItem -> {
+              assertTrue(emUtil.isLoaded(purchaseItem, "purchase"));
+            });
+  }
+
+  public void checkWhere_findRefundedAllForSeller(long sellerId, Slice<PurchaseItem> target) {
+    target
+        .getContent()
+        .forEach(
+            item -> {
+              assertFalse(item.getRefunds().isEmpty());
+              assertEquals(sellerId, item.getSellerId());
+              assertEquals(PurchaseStateType.COMPLETE, item.getPurchase().getState());
+            });
   }
 }

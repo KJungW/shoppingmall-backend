@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.project.shoppingmall.entity.*;
 import com.project.shoppingmall.entity.report.ProductReport;
 import com.project.shoppingmall.entity.report.ReviewReport;
-import com.project.shoppingmall.testdata.*;
+import com.project.shoppingmall.test_entity.*;
+import com.project.shoppingmall.type.ReportResultType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import java.io.IOException;
@@ -42,29 +43,31 @@ class MemberDeleteServiceIntegrationTest {
 
   @BeforeEach
   public void beforeEach() throws IOException {
-
-    ProductType givenType = testDataMaker.saveProductType("test$test");
-    Member otherMember = testDataMaker.saveMember();
-    Product otherMemberProduct = testDataMaker.saveProduct(otherMember, givenType);
-
     Member targetMember = testDataMaker.saveMember();
     testDataMaker.saveMemberProfileImage(targetMember);
     givenMemberId = targetMember.getId();
+    Member otherMember = testDataMaker.saveMember();
+
+    ProductType givenType = testDataMaker.saveProductType("test$test");
+    Product targetProduct = testDataMaker.saveProduct(targetMember, givenType);
+    Product otherMemberProduct = testDataMaker.saveProduct(otherMember, givenType);
 
     PurchaseItem targetPurchaseItem =
         testDataMaker.savePurchaseItem(otherMemberProduct, targetMember);
+
     Review targetReview =
         testDataMaker.saveReview(targetMember, otherMemberProduct, targetPurchaseItem);
     BasketItem targetBasketItem = testDataMaker.saveBasketItem(targetMember, otherMemberProduct);
-    Product targetProduct = testDataMaker.saveProduct(targetMember, givenType);
-    Alarm targetAlarm = testDataMaker.saveAlarm(targetMember);
+    Alarm targetAlarm = testDataMaker.saveMemberBanAlarm(targetMember);
 
     PurchaseItem otherPurchaseItem = testDataMaker.savePurchaseItem(targetProduct, otherMember);
     Review otherReview = testDataMaker.saveReview(otherMember, targetProduct, otherPurchaseItem);
 
     ProductReport targetProductReport =
-        testDataMaker.saveProductReport(targetMember, otherMemberProduct);
-    ReviewReport targetReviewReport = testDataMaker.saveReviewReport(targetMember, otherReview);
+        testDataMaker.saveProductReport(
+            targetMember, otherMemberProduct, ReportResultType.WAITING_PROCESSED);
+    ReviewReport targetReviewReport =
+        testDataMaker.saveReviewReport(targetMember, otherReview, ReportResultType.NO_ACTION);
 
     ChatRoom targetChatBuyerRoom = testDataMaker.saveChatRoom(targetMember, otherMemberProduct);
     ChatRoom targetSellerChatRoom = testDataMaker.saveChatRoom(otherMember, targetProduct);
@@ -72,7 +75,6 @@ class MemberDeleteServiceIntegrationTest {
         testDataMaker.saveChatMessage(targetChatBuyerRoom, targetMember, "test message");
     ChatMessage targetChatMessageByInSellerChatRoom =
         testDataMaker.saveChatMessage(targetSellerChatRoom, targetMember, "test message");
-
     ChatReadRecord targetReadRecordByBuyer =
         testDataMaker.saveChatReadRecord(targetChatBuyerRoom, targetMember);
     ChatReadRecord targetReadRecordBySeller =

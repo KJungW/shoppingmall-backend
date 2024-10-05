@@ -6,9 +6,12 @@ import static org.mockito.Mockito.*;
 import com.project.shoppingmall.dto.SliceResult;
 import com.project.shoppingmall.dto.alarm.AlarmDto;
 import com.project.shoppingmall.entity.Alarm;
+import com.project.shoppingmall.entity.Member;
 import com.project.shoppingmall.repository.AlarmRetrieveRepository;
-import com.project.shoppingmall.testdata.alarm.AlamBuilder;
-import java.util.ArrayList;
+import com.project.shoppingmall.test_dto.SliceManager;
+import com.project.shoppingmall.test_entity.alarm.AlarmBuilder;
+import com.project.shoppingmall.test_entity.member.MemberBuilder;
+import com.project.shoppingmall.testutil.TestUtil;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,28 +39,35 @@ class AlarmRetrieveServiceTest {
     int inputSliceSize = 5;
     long inputListenerId = 30L;
 
-    int givenAlarmListSize = 5;
-    List<Alarm> givenAlarmData = new ArrayList<>();
-    for (int i = 0; i < givenAlarmListSize; i++) {
-      givenAlarmData.add(AlamBuilder.makeMemberBanAlarm(634L));
-    }
+    Member givenListener = MemberBuilder.makeMember(inputListenerId);
+    List<Long> givenAlarmIdList = TestUtil.makeIdList(inputSliceSize, 40L);
+    List<Alarm> givenAlarmList =
+        AlarmBuilder.makeMemberBanAlarmList(givenAlarmIdList, givenListener);
+    Slice<Alarm> givenSliceData =
+        SliceManager.setMockSlice(inputSliceNumber, inputSliceSize, givenAlarmList);
 
-    Slice<Alarm> givenSliceData = mock(Slice.class);
-    when(givenSliceData.getNumber()).thenReturn(inputSliceNumber);
-    when(givenSliceData.getSize()).thenReturn(inputSliceSize);
-    when(givenSliceData.isFirst()).thenReturn(false);
-    when(givenSliceData.isLast()).thenReturn(false);
-    when(givenSliceData.hasNext()).thenReturn(true);
-    when(givenSliceData.hasPrevious()).thenReturn(true);
-    when(givenSliceData.getContent()).thenReturn(givenAlarmData);
     when(mockAlarmRetrieveRepository.retrieveAllByMember(anyLong(), any()))
         .thenReturn(givenSliceData);
 
-    // then
+    // when
     SliceResult<AlarmDto> sliceResult =
         target.retrieveAllByMember(inputSliceNumber, inputSliceSize, inputListenerId);
 
     // then
+    check_alarmRetrieveRepository_retrieveAllByMember(
+        inputSliceNumber, inputSliceSize, inputListenerId);
+    checkSliceResult(inputSliceNumber, inputSliceSize, sliceResult);
+  }
+
+  public void checkSliceResult(
+      long inputSliceNumber, long inputSliceSize, SliceResult<AlarmDto> sliceResult) {
+    assertEquals(inputSliceNumber, sliceResult.getCurrentSliceNumber());
+    assertEquals(inputSliceSize, sliceResult.getSliceSize());
+    assertEquals(inputSliceSize, sliceResult.getContentList().size());
+  }
+
+  public void check_alarmRetrieveRepository_retrieveAllByMember(
+      long inputSliceNumber, long inputSliceSize, long inputListenerId) {
     ArgumentCaptor<Long> listenerIdCaptor = ArgumentCaptor.forClass(Long.class);
     ArgumentCaptor<PageRequest> pageRequestCaptor = ArgumentCaptor.forClass(PageRequest.class);
     verify(mockAlarmRetrieveRepository, times(1))
@@ -71,9 +81,5 @@ class AlarmRetrieveServiceTest {
     assertEquals(
         "createDate",
         pageRequestCaptor.getValue().getSort().getOrderFor("createDate").getProperty());
-
-    assertEquals(inputSliceNumber, sliceResult.getCurrentSliceNumber());
-    assertEquals(inputSliceSize, sliceResult.getSliceSize());
-    assertEquals(givenAlarmListSize, sliceResult.getContentList().size());
   }
 }

@@ -8,6 +8,7 @@ import com.project.shoppingmall.type.ErrorCode;
 import com.project.shoppingmall.util.JsonUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,22 +28,23 @@ class AuthorizationFailureHandlerTest {
   @DisplayName("handle() : 정상흐름")
   public void handle_ok() throws IOException {
     // given
-    // - requeset 인자 세팅
-    MockHttpServletRequest rightRequest = new MockHttpServletRequest();
-    // - response 인자 세팅
-    MockHttpServletResponse rightResponse = new MockHttpServletResponse();
-    // - authException 세팅
-    AccessDeniedException givenAccessDeniedException = mock(AccessDeniedException.class);
+    MockHttpServletRequest inputRequest = new MockHttpServletRequest();
+    MockHttpServletResponse inputResponse = new MockHttpServletResponse();
+    AccessDeniedException inputAccessDeniedException = mock(AccessDeniedException.class);
 
     // when
-    target.handle(rightRequest, rightResponse, givenAccessDeniedException);
+    target.handle(inputRequest, inputResponse, inputAccessDeniedException);
 
     // then
-    assertEquals(HttpServletResponse.SC_FORBIDDEN, rightResponse.getStatus());
-    assertEquals("application/json;charset=utf-8", rightResponse.getContentType());
+    checkCheckResponseResult(inputResponse);
+  }
 
+  private void checkCheckResponseResult(MockHttpServletResponse inputResponse)
+      throws UnsupportedEncodingException {
+    assertEquals(HttpServletResponse.SC_FORBIDDEN, inputResponse.getStatus());
+    assertEquals("application/json;charset=utf-8", inputResponse.getContentType());
     ErrorResult contentInResponse =
-        JsonUtil.convertJsonToObject(rightResponse.getContentAsString(), ErrorResult.class);
+        JsonUtil.convertJsonToObject(inputResponse.getContentAsString(), ErrorResult.class);
     assertEquals(ErrorCode.FORBIDDEN, contentInResponse.getCode());
   }
 }
