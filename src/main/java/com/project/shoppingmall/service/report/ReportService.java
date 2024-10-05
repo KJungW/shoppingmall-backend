@@ -31,7 +31,8 @@ public class ReportService {
   private final ReviewReportRepository reviewReportRepository;
 
   @Transactional
-  public void saveProductReport(long memberId, long productId, String title, String description) {
+  public ProductReport saveProductReport(
+      long memberId, long productId, String title, String description) {
     Member reporter =
         memberFindService
             .findById(memberId)
@@ -53,10 +54,12 @@ public class ReportService {
             .product(product)
             .build();
     productReportRepository.save(report);
+    return report;
   }
 
   @Transactional
-  public void saveReviewReport(long memberId, long reviewId, String title, String description) {
+  public ReviewReport saveReviewReport(
+      long memberId, long reviewId, String title, String description) {
     Member reporter =
         memberFindService
             .findById(memberId)
@@ -78,6 +81,7 @@ public class ReportService {
             .review(review)
             .build();
     reviewReportRepository.save(report);
+    return report;
   }
 
   private boolean checkProductReportIsWithinOneDay(Long memberId, Long productId) {
