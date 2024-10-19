@@ -28,6 +28,8 @@ public class Review extends BaseEntity {
   private Boolean isBan;
   private String reviewImageUri;
   private String reviewImageDownloadUrl;
+
+  @Column(length = 1024)
   private String description;
 
   @Builder

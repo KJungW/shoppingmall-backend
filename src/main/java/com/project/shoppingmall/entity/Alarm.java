@@ -23,6 +23,7 @@ public class Alarm extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private AlarmType alarmType;
 
+  @Column(length = 512)
   private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)

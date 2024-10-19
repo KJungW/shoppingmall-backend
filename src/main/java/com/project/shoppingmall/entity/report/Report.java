@@ -23,7 +23,10 @@ public abstract class Report extends BaseEntity {
   private Member reporter;
 
   private String title;
+
+  @Column(length = 1024)
   private String description;
+
   private Boolean isProcessedComplete;
 
   @Enumerated(value = EnumType.STRING)

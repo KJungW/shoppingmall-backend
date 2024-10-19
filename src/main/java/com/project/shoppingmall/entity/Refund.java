@@ -22,7 +22,11 @@ public class Refund extends BaseEntity {
 
   private Integer refundPrice;
   private String requestTitle;
+
+  @Column(length = 1024)
   private String requestContent;
+
+  @Column(length = 1024)
   private String responseContent;
 
   @Enumerated(EnumType.STRING)
